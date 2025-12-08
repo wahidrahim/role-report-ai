@@ -1,33 +1,28 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import ResumeUploader with SSR disabled
+const ResumeUploader = dynamic(() => import("./components/ResumeUploader"), {
+  ssr: false,
+});
 
 export default function Home() {
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setResumeFile(file);
-  };
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
   };
 
   const handleSubmit = () => {
-    console.log("Resume file:", resumeFile);
     console.log("Job description:", jobDescription);
   };
 
   return (
     <div>
       <div>
-        <input
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={handleFileChange}
-        />
+        <ResumeUploader />
       </div>
       <div>
         <textarea
