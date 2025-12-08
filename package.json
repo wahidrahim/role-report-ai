@@ -10,6 +10,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.80",
+    "ai": "^5.0.108",
     "next": "16.0.8",
     "pdfjs-dist": "^5.4.449",
     "react": "19.2.1",

@@ -44,7 +44,6 @@ export default function ResumeUploader() {
 
         setResumeText(extractedText);
         setResumeFileName(file.name);
-        console.log('Extracted PDF text:', extractedText);
       } catch (error) {
         console.error('Failed to parse PDF:', error);
       } finally {
