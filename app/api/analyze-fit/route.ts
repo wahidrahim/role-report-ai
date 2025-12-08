@@ -1,5 +1,7 @@
-import { streamText } from 'ai';
+import { streamObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
+
+import { analysisSchema } from '@/schemas/analysisSchema';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,22 +16,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = streamText({
+    const result = await streamObject({
       model: 'openai/gpt-4o-mini',
-      prompt: `Analyze how well this resume fits the job description. Provide a comprehensive analysis including:
-
-1. Fit Score (0-100)
-2. Key Strengths - specific skills and experiences that match
-3. Weaknesses/Gaps - areas where the resume doesn't align with the job requirements
-4. Recommendations - actionable suggestions to improve the resume for this role
-
-Resume:
-${resumeText}
-
-Job Description:
-${jobDescription}
-
-Please format your response in a clear, structured way.`,
+      schema: analysisSchema,
+      system: `You are an expert Technical Recruiter and Career Coach. 
+      Your goal is to perform a 'Gap Analysis' between a candidate and a job.
+      
+      SCORING RULES (1-10):
+      - Job Requirement: 10=Architect/Expert needed, 5=Standard usage, 2=Nice to have.
+      - Candidate Score: 10=Deep evidence/leadership, 8=Strong action verbs, 5=Mentioned in skill list, 0=Missing.
+      
+      RADAR CHART LOGIC:
+      - Identify the most critical distinct dimensions (Technology, Soft Skills, Domain). 
+      - Determine the optimal number of axes (between 4 and 8) based on the job complexity.
+      - Do not list generic terms like "Coding"; use specific stacks like "React Ecosystem" or "Cloud Infra".`,
+      prompt: `
+        RESUME TEXT:
+        ${resumeText}
+  
+        JOB DESCRIPTION:
+        ${jobDescription}
+      `,
     });
 
     return result.toTextStreamResponse();
