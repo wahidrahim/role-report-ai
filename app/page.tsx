@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { ChangeEvent, useState } from "react";
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
+import { ChangeEvent, useState } from 'react';
 
 // Dynamically import ResumeUploader with SSR disabled
-const ResumeUploader = dynamic(() => import("./components/ResumeUploader"), {
+const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), {
   ssr: false,
 });
 
 export default function Home() {
-  const [jobDescription, setJobDescription] = useState<string>("");
+  const [jobDescription, setJobDescription] = useState<string>('');
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
   };
 
   const handleSubmit = () => {
-    console.log("Job description:", jobDescription);
+    console.log('Job description:', jobDescription);
   };
 
   return (

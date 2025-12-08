@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "AI Career Dossier",
-  description: "AI Career Dossier",
+  title: 'AI Career Dossier',
+  description: 'AI Career Dossier',
 };
 
 export default function RootLayout({
