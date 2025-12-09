@@ -8,6 +8,6 @@ export type SkillAuditItem = {
 export type SkillChartItem = {
   axis: string;
   requiredLevel: number;
-  userLevel: number;
+  candidateLevel: number;
   reasoning: string;
 };

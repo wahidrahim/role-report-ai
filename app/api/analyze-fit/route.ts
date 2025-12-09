@@ -44,16 +44,15 @@ export async function POST(request: NextRequest) {
         - <60: Weak Match. Missing Critical requirements.
 
         *** RADAR CHART INSTRUCTIONS ***
-        - Select between 3 and 8 distinct technical axes.
+        - Select 4 to 8 distinct technical axes.
         - Fewer is better. Only add an axis if it is a major distinct requirement.
-        - Generate axes for user's existing skills before generating other axes.
         - For every axis (e.g., "Cloud Infrastructure"), you must generate TWO scores:
             A. [Required Level] (The Bar):
               - 90-100: "Expert/Architect" (Primary focus of job)
               - 70-80: "Senior/Proficient" (Daily usage required)
               - 40-60: "Familiarity" (Occasional usage)
               
-            B. [User Level] (The Candidate):
+            B. [Candidate Level] (The Candidate):
               - 90-100: "Mastery" (Led projects, complex metrics shown)
               - 70-80: "Strong" (Action verbs: Built, Deployed, Implemented)
               - 40-60: "Competent" (Listed in skills, minor usage)

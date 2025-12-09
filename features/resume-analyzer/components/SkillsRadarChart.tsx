@@ -28,13 +28,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
-  const chartData = skills.map((skill) => ({
-    skill: skill.axis,
-    requiredLevel: Math.min(skill.requiredLevel, 100), // Cap at 100%
-    candidateLevel: Math.min(skill.userLevel, 100), // Cap at 100%
-    reasoning: skill.reasoning,
-  }));
-
   if (skills.length === 0) {
     return (
       <div className="flex h-[300px] w-full items-center justify-center text-muted-foreground">
@@ -43,9 +36,38 @@ export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
     );
   }
 
+  const chartData = skills
+    .map((skill) => ({
+      skill: skill.axis,
+      requiredLevel: Math.min(skill.requiredLevel || 0, 100), // Cap at 100%, default to 0
+      candidateLevel: Math.min(skill.candidateLevel || 0, 100), // Cap at 100%, default to 0
+      reasoning: skill.reasoning,
+    }))
+    .filter((item) => item.skill); // Filter out items where the skill name hasn't streamed in yet
+
+  // Sort by level to group similar values, then by name for stability
+  const sortedData = [...chartData].sort(
+    (a, b) => b.candidateLevel - a.candidateLevel || (a.skill || '').localeCompare(b.skill || ''),
+  );
+
+  // Distribute data to create a "bell curve" arrangement
+  // This avoids the sharp cliff between the highest and lowest values in a standard sort
+  const left: typeof chartData = [];
+  const right: typeof chartData = [];
+
+  sortedData.forEach((item, index) => {
+    if (index % 2 === 0) {
+      right.push(item);
+    } else {
+      left.unshift(item);
+    }
+  });
+
+  const finalData = [...right, ...left];
+
   return (
     <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[400px] w-full">
-      <RadarChart data={chartData}>
+      <RadarChart data={finalData}>
         <ChartTooltip
           cursor={false}
           content={(props) => {

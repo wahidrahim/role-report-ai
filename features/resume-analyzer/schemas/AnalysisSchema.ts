@@ -5,7 +5,7 @@ const RadarPoint = z.object({
     .string()
     .describe("Technical skill or competency (e.g. 'System Design', 'React Ecosystem')"),
   requiredLevel: z.number().min(0).max(100).describe('Required competency level (0-100)'),
-  userLevel: z.number().min(0).max(100).describe("Candidate's competency level (0-100)"),
+  candidateLevel: z.number().min(0).max(100).describe("Candidate's competency level (0-100)"),
   reasoning: z.string().describe('Brief justification for this score'),
 });
 
