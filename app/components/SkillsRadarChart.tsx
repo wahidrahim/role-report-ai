@@ -15,7 +15,7 @@ import { analysisSchema } from '@/schemas/analysisSchema';
 
 export type SkillsRadarChartItem = z.infer<
   typeof analysisSchema
->['analysis']['skills_radar_chart'][number];
+>['analysis']['skillsRadarChart'][number];
 
 interface SkillsRadarChartProps {
   skills: SkillsRadarChartItem[];
@@ -25,9 +25,7 @@ export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
   // Transform data for recharts - calculate percentage
   const chartData = skills.map((skill) => {
     const percentage =
-      skill.required_skill_level > 0
-        ? (skill.users_skill_level / skill.required_skill_level) * 100
-        : 0;
+      skill.requiredSkillLevel > 0 ? (skill.usersSkillLevel / skill.requiredSkillLevel) * 100 : 0;
     return {
       skill: skill.axis,
       percentage: Math.min(percentage, 100), // Cap at 100%

@@ -115,9 +115,9 @@ export default function Home() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {object.analysis?.skills_radar_chart && (
+            {object.analysis?.skillsRadarChart && (
               <SkillsRadarChart
-                skills={object.analysis.skills_radar_chart as SkillsRadarChartItem[]}
+                skills={object.analysis.skillsRadarChart as SkillsRadarChartItem[]}
               />
             )}
             <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
