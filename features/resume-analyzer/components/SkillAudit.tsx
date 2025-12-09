@@ -1,12 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-
-export type SkillAuditItem = {
-  skill: string;
-  status: 'verified' | 'transferable' | 'missing';
-  evidence?: string;
-  importance: 'critical' | 'niceToHave';
-};
+import { SkillAuditItem } from '@/features/resume-analyzer/types';
 
 export type SkillAuditProps = {
   skillItems: SkillAuditItem[];

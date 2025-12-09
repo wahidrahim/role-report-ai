@@ -1,7 +1,7 @@
 import { streamObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { AnalysisSchema } from '@/app/schemas/AnalysisSchema';
+import { AnalysisSchema } from '@/features/resume-analyzer/schemas/AnalysisSchema';
 
 export async function POST(request: NextRequest) {
   try {

@@ -8,12 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-
-export type SkillChartItem = {
-  axis: string;
-  value: number;
-  reasoning: string;
-};
+import { SkillChartItem } from '@/features/resume-analyzer/types';
 
 export type SkillsRadarChartProps = {
   skills: SkillChartItem[];
