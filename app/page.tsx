@@ -6,12 +6,12 @@ import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
 import SkillsRadarChart, { SkillChartItem } from '@/app/components/SkillsRadarChart';
+import { AnalysisSchema } from '@/app/schemas/AnalysisSchema';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { analysisSchema } from '@/schemas/analysisSchema';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import MatchScore from './components/MatchScore';
@@ -25,10 +25,8 @@ export default function Home() {
 
   const { object, submit, isLoading, error } = useObject({
     api: '/api/analyze-fit',
-    schema: analysisSchema,
+    schema: AnalysisSchema,
   });
-
-  const analysis = object?.analysis;
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
@@ -118,18 +116,12 @@ export default function Home() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {analysis?.matchScore && analysis?.verdict && (
-              <MatchScore matchScore={analysis.matchScore} verdict={analysis.verdict} />
+            {object?.matchScore && object?.verdict && (
+              <MatchScore matchScore={object.matchScore} verdict={object.verdict} />
             )}
-            {analysis?.skillsRadarChart &&
-              analysis.skillsRadarChart.length > 0 &&
-              analysis.skillsRadarChart.some(
-                (skill) =>
-                  skill?.axis &&
-                  skill?.requiredSkillLevel &&
-                  skill?.usersSkillLevel &&
-                  skill?.reason,
-              ) && <SkillsRadarChart skills={analysis.skillsRadarChart as SkillChartItem[]} />}
+            {object.radarChart && (
+              <SkillsRadarChart skills={object.radarChart as SkillChartItem[]} />
+            )}
             <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
               {JSON.stringify(object, null, 2)}
             </pre>

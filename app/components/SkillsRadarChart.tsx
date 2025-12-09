@@ -12,9 +12,8 @@ import {
 
 export type SkillChartItem = {
   axis: string;
-  requiredSkillLevel: number;
-  usersSkillLevel: number;
-  reason: string;
+  value: number;
+  reasoning: string;
 };
 
 export type SkillsRadarChartProps = {
@@ -23,15 +22,11 @@ export type SkillsRadarChartProps = {
 
 export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
   // Transform data for recharts - calculate percentage
-  const chartData = skills.map((skill) => {
-    const percentage =
-      skill.requiredSkillLevel > 0 ? (skill.usersSkillLevel / skill.requiredSkillLevel) * 100 : 0;
-    return {
-      skill: skill.axis,
-      percentage: Math.min(percentage, 100), // Cap at 100%
-      reason: skill.reason,
-    };
-  });
+  const chartData = skills.map((skill) => ({
+    skill: skill.axis,
+    percentage: Math.min(skill.value, 100), // Cap at 100%
+    reasoning: skill.reasoning,
+  }));
 
   return (
     <div className="space-y-4">
