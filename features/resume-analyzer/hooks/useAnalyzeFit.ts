@@ -8,130 +8,127 @@ import { useResumeStore } from '@/stores/resumeStore';
 
 const testObject = {
   thoughtProcess: [
-    'The candidate has strong experience in TypeScript and Vue.js, which aligns well with the job requirements.',
-    'The job description emphasizes GraphQL expertise, which is not explicitly mentioned in the resume.',
-    'The candidate has experience with state management using Vuex, but there is no evidence of experience with Redux or Zustand, which are also mentioned in the job description.',
-    "The candidate has demonstrated clean coding practices and experience in an agile environment, which matches the job's expectations.",
-    'The transition to Next.js is a critical requirement, and the candidate has experience with Nuxt.js, which may provide some transferable skills.',
+    'The candidate has strong front-end experience, particularly with Vue.js and JavaScript, but lacks direct experience with PHP and Laravel, which are critical for the role.',
+    "The candidate's SQL experience is not explicitly mentioned, which is a gap given the job's requirements for solid SQL/RDBMS experience.",
+    "The candidate has experience with Git and Agile methodologies, aligning with the job's collaborative environment, but testing fundamentals are not evidenced in the resume.",
+    "Overall, the candidate's front-end skills are strong, but the lack of PHP and SQL experience presents significant gaps.",
   ],
-  skillAudit: {
-    verified: [
+  skillAudit: [
+    {
+      skill: 'PHP framework (Laravel/Symfony)',
+      status: 'missing',
+      importance: 'critical',
+      resumeMatch: 'None',
+      reasoning: 'No evidence of PHP or Laravel/Symfony experience in the resume.',
+    },
+    {
+      skill: 'Front-end (Vue.js/React)',
+      status: 'verified',
+      importance: 'critical',
+      resumeMatch: 'Vue.js, React.js',
+      reasoning:
+        'Candidate has extensive experience with Vue.js and React, meeting the requirement.',
+    },
+    {
+      skill: 'SQL/RDBMS experience',
+      status: 'missing',
+      importance: 'critical',
+      resumeMatch: 'None',
+      reasoning: 'No explicit mention of SQL or RDBMS experience in the resume.',
+    },
+    {
+      skill: 'Git workflow',
+      status: 'verified',
+      importance: 'nice-to-have',
+      resumeMatch: 'Git',
+      reasoning:
+        'Candidate has experience working within an Agile environment, which typically includes Git.',
+    },
+    {
+      skill: 'Testing fundamentals (PHPUnit/Pest, component tests)',
+      status: 'missing',
+      importance: 'nice-to-have',
+      resumeMatch: 'None',
+      reasoning: 'No evidence of testing experience or knowledge of PHPUnit/Pest in the resume.',
+    },
+  ],
+  radarChart: [
+    {
+      axis: 'PHP Framework (Laravel/Symfony)',
+      requiredLevel: 90,
+      candidateLevel: 0,
+      reasoning: 'Candidate has no experience with PHP frameworks.',
+    },
+    {
+      axis: 'Front-end (Vue.js/React)',
+      requiredLevel: 80,
+      candidateLevel: 80,
+      reasoning: 'Candidate has strong experience with Vue.js and React.',
+    },
+    {
+      axis: 'SQL/RDBMS',
+      requiredLevel: 70,
+      candidateLevel: 0,
+      reasoning: 'No evidence of SQL experience.',
+    },
+    {
+      axis: 'Git Workflow',
+      requiredLevel: 60,
+      candidateLevel: 70,
+      reasoning: 'Candidate has experience with Git in Agile environments.',
+    },
+    {
+      axis: 'Testing Fundamentals',
+      requiredLevel: 60,
+      candidateLevel: 0,
+      reasoning: 'No evidence of testing experience.',
+    },
+  ],
+  actionPlan: {
+    resumeOptimizations: [
       {
-        skill: 'TypeScript',
-        evidence:
-          'Initialized and architected new frontend platform using customized Nuxt.js configurations, JavaScript, TypeScript, SCSS, and Shell scripts.',
+        title: 'Highlight PHP Experience',
+        description:
+          'If any PHP experience exists, even if minimal, it should be included in the resume to address the critical gap.',
+        priority: 'high',
       },
       {
-        skill: 'Vue.js',
-        evidence:
-          'Implemented client application features with pixel perfect accuracy from design specifications, using Nuxt.js, Vuex, JavaScript, and SCSS.',
+        title: 'Add SQL Experience',
+        description:
+          'If the candidate has any SQL experience, it should be explicitly mentioned to meet the job requirements.',
+        priority: 'high',
       },
       {
-        skill: 'Agile Environment',
-        evidence:
-          'Worked within an Agile engineering team, participated in scrums, and conducted code reviews.',
+        title: 'Include Testing Knowledge',
+        description:
+          'If the candidate has any knowledge or experience with testing frameworks, it should be added to the resume.',
+        priority: 'medium',
       },
     ],
-    missing: [
+    learningPriorities: [
       {
-        skill: 'GraphQL',
-        importance: 'critical',
+        title: 'Learn PHP and Laravel',
+        description:
+          'Focus on gaining foundational knowledge in PHP and Laravel, as these are critical for the role.',
+        priority: 'high',
       },
       {
-        skill: 'Redux or Zustand',
-        importance: 'niceToHave',
+        title: 'Review SQL Concepts',
+        description:
+          'Study SQL fundamentals, including migrations, indexing, and query tuning, to demonstrate competency in RDBMS.',
+        priority: 'high',
       },
       {
-        skill: 'Next.js',
-        importance: 'critical',
-      },
-      {
-        skill: 'Web Security Awareness',
-        importance: 'niceToHave',
-      },
-    ],
-    transferable: [
-      {
-        missingSkill: 'GraphQL',
-        candidateSkill: 'REST APIs',
-        reasoning:
-          'Both are used for data fetching in frontend applications, but GraphQL offers more flexibility in querying.',
-      },
-      {
-        missingSkill: 'Next.js',
-        candidateSkill: 'Nuxt.js',
-        reasoning:
-          'Both frameworks are built on top of React and Vue respectively and share similar concepts in server-side rendering.',
+        title: 'Familiarize with Testing Frameworks',
+        description:
+          'Learn about PHPUnit and Pest to understand testing fundamentals relevant to the job.',
+        priority: 'medium',
       },
     ],
   },
-  radarChart: [
-    {
-      axis: 'TypeScript',
-      requiredLevel: 90,
-      candidateLevel: 80,
-      reasoning: 'Strong experience in TypeScript, but not explicitly stated as a primary focus.',
-    },
-    {
-      axis: 'Vue.js',
-      requiredLevel: 80,
-      candidateLevel: 90,
-      reasoning: 'Extensive experience with Vue.js, exceeding the required level.',
-    },
-    {
-      axis: 'GraphQL',
-      requiredLevel: 80,
-      candidateLevel: 0,
-      reasoning: 'No evidence of experience with GraphQL.',
-    },
-    {
-      axis: 'State Management',
-      requiredLevel: 70,
-      candidateLevel: 80,
-      reasoning: 'Experience with Vuex, but no evidence of Redux or Zustand.',
-    },
-    {
-      axis: 'Agile Practices',
-      requiredLevel: 70,
-      candidateLevel: 80,
-      reasoning: 'Demonstrated experience in an Agile environment.',
-    },
-    {
-      axis: 'Web Security Awareness',
-      requiredLevel: 70,
-      candidateLevel: 0,
-      reasoning: 'No evidence of awareness of web security issues.',
-    },
-  ],
-  actionPlan: [
-    {
-      title: 'Learn GraphQL',
-      description:
-        'Take an online course or tutorial focused on GraphQL to gain practical experience and understanding of its principles.',
-      priority: 'high',
-    },
-    {
-      title: 'Familiarize with Next.js',
-      description:
-        'Build a small project using Next.js to understand its features and differences from Nuxt.js.',
-      priority: 'high',
-    },
-    {
-      title: 'Explore Redux or Zustand',
-      description:
-        'Study state management libraries like Redux or Zustand to enhance knowledge and applicability in future projects.',
-      priority: 'medium',
-    },
-    {
-      title: 'Web Security Best Practices',
-      description:
-        'Research common web security issues and best practices to ensure secure coding practices.',
-      priority: 'medium',
-    },
-  ],
-  matchScore: 70,
+  matchScore: 45,
   verdict:
-    'The candidate has strong foundational skills but lacks critical experience with GraphQL and Next.js.',
+    'The candidate has strong front-end skills but lacks critical PHP and SQL experience, making them a weak match for the role.',
 };
 
 export function useAnalyzeFit() {

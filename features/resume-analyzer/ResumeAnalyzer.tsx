@@ -94,7 +94,7 @@ export default function ResumeAnalyzer() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {object?.matchScore && object?.verdict && (
+            {object.matchScore && object.verdict && (
               <MatchScore matchScore={object.matchScore} verdict={object.verdict} />
             )}
 

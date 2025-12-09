@@ -6,42 +6,62 @@ import { AnalysisSchema } from '@/features/resume-analyzer/schemas/AnalysisSchem
 
 type AnalysisSchemaType = z.infer<typeof AnalysisSchema>;
 type SkillAuditData = AnalysisSchemaType['skillAudit'];
-type VerifiedItemType = SkillAuditData['verified'][number];
-type MissingItemType = SkillAuditData['missing'][number];
-type TransferableItemType = SkillAuditData['transferable'][number];
+type SkillItemType = SkillAuditData[number];
 
 export type SkillAuditProps = {
   audit: SkillAuditData;
 };
 
-function VerifiedItem({ item }: { item: VerifiedItemType }) {
-  return (
-    <div>
-      <h4 className="text-sm font-bold flex items-center gap-2">{item.skill}</h4>
-      {item.evidence && <p className="text-sm text-muted-foreground mt-1">{item.evidence}</p>}
-    </div>
-  );
-}
-
-function MissingItem({ item }: { item: MissingItemType }) {
+function VerifiedItem({ item }: { item: SkillItemType }) {
   const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
+  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
+
   return (
     <div>
       <h4 className="text-sm font-bold flex items-center gap-2">
         {item.skill}
-        <Badge variant={importanceVariant}>{item.importance}</Badge>
+        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
       </h4>
+      {item.resumeMatch && item.resumeMatch !== 'None' && (
+        <p className="text-sm font-medium mt-1">
+          Found: <span className="text-foreground">{item.resumeMatch}</span>
+        </p>
+      )}
+      {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
     </div>
   );
 }
 
-function TransferableItem({ item }: { item: TransferableItemType }) {
+function MissingItem({ item }: { item: SkillItemType }) {
+  const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
+  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
+
   return (
     <div>
-      <h4 className="text-sm font-bold flex items-center gap-2">{item.missingSkill}</h4>
-      <p className="text-sm font-medium mt-1">
-        Bridge: <span className="text-foreground">{item.candidateSkill}</span>
-      </p>
+      <h4 className="text-sm font-bold flex items-center gap-2">
+        {item.skill}
+        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
+      </h4>
+      {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
+    </div>
+  );
+}
+
+function TransferableItem({ item }: { item: SkillItemType }) {
+  const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
+  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
+
+  return (
+    <div>
+      <h4 className="text-sm font-bold flex items-center gap-2">
+        {item.skill}
+        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
+      </h4>
+      {item.resumeMatch && item.resumeMatch !== 'None' && (
+        <p className="text-sm font-medium mt-1">
+          Bridge: <span className="text-foreground">{item.resumeMatch}</span>
+        </p>
+      )}
       {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
     </div>
   );
@@ -71,20 +91,24 @@ function SkillSection<T>({ title, items, renderItem }: SkillSectionProps<T>) {
 }
 
 export default function SkillAudit({ audit }: SkillAuditProps) {
-  if (!audit) {
+  if (!audit || audit.length === 0) {
     return null;
   }
 
-  const { verified, transferable, missing } = audit;
+  const verified = audit.filter((item): item is SkillItemType => item.status === 'verified');
+  const missing = audit.filter((item): item is SkillItemType => item.status === 'missing');
+  const transferable = audit.filter(
+    (item): item is SkillItemType => item.status === 'transferable',
+  );
 
-  const hasVerified = verified && verified.length > 0;
-  const hasTransferable = transferable && transferable.length > 0;
-  const hasMissing = missing && missing.length > 0;
+  const hasVerified = verified.length > 0;
+  const hasTransferable = transferable.length > 0;
+  const hasMissing = missing.length > 0;
 
   return (
     <div className="space-y-6">
       {hasVerified && (
-        <SkillSection
+        <SkillSection<SkillItemType>
           title="Verified Skills"
           items={verified}
           renderItem={(item) => <VerifiedItem item={item} />}
@@ -94,7 +118,7 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
       {hasVerified && hasMissing && <Separator />}
 
       {hasMissing && (
-        <SkillSection
+        <SkillSection<SkillItemType>
           title="Missing Requirements"
           items={missing}
           renderItem={(item) => <MissingItem item={item} />}
@@ -104,7 +128,7 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
       {hasMissing && hasTransferable && <Separator />}
 
       {hasTransferable && (
-        <SkillSection
+        <SkillSection<SkillItemType>
           title="Transferable Skills"
           items={transferable}
           renderItem={(item) => <TransferableItem item={item} />}

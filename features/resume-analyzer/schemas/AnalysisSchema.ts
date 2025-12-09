@@ -39,6 +39,22 @@ const SkillAudit = z.object({
     .describe('Skills that are not direct matches but show capability.'),
 });
 
+const SkillItem = z.object({
+  skill: z.string().describe('The requirement from the job description'),
+  status: z
+    .enum(['verified', 'transferable', 'missing'])
+    .describe(
+      '"verified" if explicit evidence found. "transferable" if a strong proxy/competing tech exists. "missing" if neither.',
+    ),
+  importance: z
+    .enum(['critical', 'nice-to-have'])
+    .describe('The importance of this skill based on the job description.'),
+  resumeMatch: z
+    .string()
+    .describe('If Verified/Transferable: the specific skill found in resume. If Missing: "None".'),
+  reasoning: z.string().describe('Brief evidence or mapping logic.'),
+});
+
 const ActionItem = z.object({
   title: z.string(),
   description: z.string().describe('Specific, actionable advice. No generic fluff.'),
@@ -67,7 +83,7 @@ export const AnalysisSchema = z.object({
     ),
 
   // STEP 2: EVIDENCE GATHERING (The Audit)
-  skillAudit: SkillAudit.describe('Comprehensive breakdown of technical fit.'),
+  skillAudit: z.array(SkillItem).describe('Comprehensive breakdown of technical fit.'),
 
   // STEP 3: SYNTHESIS (The Chart)
   radarChart: z

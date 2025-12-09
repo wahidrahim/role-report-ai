@@ -43,6 +43,13 @@ export async function POST(request: NextRequest) {
         - 60-74: Transferable Match. Has fundamental skills but different stack (e.g., Python dev applying for Ruby role).
         - <60: Weak Match. Missing Critical requirements.
 
+        *** SKILL AUDIT INSTRUCTIONS ***
+        Iterate through every major technical requirement in the Job Description.
+        For each requirement, assign EXACTLY ONE status:
+        1. VERIFIED: Evidence is explicitly in the resume.
+        2. TRANSFERABLE: Evidence is missing, but a strong proxy exists (e.g., Job: AWS -> Resume: Azure).
+        3. MISSING: No evidence and no proxy found.
+
         *** RADAR CHART INSTRUCTIONS ***
         - Select 4 to 8 distinct technical axes.
         - Fewer is better. Only add an axis if it is a major distinct requirement.
