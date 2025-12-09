@@ -1,9 +1,15 @@
 'use client';
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { analysisSchema } from '@/schemas/analysisSchema';
 import { useResumeStore } from '@/stores/resumeStore';
 
@@ -44,35 +50,73 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <div>
-        <ResumeUploader />
-      </div>
-      <div>
-        <textarea
-          rows={10}
-          cols={50}
-          placeholder="Paste job posting URL or job description text here"
-          value={jobDescription}
-          onChange={handleJobDescriptionChange}
-        ></textarea>
-      </div>
-      <div>
-        <button type="button" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'Analyzing...' : 'Analyze Fit'}
-        </button>
-      </div>
-      {validationError && <div style={{ color: 'red', marginTop: '10px' }}>{validationError}</div>}
-      {error && (
-        <div style={{ color: 'red', marginTop: '10px' }}>
-          {error instanceof Error ? error.message : 'An unexpected error occurred'}
-        </div>
+    <div className="container mx-auto max-w-4xl p-6 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Resume Upload</CardTitle>
+          <CardDescription>Upload your resume to get started</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResumeUploader />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Job Description</CardTitle>
+          <CardDescription>Paste job posting URL or job description text here</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="job-description">Job Description</Label>
+            <Textarea
+              id="job-description"
+              rows={10}
+              placeholder="Paste job posting URL or job description text here"
+              value={jobDescription}
+              onChange={handleJobDescriptionChange}
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
+            {isLoading ? 'Analyzing...' : 'Analyze Fit'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {validationError && (
+        <Alert variant="destructive">
+          <AlertCircle />
+          <AlertTitle>Validation Error</AlertTitle>
+          <AlertDescription>{validationError}</AlertDescription>
+        </Alert>
       )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {object && (
-        <div style={{ marginTop: '20px', whiteSpace: 'pre-wrap' }}>
-          <h3>Analysis Results:</h3>
-          <div>{JSON.stringify(object, null, 2)}</div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Analysis Results</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
+              {JSON.stringify(object, null, 2)}
+            </pre>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
