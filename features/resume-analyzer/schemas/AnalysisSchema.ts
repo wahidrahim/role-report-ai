@@ -3,14 +3,18 @@ import { z } from 'zod';
 const RadarPoint = z.object({
   axis: z
     .string()
-    .describe("Technical skill or competency (e.g. 'System Design', 'React Ecosystem')"),
+    .describe("The technical dimension (e.g. 'Cloud Infra'). EXCLUDE Location/Visa/Education."),
   requiredLevel: z.number().min(0).max(100).describe('Required competency level (0-100)'),
   candidateLevel: z.number().min(0).max(100).describe("Candidate's competency level (0-100)"),
   reasoning: z.string().describe('Brief justification for this score'),
 });
 
 const SkillItem = z.object({
-  skill: z.string().describe('The requirement from the job description'),
+  skill: z
+    .string()
+    .describe(
+      'The specific TECHNICAL skill, tool, or methodology (e.g. "React", "Agile", "System Design"). DO NOT include logistical requirements like Location, Citizenship, Degree, or Salary.',
+    ),
   status: z
     .enum(['verified', 'transferable', 'missing'])
     .describe(

@@ -36,6 +36,21 @@ export async function POST(request: NextRequest) {
            - STEP 3 (radarChart): Synthesis of audit into 6 dimensions.
            - STEP 4 (actionPlan): Strategic advice.
            - STEP 5 (matchScore and verdict): Final calculation based on all prior steps.
+
+        *** SCOPE OF ANALYSIS (CRITICAL) ***
+        You are evaluating TECHNICAL & FUNCTIONAL COMPATIBILITY only.
+        
+        IGNORE the following "Deal Breaker" categories for the Skill Audit and Radar Chart:
+        - Location / Commute / Remote status
+        - Visa / Citizenship / Work Authorization
+        - Education Degrees (Bachelors/Masters)
+        - Driver's License / Car ownership
+        - Salary expectations
+
+        Focus ONLY on:
+        - Hard Skills (Languages, Frameworks, Tools)
+        - Concepts (System Design, Testing, CI/CD)
+        - Soft Skills (Leadership, Communication) - ONLY if heavily emphasized.
         
         *** SCORING RUBRIC ***
         - 90-100: Perfect Match. Meets all Critical + Nice-to-haves.
