@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { analysisSchema } from '@/schemas/analysisSchema';
 import { useResumeStore } from '@/stores/resumeStore';
 
+import SkillsRadarChart, { SkillsRadarChartItem } from './components/SkillsRadarChart';
+
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
 export default function Home() {
@@ -75,6 +77,7 @@ export default function Home() {
               placeholder="Paste job posting URL or job description text here"
               value={jobDescription}
               onChange={handleJobDescriptionChange}
+              className="field-sizing-fixed resize-none"
             />
           </div>
           <Button
@@ -112,6 +115,11 @@ export default function Home() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
+            {object.analysis?.skills_radar_chart && (
+              <SkillsRadarChart
+                skills={object.analysis.skills_radar_chart as SkillsRadarChartItem[]}
+              />
+            )}
             <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
               {JSON.stringify(object, null, 2)}
             </pre>

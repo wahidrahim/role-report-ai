@@ -8,14 +8,18 @@ export const analysisSchema = z.object({
 
     // DYNAMIC RADAR CHART
     // We use z.array() to let the AI decide how many items to return.
-    radar_chart: z
+    skills_radar_chart: z
       .array(
         z.object({
           axis: z
             .string()
             .describe('The skill or competency name (e.g., "React", "System Design")'),
-          required: z.number().min(0).max(10).describe('Level required by job (1-10)'),
-          you: z.number().min(0).max(10).describe('Level demonstrated in resume (1-10)'),
+          required_skill_level: z.number().min(0).max(10).describe('Level required by job (1-10)'),
+          users_skill_level: z
+            .number()
+            .min(0)
+            .max(10)
+            .describe('Level demonstrated in resume (1-10)'),
           reason: z.string().describe('Short reason for the score difference'),
         }),
       )
