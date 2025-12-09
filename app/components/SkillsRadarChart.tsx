@@ -9,17 +9,17 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from 'recharts';
-import { z } from 'zod';
 
-import { analysisSchema } from '@/schemas/analysisSchema';
+export type SkillChartItem = {
+  axis: string;
+  requiredSkillLevel: number;
+  usersSkillLevel: number;
+  reason: string;
+};
 
-export type SkillsRadarChartItem = z.infer<
-  typeof analysisSchema
->['analysis']['skillsRadarChart'][number];
-
-interface SkillsRadarChartProps {
-  skills: SkillsRadarChartItem[];
-}
+export type SkillsRadarChartProps = {
+  skills: SkillChartItem[];
+};
 
 export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
   // Transform data for recharts - calculate percentage

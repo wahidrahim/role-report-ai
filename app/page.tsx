@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
+import SkillsRadarChart, { SkillChartItem } from '@/app/components/SkillsRadarChart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,6 @@ import { analysisSchema } from '@/schemas/analysisSchema';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import MatchScore from './components/MatchScore';
-import SkillsRadarChart, { SkillsRadarChartItem } from './components/SkillsRadarChart';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
@@ -27,6 +27,8 @@ export default function Home() {
     api: '/api/analyze-fit',
     schema: analysisSchema,
   });
+
+  const analysis = object?.analysis;
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
@@ -116,17 +118,18 @@ export default function Home() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {object.analysis?.matchScore && object.analysis?.verdict && (
-              <MatchScore
-                matchScore={object.analysis.matchScore}
-                verdict={object.analysis.verdict}
-              />
+            {analysis?.matchScore && analysis?.verdict && (
+              <MatchScore matchScore={analysis.matchScore} verdict={analysis.verdict} />
             )}
-            {object.analysis?.skillsRadarChart && (
-              <SkillsRadarChart
-                skills={object.analysis.skillsRadarChart as SkillsRadarChartItem[]}
-              />
-            )}
+            {analysis?.skillsRadarChart &&
+              analysis.skillsRadarChart.length > 0 &&
+              analysis.skillsRadarChart.some(
+                (skill) =>
+                  skill?.axis &&
+                  skill?.requiredSkillLevel &&
+                  skill?.usersSkillLevel &&
+                  skill?.reason,
+              ) && <SkillsRadarChart skills={analysis.skillsRadarChart as SkillChartItem[]} />}
             <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
               {JSON.stringify(object, null, 2)}
             </pre>
