@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// 1. ATOMIC SUB-SCHEMAS
 const RadarPoint = z.object({
   axis: z
     .string()
@@ -27,30 +26,29 @@ const ActionItem = z.object({
   priority: z.enum(['high', 'medium']),
 });
 
-// 2. THE MAIN SCHEMA (Chronological Order)
 export const AnalysisSchema = z.object({
-  // STEP A: SCRATCHPAD (Hidden from user, used for AI reasoning)
+  // STEP 1: SCRATCHPAD (Hidden from user, used for AI reasoning)
   thoughtProcess: z
     .array(z.string())
     .describe(
       "3-5 bullet points analyzing the 'vibe' and major gaps before committing to structured data.",
     ),
 
-  // STEP B: EVIDENCE GATHERING (The Audit)
+  // STEP 2: EVIDENCE GATHERING (The Audit)
   skillAudit: z
     .array(SkillAuditItem)
     .describe('A comprehensive extraction of every technical requirement and its status.'),
 
-  // STEP C: SYNTHESIS (The Chart)
+  // STEP 3: SYNTHESIS (The Chart)
   radarChart: z
     .array(RadarPoint)
     .length(6)
     .describe('Top 6 distinct technical dimensions derived from the audit.'),
 
-  // STEP D: STRATEGY (The Advice)
+  // STEP 4: STRATEGY (The Advice)
   actionPlan: z.array(ActionItem).describe('Strategic advice to close the identified gaps.'),
 
-  // STEP E: FINAL VERDICT (The Score)
+  // STEP 5: FINAL VERDICT (The Score)
   // This comes LAST so it includes all previous context.
   matchScore: z
     .number()

@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
            - A "Transferable" match requires a competing technology (e.g., AWS vs Azure).
            - "Missing" means no evidence found.
         3. CHRONOLOGICAL REASONING: Follow the schema steps strictly in order:
-           - STEP A (thoughtProcess): Analyze high-level gaps.
-           - STEP B (skillAudit): Detailed evidence gathering.
-           - STEP C (radarChart): Synthesis of audit into 6 dimensions.
-           - STEP D (actionPlan): Strategic advice.
-           - STEP E (matchScore/verdict): Final calculation based on all prior steps.
+           - STEP 1 (thoughtProcess): Analyze high-level gaps.
+           - STEP 2 (skillAudit): Detailed evidence gathering.
+           - STEP 3 (radarChart): Synthesis of audit into 6 dimensions.
+           - STEP 4 (actionPlan): Strategic advice.
+           - STEP 5 (matchScore and verdict): Final calculation based on all prior steps.
         
         *** SCORING RUBRIC ***
         - 90-100: Perfect Match. Meets all Critical + Nice-to-haves.
