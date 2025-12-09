@@ -45,6 +45,19 @@ const ActionItem = z.object({
   priority: z.enum(['high', 'medium']),
 });
 
+const ActionPlan = z.object({
+  resumeOptimizations: z
+    .array(ActionItem)
+    .describe(
+      'Immediate edits to the resume text (keywords, re-phrasing) to pass the initial screen.',
+    ),
+  learningPriorities: z
+    .array(ActionItem)
+    .describe(
+      'High-yield technical topics or concepts the candidate must review immediately to handle a screening call.',
+    ),
+});
+
 export const AnalysisSchema = z.object({
   // STEP 1: SCRATCHPAD (Hidden from user, used for AI reasoning)
   thoughtProcess: z
@@ -64,7 +77,7 @@ export const AnalysisSchema = z.object({
     .describe('Extract the top 3-8 most critical technical dimensions.'),
 
   // STEP 4: STRATEGY (The Advice)
-  actionPlan: z.array(ActionItem).describe('Strategic advice to close the identified gaps.'),
+  actionPlan: ActionPlan.describe('Strategic advice to close the identified gaps.'),
 
   // STEP 5: FINAL VERDICT (The Score)
   // This comes LAST so it includes all previous context.

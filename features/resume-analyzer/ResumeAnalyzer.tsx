@@ -7,8 +7,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 
+import ActionPlan, { ActionPlanProps } from './components/ActionPlan';
 import MatchScore from './components/MatchScore';
 import SkillAudit, { SkillAuditProps } from './components/SkillAudit';
 import SkillsRadarChart from './components/SkillsRadarChart';
@@ -100,8 +102,16 @@ export default function ResumeAnalyzer() {
               <SkillsRadarChart skills={object.radarChart as SkillChartItem[]} />
             )}
 
+            {object.radarChart && object.skillAudit && <Separator className="my-4" />}
+
             {object.skillAudit && (
               <SkillAudit audit={object.skillAudit as SkillAuditProps['audit']} />
+            )}
+
+            {object.skillAudit && object.actionPlan && <Separator className="my-4" />}
+
+            {object.actionPlan && (
+              <ActionPlan actionPlan={object.actionPlan as ActionPlanProps['actionPlan']} />
             )}
           </CardContent>
         </Card>
