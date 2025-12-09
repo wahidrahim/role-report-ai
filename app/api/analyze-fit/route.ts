@@ -72,6 +72,16 @@ export async function POST(request: NextRequest) {
           "importance": "critical"
         }
         (Note: It is NOT "verified" because Web != Native. It is NOT "missing" because the core concept is present.)
+
+        *** FEW-SHOT EXAMPLE: TRANSFERABILITY ***
+        [JD Requirement]: "Looking for a Python/Django developer."
+        [Resume Snippet]: "Senior Ruby on Rails Developer with 5 years experience."
+        [Correct Analysis]:
+        {
+          "missingSkill": "Django",
+          "candidateSkill": "Ruby on Rails",
+          "reasoning": "Both are MVC frameworks with similar ORMs (ActiveRecord vs Django ORM). Patterns transfer 90%."
+        }
   
         *** ACTUAL DATA ***
         RESUME CONTENT:

@@ -9,124 +9,129 @@ import { useResumeStore } from '@/stores/resumeStore';
 const testObject = {
   thoughtProcess: [
     'The candidate has strong experience in TypeScript and Vue.js, which aligns well with the job requirements.',
-    'The job description emphasizes a transition to Next.js, which the candidate has not explicitly mentioned experience with, but has related experience in Vue.js and Nuxt.js.',
-    "GraphQL knowledge is a critical requirement, but the candidate's resume does not provide evidence of experience with GraphQL, marking it as a gap.",
-    'The candidate has experience with state management using Vuex, which is relevant but does not cover the full range of state management tools mentioned in the job description.',
-    "The candidate's experience in agile environments is a plus, but there is no mention of specific security best practices, which is a nice-to-have in the job description.",
+    'The job description emphasizes GraphQL expertise, which is not explicitly mentioned in the resume.',
+    'The candidate has experience with state management using Vuex, but there is no evidence of experience with Redux or Zustand, which are also mentioned in the job description.',
+    "The candidate has demonstrated clean coding practices and experience in an agile environment, which matches the job's expectations.",
+    'The transition to Next.js is a critical requirement, and the candidate has experience with Nuxt.js, which may provide some transferable skills.',
   ],
-  skillAudit: [
-    {
-      skill: 'TypeScript',
-      status: 'verified',
-      evidence:
-        'Strong experience with TypeScript in multiple projects, including frontend applications.',
-      importance: 'critical',
-    },
-    {
-      skill: 'Vue.js or React',
-      status: 'verified',
-      evidence: 'Solid hands-on experience in Vue.js, with multiple projects listed.',
-      importance: 'critical',
-    },
-    {
-      skill: 'GraphQL',
-      status: 'missing',
-      evidence: 'No evidence of experience with GraphQL in the resume.',
-      importance: 'critical',
-    },
-    {
-      skill: 'State Management Solutions',
-      status: 'verified',
-      evidence: 'Experience with Vuex for state management in applications.',
-      importance: 'critical',
-    },
-    {
-      skill: 'Next.js',
-      status: 'missing',
-      evidence: 'No mention of Next.js experience, only Nuxt.js which is a different framework.',
-      importance: 'critical',
-    },
-    {
-      skill: 'Web Security Best Practices',
-      status: 'missing',
-      evidence: 'No specific mention of awareness or experience with frontend security issues.',
-      importance: 'niceToHave',
-    },
-    {
-      skill: 'Agile Environment',
-      status: 'verified',
-      evidence:
-        'Worked within an Agile engineering team, participated in scrums, and conducted code reviews.',
-      importance: 'critical',
-    },
-    {
-      skill: 'UI/UX Design',
-      status: 'verified',
-      evidence: 'Experience in optimizing UI/UX for applications and collaborating with designers.',
-      importance: 'niceToHave',
-    },
-  ],
+  skillAudit: {
+    verified: [
+      {
+        skill: 'TypeScript',
+        evidence:
+          'Initialized and architected new frontend platform using customized Nuxt.js configurations, JavaScript, TypeScript, SCSS, and Shell scripts.',
+      },
+      {
+        skill: 'Vue.js',
+        evidence:
+          'Implemented client application features with pixel perfect accuracy from design specifications, using Nuxt.js, Vuex, JavaScript, and SCSS.',
+      },
+      {
+        skill: 'Agile Environment',
+        evidence:
+          'Worked within an Agile engineering team, participated in scrums, and conducted code reviews.',
+      },
+    ],
+    missing: [
+      {
+        skill: 'GraphQL',
+        importance: 'critical',
+      },
+      {
+        skill: 'Redux or Zustand',
+        importance: 'niceToHave',
+      },
+      {
+        skill: 'Next.js',
+        importance: 'critical',
+      },
+      {
+        skill: 'Web Security Awareness',
+        importance: 'niceToHave',
+      },
+    ],
+    transferable: [
+      {
+        missingSkill: 'GraphQL',
+        candidateSkill: 'REST APIs',
+        reasoning:
+          'Both are used for data fetching in frontend applications, but GraphQL offers more flexibility in querying.',
+      },
+      {
+        missingSkill: 'Next.js',
+        candidateSkill: 'Nuxt.js',
+        reasoning:
+          'Both frameworks are built on top of React and Vue respectively and share similar concepts in server-side rendering.',
+      },
+    ],
+  },
   radarChart: [
     {
       axis: 'TypeScript',
-      requiredLevel: 70,
+      requiredLevel: 90,
       userLevel: 80,
-      reasoning: 'Candidate has strong experience with TypeScript in multiple projects.',
+      reasoning: 'Strong experience in TypeScript, but not explicitly stated as a primary focus.',
     },
     {
       axis: 'Vue.js',
-      requiredLevel: 70,
-      userLevel: 80,
-      reasoning: 'Solid hands-on experience in Vue.js, with multiple projects listed.',
+      requiredLevel: 80,
+      userLevel: 90,
+      reasoning: 'Extensive experience with Vue.js, exceeding the required level.',
+    },
+    {
+      axis: 'GraphQL',
+      requiredLevel: 80,
+      userLevel: 0,
+      reasoning: 'No evidence of experience with GraphQL.',
     },
     {
       axis: 'State Management',
       requiredLevel: 70,
       userLevel: 80,
-      reasoning: 'Experience with Vuex for state management.',
+      reasoning: 'Experience with Vuex, but no evidence of Redux or Zustand.',
     },
     {
-      axis: 'GraphQL',
-      requiredLevel: 70,
-      userLevel: 0,
-      reasoning: 'No evidence of experience with GraphQL.',
-    },
-    {
-      axis: 'Next.js',
-      requiredLevel: 70,
-      userLevel: 0,
-      reasoning: 'No mention of Next.js experience.',
-    },
-    {
-      axis: 'Agile Environment',
+      axis: 'Agile Practices',
       requiredLevel: 70,
       userLevel: 80,
-      reasoning: 'Worked within an Agile engineering team.',
+      reasoning: 'Demonstrated experience in an Agile environment.',
+    },
+    {
+      axis: 'Web Security Awareness',
+      requiredLevel: 70,
+      userLevel: 0,
+      reasoning: 'No evidence of awareness of web security issues.',
     },
   ],
   actionPlan: [
     {
-      title: 'Gain Experience with GraphQL',
+      title: 'Learn GraphQL',
       description:
-        'Engage in projects or courses that focus on GraphQL to build expertise, as it is a critical requirement for the role.',
+        'Take an online course or tutorial focused on GraphQL to gain practical experience and understanding of its principles.',
       priority: 'high',
     },
     {
-      title: 'Learn Next.js',
+      title: 'Familiarize with Next.js',
       description:
-        'Start a personal project or take a course on Next.js to gain familiarity with the framework, which is essential for the job.',
+        'Build a small project using Next.js to understand its features and differences from Nuxt.js.',
       priority: 'high',
     },
     {
-      title: 'Enhance Knowledge of Web Security Best Practices',
+      title: 'Explore Redux or Zustand',
       description:
-        'Study common web security issues and best practices to ensure a strong understanding of security in frontend development.',
+        'Study state management libraries like Redux or Zustand to enhance knowledge and applicability in future projects.',
+      priority: 'medium',
+    },
+    {
+      title: 'Web Security Best Practices',
+      description:
+        'Research common web security issues and best practices to ensure secure coding practices.',
       priority: 'medium',
     },
   ],
-  matchScore: 65,
+  matchScore: 70,
   verdict:
-    'The candidate has strong TypeScript and Vue.js skills but lacks critical experience in GraphQL and Next.js, making them a weak match for the role.',
+    'The candidate has strong foundational skills but lacks critical experience with GraphQL and Next.js.',
 };
 
 export function useAnalyzeFit() {

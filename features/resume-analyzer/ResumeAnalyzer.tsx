@@ -10,10 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 import MatchScore from './components/MatchScore';
-import SkillAudit from './components/SkillAudit';
+import SkillAudit, { SkillAuditProps } from './components/SkillAudit';
 import SkillsRadarChart from './components/SkillsRadarChart';
 import { useAnalyzeFit } from './hooks/useAnalyzeFit';
-import { SkillAuditItem, SkillChartItem } from './types';
+import { SkillChartItem } from './types';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
@@ -100,7 +100,9 @@ export default function ResumeAnalyzer() {
               <SkillsRadarChart skills={object.radarChart as SkillChartItem[]} />
             )}
 
-            {object.skillAudit && <SkillAudit skillItems={object.skillAudit as SkillAuditItem[]} />}
+            {object.skillAudit && (
+              <SkillAudit audit={object.skillAudit as SkillAuditProps['audit']} />
+            )}
           </CardContent>
         </Card>
       )}

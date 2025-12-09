@@ -9,16 +9,34 @@ const RadarPoint = z.object({
   reasoning: z.string().describe('Brief justification for this score'),
 });
 
-const SkillAuditItem = z.object({
-  skill: z.string().describe('The specific requirement from the JD'),
-  status: z
-    .enum(['verified', 'transferable', 'missing'])
-    .describe("Verdict on the candidate's proficiency"),
-  evidence: z
-    .string()
-    .optional()
-    .describe('Direct quote from resume (if verified) or reasoning (if transferable/missing)'),
-  importance: z.enum(['critical', 'niceToHave']),
+const SkillAudit = z.object({
+  verified: z
+    .array(
+      z.object({
+        skill: z.string(),
+        evidence: z.string().describe('Quote or metric from resume proving this.'),
+      }),
+    )
+    .describe('Direct matches found in the resume.'),
+  missing: z
+    .array(
+      z.object({
+        skill: z.string(),
+        importance: z.enum(['critical', 'niceToHave']),
+      }),
+    )
+    .describe('Requirements with zero evidence in resume.'),
+  transferable: z
+    .array(
+      z.object({
+        missingSkill: z.string().describe('The job requirement the candidate lacks (e.g., React)'),
+        candidateSkill: z
+          .string()
+          .describe('The skill the candidate has that bridges the gap (e.g., Vue)'),
+        reasoning: z.string().describe('Why these are equivalent (e.g., "Both use Virtual DOM")'),
+      }),
+    )
+    .describe('Skills that are not direct matches but show capability.'),
 });
 
 const ActionItem = z.object({
@@ -36,9 +54,7 @@ export const AnalysisSchema = z.object({
     ),
 
   // STEP 2: EVIDENCE GATHERING (The Audit)
-  skillAudit: z
-    .array(SkillAuditItem)
-    .describe('A comprehensive extraction of every technical requirement and its status.'),
+  skillAudit: SkillAudit.describe('Comprehensive breakdown of technical fit.'),
 
   // STEP 3: SYNTHESIS (The Chart)
   radarChart: z
