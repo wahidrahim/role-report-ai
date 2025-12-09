@@ -4,7 +4,7 @@ const RadarPoint = z.object({
   axis: z
     .string()
     .describe("Technical skill or competency (e.g. 'System Design', 'React Ecosystem')"),
-  value: z.number().min(0).max(10).describe("Candidate's competency level (0-10)"),
+  value: z.number().min(0).max(10).describe("Candidate's competency level (0-100)"),
   reasoning: z.string().describe('Brief justification for this score'),
 });
 
@@ -42,20 +42,15 @@ export const AnalysisSchema = z.object({
   // STEP 3: SYNTHESIS (The Chart)
   radarChart: z
     .array(RadarPoint)
-    .length(6)
-    .describe('Top 6 distinct technical dimensions derived from the audit.'),
+    .min(3)
+    .max(8)
+    .describe('Extract the top 3-8 most critical technical dimensions.'),
 
   // STEP 4: STRATEGY (The Advice)
   actionPlan: z.array(ActionItem).describe('Strategic advice to close the identified gaps.'),
 
   // STEP 5: FINAL VERDICT (The Score)
   // This comes LAST so it includes all previous context.
-  matchScore: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe(
-      'Final calculation as a percentage based on: (Critical Matches + Transferable) / Total Critical Requirements.',
-    ),
+  matchScore: z.number().min(0).max(100).describe('Final rating on a 0-100 scale.'),
   verdict: z.string().describe("A brutal, 1-sentence summary of the candidate's fit."),
 });

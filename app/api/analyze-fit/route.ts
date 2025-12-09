@@ -42,6 +42,12 @@ export async function POST(request: NextRequest) {
         - 75-89: Strong Match. Has Criticals, missing minor Nice-to-haves.
         - 60-74: Transferable Match. Has fundamental skills but different stack (e.g., Python dev applying for Ruby role).
         - <60: Weak Match. Missing Critical requirements.
+
+        *** RADAR CHART INSTRUCTIONS ***
+        - Select between 3 and 8 distinct technical axes.
+        - Optimization Rule: Fewer is better. Only add an axis if it is a major distinct requirement.
+        - Example: If a job is pure "React Frontend", do not create an axis for "DevOps" unless explicitly asked.
+        - Use 0-100 scale.
       `,
       prompt: `
         *** FEW-SHOT EXAMPLE (HOW TO THINK) ***
