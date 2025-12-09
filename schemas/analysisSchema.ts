@@ -3,7 +3,7 @@ import { z } from 'zod';
 // This schema defines the structure of your entire report
 export const analysisSchema = z.object({
   analysis: z.object({
-    match_score: z.number().min(0).max(100).describe('Overall compatibility score 0-100'),
+    match_score: z.number().min(0).max(10).describe('Overall compatibility score 0-10'),
     verdict: z.string().describe('A 2-sentence executive summary of the fit'),
 
     // DYNAMIC RADAR CHART
