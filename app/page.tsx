@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { analysisSchema } from '@/schemas/analysisSchema';
 import { useResumeStore } from '@/stores/resumeStore';
 
+import MatchScore from './components/MatchScore';
 import SkillsRadarChart, { SkillsRadarChartItem } from './components/SkillsRadarChart';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
@@ -115,6 +116,12 @@ export default function Home() {
             <CardTitle>Analysis Results</CardTitle>
           </CardHeader>
           <CardContent>
+            {object.analysis?.matchScore && object.analysis?.verdict && (
+              <MatchScore
+                matchScore={object.analysis.matchScore}
+                verdict={object.analysis.verdict}
+              />
+            )}
             {object.analysis?.skillsRadarChart && (
               <SkillsRadarChart
                 skills={object.analysis.skillsRadarChart as SkillsRadarChartItem[]}
