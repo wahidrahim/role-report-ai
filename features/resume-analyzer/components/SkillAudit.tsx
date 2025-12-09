@@ -115,23 +115,23 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
         />
       )}
 
-      {hasVerified && hasMissing && <Separator />}
-
-      {hasMissing && (
-        <SkillSection<SkillItemType>
-          title="Missing Requirements"
-          items={missing}
-          renderItem={(item) => <MissingItem item={item} />}
-        />
-      )}
-
-      {hasMissing && hasTransferable && <Separator />}
+      {hasVerified && hasTransferable && <Separator />}
 
       {hasTransferable && (
         <SkillSection<SkillItemType>
           title="Transferable Skills"
           items={transferable}
           renderItem={(item) => <TransferableItem item={item} />}
+        />
+      )}
+
+      {hasTransferable && hasMissing && <Separator />}
+
+      {hasMissing && (
+        <SkillSection<SkillItemType>
+          title="Missing Requirements"
+          items={missing}
+          renderItem={(item) => <MissingItem item={item} />}
         />
       )}
     </div>
