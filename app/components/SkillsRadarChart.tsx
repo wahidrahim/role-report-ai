@@ -1,14 +1,13 @@
 'use client';
 
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+
 import {
-  Legend,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-} from 'recharts';
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 
 export type SkillChartItem = {
   axis: string;
@@ -20,8 +19,14 @@ export type SkillsRadarChartProps = {
   skills: SkillChartItem[];
 };
 
+const chartConfig = {
+  percentage: {
+    label: 'Your score',
+    color: 'hsl(var(--chart-1))',
+  },
+} satisfies ChartConfig;
+
 export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
-  // Transform data for recharts - calculate percentage
   const chartData = skills.map((skill) => ({
     skill: skill.axis,
     percentage: Math.min(skill.value, 100), // Cap at 100%
@@ -29,22 +34,33 @@ export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
   }));
 
   return (
-    <div className="space-y-4">
-      <ResponsiveContainer width="100%" height={400}>
-        <RadarChart data={chartData}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="skill" />
-          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} />
-          <Radar
-            name="Your Level"
-            dataKey="percentage"
-            stroke="#22c55e"
-            fill="#22c55e"
-            fillOpacity={0.3}
-          />
-          <Legend />
-        </RadarChart>
-      </ResponsiveContainer>
-    </div>
+    <ChartContainer config={chartConfig}>
+      <RadarChart data={chartData}>
+        <ChartTooltip
+          cursor={false}
+          content={
+            <ChartTooltipContent
+              labelFormatter={(label) => label}
+              formatter={(value, name, item) => {
+                const data = item.payload as unknown as {
+                  skill: string;
+                  percentage: number;
+                  reasoning: string;
+                };
+                return (
+                  <div>
+                    <div>Your level: {value}%</div>
+                    <div>{data.reasoning}</div>
+                  </div>
+                );
+              }}
+            />
+          }
+        />
+        <PolarAngleAxis dataKey="skill" />
+        <PolarGrid />
+        <Radar dataKey="percentage" fill="var(--color-percentage)" fillOpacity={0.6} />
+      </RadarChart>
+    </ChartContainer>
   );
 }
