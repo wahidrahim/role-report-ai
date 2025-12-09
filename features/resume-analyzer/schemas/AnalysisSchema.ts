@@ -4,7 +4,8 @@ const RadarPoint = z.object({
   axis: z
     .string()
     .describe("Technical skill or competency (e.g. 'System Design', 'React Ecosystem')"),
-  value: z.number().min(0).max(10).describe("Candidate's competency level (0-100)"),
+  requiredLevel: z.number().min(0).max(100).describe('Required competency level (0-100)'),
+  userLevel: z.number().min(0).max(100).describe("Candidate's competency level (0-100)"),
   reasoning: z.string().describe('Brief justification for this score'),
 });
 
@@ -31,7 +32,7 @@ export const AnalysisSchema = z.object({
   thoughtProcess: z
     .array(z.string())
     .describe(
-      "3-5 bullet points analyzing the 'vibe' and major gaps before committing to structured data.",
+      "Bullet points analyzing the 'vibe' and major gaps before committing to structured data.",
     ),
 
   // STEP 2: EVIDENCE GATHERING (The Audit)
