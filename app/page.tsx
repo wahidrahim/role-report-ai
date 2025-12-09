@@ -247,12 +247,12 @@ export default function Home() {
             )}
 
             {object.skillAudit && <SkillAudit skillItems={object.skillAudit as SkillAuditItem[]} />}
-            <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
-              {JSON.stringify(object, null, 2)}
-            </pre>
           </CardContent>
         </Card>
       )}
+      <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
+        {JSON.stringify(object, null, 2)}
+      </pre>
     </div>
   );
 }

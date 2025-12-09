@@ -14,27 +14,18 @@ export type SkillAuditProps = {
 
 type SkillItemProps = {
   item: SkillAuditItem;
-  isLast: boolean;
 };
 
-function SkillItem({ item, isLast }: SkillItemProps) {
-  const statusVariant =
-    item.status === 'verified'
-      ? 'default'
-      : item.status === 'transferable'
-        ? 'secondary'
-        : 'outline';
+function SkillItem({ item }: SkillItemProps) {
   const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
 
   return (
-    <div>
-      <h2>{item.skill}</h2>
+    <div className="mt-4">
       <div>
-        <Badge variant={statusVariant}>{item.status}</Badge>
+        <h4 className="text-sm font-bold">{item.skill}</h4>
         <Badge variant={importanceVariant}>{item.importance}</Badge>
       </div>
       {item.evidence && <p>{item.evidence}</p>}
-      {!isLast && <Separator className="my-4" />}
     </div>
   );
 }
@@ -51,10 +42,10 @@ function SkillSection({ title, items }: SkillSectionProps) {
 
   return (
     <div>
-      <h3>{title}</h3>
+      <h3 className="text-md font-bold">{title}</h3>
       <div>
         {items.map((item, index) => (
-          <SkillItem key={index} item={item} isLast={index === items.length - 1} />
+          <SkillItem key={index} item={item} />
         ))}
       </div>
     </div>
