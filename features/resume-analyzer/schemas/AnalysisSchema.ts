@@ -4,8 +4,20 @@ const RadarPoint = z.object({
   axis: z
     .string()
     .describe("The technical dimension (e.g. 'Cloud Infra'). EXCLUDE Location/Visa/Education."),
-  requiredLevel: z.number().min(0).max(100).describe('Required competency level (0-100)'),
-  candidateLevel: z.number().min(0).max(100).describe("Candidate's competency level (0-100)"),
+  requiredLevel: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      'Required competency level (0-100), 90=Expert/Lead, 70=Senior/Proficient, 50=Familiarity',
+    ),
+  candidateLevel: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      "Candidate's competency level (0-100), 90=Mastery, 70=Strong, 50=Familiarity, 0=No Evidence",
+    ),
   reasoning: z.string().describe('Brief justification for this score'),
 });
 

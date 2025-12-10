@@ -1,7 +1,10 @@
 import { streamObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { createOllama } from 'ollama-ai-provider-v2';
 
 import { AnalysisSchema } from '@/features/resume-analyzer/schemas/AnalysisSchema';
+
+const ollama = createOllama();
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,9 +20,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = streamObject({
-      model: 'gpt-4o-mini',
+      model: ollama('qwen3-coder:30b'),
       schema: AnalysisSchema,
-      temperature: 0.2, // Low temp = high consistency/strictness
+      temperature: 0, // Low temp = high consistency/strictness
       system: `
         You are an expert Technical Recruiter performing systematic cognitive analysis. Think like a detective investigating a case.
 
@@ -54,8 +57,9 @@ export async function POST(request: NextRequest) {
 
         *** RADAR SYNTHESIS ***
         - 4-8 dimensions from skillAudit analysis
-        - Required: 90=Expert/Lead, 70=Senior/Proficient, 50=Familiarity
-        - Candidate: 90=Mastery, 70=Strong, 40=Competent, 0=No Evidence
+        - Evaluate the level on a 0-100 scale
+        - Required Level: 90=Expert/Lead, 70=Senior/Proficient, 50=Familiarity
+        - Candidate Level: 90=Mastery, 80=Expert, 70=Strong/Proficient, 60=Advanced, 50=Familiarity, 30=Basic, 10=Minimal, 0=No Evidence
       `,
       prompt: `
         *** COGNITIVE ANALYSIS EXAMPLE ***
