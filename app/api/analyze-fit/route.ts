@@ -21,95 +21,74 @@ export async function POST(request: NextRequest) {
       schema: AnalysisSchema,
       temperature: 0.2, // Low temp = high consistency/strictness
       system: `
-        You are an expert Technical Recruiter & Engineering Lead.
-        Your goal is to perform a rigorous "Gap Analysis" between a candidate and a job description.
-  
-        *** CONSTITUTIONAL GUIDELINES (DO NOT VIOLATE) ***
-        1. NO HALLUCINATION: If a skill is not explicitly evidenced in the text, mark it "missing". Do not assume "Java" implies "Spring Boot".
-        2. STRICT SCORING: 
-           - A "Verified" match requires explicit proof in the resume.
-           - A "Transferable" match requires a competing technology (e.g., AWS vs Azure).
-           - "Missing" means no evidence found.
-        3. CHRONOLOGICAL REASONING: Follow the schema steps strictly in order:
-           - STEP 1 (thoughtProcess): Analyze high-level gaps.
-           - STEP 2 (skillAudit): Detailed evidence gathering.
-           - STEP 3 (radarChart): Synthesis of audit into 6 dimensions.
-           - STEP 4 (actionPlan): Strategic advice.
-           - STEP 5 (matchScore and verdict): Final calculation based on all prior steps.
+        You are an expert Technical Recruiter performing systematic cognitive analysis. Think like a detective investigating a case.
 
-        *** SCOPE OF ANALYSIS (CRITICAL) ***
-        You are evaluating TECHNICAL & FUNCTIONAL COMPATIBILITY only.
-        
-        IGNORE the following "Deal Breaker" categories for the Skill Audit and Radar Chart:
-        - Location / Commute / Remote status
-        - Visa / Citizenship / Work Authorization
-        - Education Degrees (Bachelors/Masters)
-        - Driver's License / Car ownership
-        - Salary expectations
+        *** CORE PRINCIPLES ***
+        1. NO HALLUCINATION: Only "verified" if explicitly evidenced. No assumptions.
+        2. TRANSFERABLE: Strong competing tech (AWS↔Azure, React↔Vue, Django↔Rails) with pattern similarity.
+        3. SCOPE: Hard Skills & Concepts only. Exclude Location/Visa/Education/Salary.
 
-        Focus ONLY on:
-        - Hard Skills (Languages, Frameworks, Tools)
-        - Concepts (System Design, Testing, CI/CD)
-        - Soft Skills (Leadership, Communication) - ONLY if heavily emphasized.
-        
-        *** SCORING RUBRIC ***
-        - 90-100: Perfect Match. Meets all Critical + Nice-to-haves.
-        - 75-89: Strong Match. Has Criticals, missing minor Nice-to-haves.
-        - 60-74: Transferable Match. Has fundamental skills but different stack (e.g., Python dev applying for Ruby role).
-        - <60: Weak Match. Missing Critical requirements.
+        Armed with these principles, follow this systematic analysis protocol:
 
-        *** SKILL AUDIT INSTRUCTIONS ***
-        Iterate through every major technical requirement in the Job Description.
-        For each requirement, assign EXACTLY ONE status:
-        1. VERIFIED: Evidence is explicitly in the resume.
-        2. TRANSFERABLE: Evidence is missing, but a strong proxy exists (e.g., Job: AWS -> Resume: Azure).
-        3. MISSING: No evidence and no proxy found.
+        *** COGNITIVE PROTOCOL (MANDATORY 7-PHASE ANALYSIS) ***
+        You MUST follow this exact 7-phase cognitive chain in 'thoughtProcess'. Each phase builds on previous ones.
 
-        *** RADAR CHART INSTRUCTIONS ***
-        - Select 4 to 8 distinct technical axes.
-        - Fewer is better. Only add an axis if it is a major distinct requirement.
-        - For every axis (e.g., "Cloud Infrastructure"), you must generate TWO scores:
-            A. [Required Level] (The Bar):
-              - 90-100: "Expert/Architect" (Primary focus of job)
-              - 70-80: "Senior/Proficient" (Daily usage required)
-              - 40-60: "Familiarity" (Occasional usage)
-              
-            B. [Candidate Level] (The Candidate):
-              - 90-100: "Mastery" (Led projects, complex metrics shown)
-              - 70-80: "Strong" (Action verbs: Built, Deployed, Implemented)
-              - 40-60: "Competent" (Listed in skills, minor usage)
-              - 10-30: "Concept Only" (Theoretical knowledge, no hands-on)
-              - 0: "No Evidence"
+        1. [initial_assessment]: First impressions only. Years of experience? Overall technical level? Red flags?
+        2. [experience_analysis]: Chronological review. Career progression? Relevant domains? Recent activity?
+        3. [skill_gap_analysis]: Skill-by-skill comparison. What matches perfectly? What is partially missing?
+        4. [transferability_evaluation]: Transferable skills analysis. AWS→Azure? React→Vue? Django→Rails?
+        5. [criticality_assessment]: JD requirements analysis. Which skills are deal-breakers vs nice-to-have?
+        6. [temporal_analysis]: Recency & depth. When did they last use X? How deeply do they know Y?
+        7. [final_synthesis]: Holistic judgment. Weight evidence, consider combinations, final assessment.
+
+        *** EVIDENCE REQUIREMENTS ***
+        - Cite SPECIFIC text from Resume and JD in each 'evidence' field
+        - Express CONFIDENCE level based on evidence strength
+        - Each phase must have a clear CONCLUSION
+
+        *** SCORING FRAMEWORK ***
+        - 90-100: Perfect Match (all criticals + nice-to-haves)
+        - 75-89: Strong Match (criticals present, minor gaps)
+        - 60-74: Transferable Match (fundamental skills, different stack)
+        - <60: Weak Match (missing critical requirements)
+
+        *** RADAR SYNTHESIS ***
+        - 4-8 dimensions from skillAudit analysis
+        - Required: 90=Expert/Lead, 70=Senior/Proficient, 50=Familiarity
+        - Candidate: 90=Mastery, 70=Strong, 40=Competent, 0=No Evidence
       `,
       prompt: `
-        *** FEW-SHOT EXAMPLE (HOW TO THINK) ***
-        [JD Requirement]: "Expert in React Native"
-        [Resume Snippet]: "5 years experience building React web apps with Next.js"
-        [Correct Analysis]: 
-        {
-          "skill": "React Native",
-          "status": "transferable", 
-          "evidence": "Candidate has deep React (Web) experience, which transfers easily to Native, but lacks specific mobile API knowledge.",
-          "importance": "critical"
-        }
-        (Note: It is NOT "verified" because Web != Native. It is NOT "missing" because the core concept is present.)
+        *** COGNITIVE ANALYSIS EXAMPLE ***
 
-        *** FEW-SHOT EXAMPLE: TRANSFERABILITY ***
-        [JD Requirement]: "Looking for a Python/Django developer."
-        [Resume Snippet]: "Senior Ruby on Rails Developer with 5 years experience."
-        [Correct Analysis]:
-        {
-          "missingSkill": "Django",
-          "candidateSkill": "Ruby on Rails",
-          "reasoning": "Both are MVC frameworks with similar ORMs (ActiveRecord vs Django ORM). Patterns transfer 90%."
-        }
-  
-        *** ACTUAL DATA ***
-        RESUME CONTENT:
-        ${resumeText}
-  
-        JOB DESCRIPTION:
-        ${jobDescription}
+        THOUGHT PROCESS EXAMPLE:
+        [
+          {
+            "phase": "initial_assessment",
+            "reasoning": "Candidate shows 5+ years experience, strong front-end focus",
+            "evidence": "Resume shows 'Senior Frontend Developer, 2019-Present'",
+            "confidence": "high",
+            "conclusion": "Experienced developer but may lack back-end depth"
+          },
+          {
+            "phase": "skill_gap_analysis",
+            "reasoning": "JD requires React Native but resume only shows React web",
+            "evidence": "JD: 'Expert React Native'; Resume: 'React.js, Next.js'",
+            "confidence": "high",
+            "conclusion": "Core React knowledge transfers but mobile experience missing"
+          }
+        ]
+
+        SKILL ANALYSIS EXAMPLES:
+        [React Native] skill:"React Native", status:"transferable", resumeMatch:"React.js, Next.js", reasoning:"Web React transfers to Native (90% pattern overlap) but lacks mobile APIs"
+
+        [Django] skill:"Django", status:"transferable", resumeMatch:"Ruby on Rails", reasoning:"Both MVC frameworks with ORM patterns, ActiveRecord→Django ORM transfers well"
+
+        *** CANDIDATE ANALYSIS REQUEST ***
+        RESUME: ${resumeText}
+
+        JOB DESCRIPTION: ${jobDescription}
+
+        Follow the 7-phase cognitive protocol exactly. Each thoughtProcess step must cite specific evidence.
       `,
     });
 

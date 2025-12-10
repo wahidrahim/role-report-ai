@@ -25,8 +25,28 @@ const SkillItem = z.object({
     .describe('The importance of this skill based on the job description.'),
   resumeMatch: z
     .string()
-    .describe('If Verified/Transferable: the specific skill found in resume. If Missing: "None".'),
+    .describe(
+      'If "verified"/"transferable": the exact skill/phrase found in resume. If "missing": use exactly "none".',
+    ),
   reasoning: z.string().describe('Brief evidence or mapping logic.'),
+});
+
+const ThoughtStep = z.object({
+  phase: z
+    .enum([
+      'initial_assessment',
+      'experience_analysis',
+      'skill_gap_analysis',
+      'transferability_evaluation',
+      'criticality_assessment',
+      'temporal_analysis',
+      'final_synthesis',
+    ])
+    .describe('The cognitive phase of this reasoning step.'),
+  thought: z.string().describe('The specific thought or analysis performed in this phase.'),
+  evidence: z.string().describe('Specific evidence from resume/JD that supports this reasoning.'),
+  confidence: z.enum(['high', 'medium', 'low']).describe('Confidence level in this assessment.'),
+  conclusion: z.string().describe('Key takeaway or decision from this step.'),
 });
 
 const ActionItem = z.object({
@@ -49,28 +69,30 @@ const ActionPlan = z.object({
 });
 
 export const AnalysisSchema = z.object({
-  // STEP 1: SCRATCHPAD (Hidden from user, used for AI reasoning)
+  // 1. THOUGHT PROCESS (The Cognitive Chain)
   thoughtProcess: z
-    .array(z.string())
+    .array(ThoughtStep)
+    .min(5)
     .describe(
-      "Bullet points analyzing the 'vibe' and major gaps before committing to structured data.",
+      'Structured cognitive analysis following 7 phases: initial_assessment → experience_analysis → skill_gap_analysis → transferability_evaluation → criticality_assessment → temporal_analysis → final_synthesis.',
     ),
 
-  // STEP 2: EVIDENCE GATHERING (The Audit)
+  // 2. SKILL AUDIT (The Evidence)
   skillAudit: z.array(SkillItem).describe('Comprehensive breakdown of technical fit.'),
 
-  // STEP 3: SYNTHESIS (The Chart)
+  // 3. RADAR CHART (The Visual Shape)
   radarChart: z
     .array(RadarPoint)
-    .min(3)
+    .min(4)
     .max(8)
-    .describe('Extract the top 3-8 most critical technical dimensions.'),
+    .describe('Extract 4-8 most critical technical dimensions for radar visualization.'),
 
-  // STEP 4: STRATEGY (The Advice)
-  actionPlan: ActionPlan.describe('Strategic advice to close the identified gaps.'),
-
-  // STEP 5: FINAL VERDICT (The Score)
-  // This comes LAST so it includes all previous context.
-  matchScore: z.number().min(0).max(100).describe('Final rating on a 0-100 scale.'),
+  // 4. VERDICT (The Qualitative Judgment)
   verdict: z.string().describe("A brutal, 1-sentence summary of the candidate's fit."),
+
+  // 5. MATCH SCORE (The Quantitative Judgment)
+  matchScore: z.number().min(0).max(100).describe('Final rating on a 0-100 scale.'),
+
+  // 6. ACTION PLAN (The Solution)
+  actionPlan: ActionPlan.describe('Strategic advice to close the identified gaps.'),
 });
