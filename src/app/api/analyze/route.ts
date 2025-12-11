@@ -16,8 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     return streamObject({
-      // model: ollama('qwen3:30b'),
-      model: 'openai/gpt-4o',
+      model: ollama('qwen3:30b'),
       temperature: 0.1,
       schema: AnalyzeSchema,
       system: `

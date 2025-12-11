@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = streamObject({
-      model: ollama('qwen3-coder:30b'),
+      model: ollama('qwen3:30b'),
       schema: AnalysisSchema,
       temperature: 0, // Low temp = high consistency/strictness
       system: `
