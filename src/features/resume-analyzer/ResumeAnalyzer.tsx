@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
 import { AnalyzeSchema } from '@/app/api/analyze/AnalyzeSchema';
+import { RadarChartDataSchema } from '@/app/api/generate-radar-chart-data/route';
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -30,10 +31,13 @@ export default function ResumeAnalyzer() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
 
-  const { object, submit, isLoading, error } = useObject({
-    api: '/api/analyze',
-    schema: AnalyzeSchema,
+  const chartData = useObject({
+    api: '/api/generate-radar-chart-data',
+    schema: RadarChartDataSchema,
   });
+
+  const isLoading = chartData.isLoading;
+  const error = chartData.error;
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
@@ -52,7 +56,10 @@ export default function ResumeAnalyzer() {
     }
 
     setValidationError(null);
-    submit({ resumeText, jobDescriptionText });
+    chartData.submit({
+      resumeText,
+      jobDescriptionText,
+    });
   };
 
   return (
@@ -113,7 +120,7 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {object?.fitScore?.toString() && object?.verdict && (
+      {/* {object?.fitScore?.toString() && object?.verdict && (
         <Card>
           <CardHeader>
             <CardTitle>Fit Score</CardTitle>
@@ -122,20 +129,20 @@ export default function ResumeAnalyzer() {
             <MatchScore matchScore={object.fitScore} verdict={object.verdict} />
           </CardContent>
         </Card>
-      )}
+      )} */}
 
-      {object?.radarChartData && (
+      {chartData.object && (
         <Card>
           <CardHeader>
             <CardTitle>Skills Radar Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            <SkillsRadarChart data={object.radarChartData} />
+            <SkillsRadarChart data={chartData.object.data} />
           </CardContent>
         </Card>
       )}
 
-      {object?.skillAuditData && (
+      {/* {object?.skillAuditData && (
         <Card>
           <CardHeader>
             <CardTitle>Skill Audit</CardTitle>
@@ -145,10 +152,10 @@ export default function ResumeAnalyzer() {
             <SkillAudit data={object.skillAuditData} />
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
-        {JSON.stringify(object, null, 2)}
+        {JSON.stringify(chartData.object, null, 2)}
       </pre>
     </div>
   );
