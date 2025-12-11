@@ -114,4 +114,18 @@ export const AnalyzeSchema = z.object({
         'PHASE 2 OUTPUT: [NO MATCHES] Skills required by the JD with NO evidence in the resume and NO reasonable transferable alternative.',
       ),
   }),
+  fitScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      'PHASE 3 OUTPUT: Final candidate fit score 0-100 (e.g., 75, 82). Synthesize Phase 1 & 2 findings.',
+    ),
+  verdict: z
+    .string()
+    .min(20)
+    .max(300)
+    .describe(
+      'PHASE 3 OUTPUT: Brief verdict explaining the score and candidate suitability. MAX 300 characters.',
+    ),
 });
