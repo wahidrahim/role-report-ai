@@ -19,6 +19,7 @@ import { Label } from '@/core/components/ui/label';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
+import MatchScore from './components/MatchScore';
 import { SkillAudit } from './components/SkillAudit';
 import { SkillsRadarChart } from './components/SkillsRadarChart';
 
@@ -110,6 +111,17 @@ export default function ResumeAnalyzer() {
             {error instanceof Error ? error.message : 'An unexpected error occurred'}
           </AlertDescription>
         </Alert>
+      )}
+
+      {object?.fitScore?.toString() && object?.verdict && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Fit Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MatchScore matchScore={object.fitScore} verdict={object.verdict} />
+          </CardContent>
+        </Card>
       )}
 
       {object?.radarChartData && (
