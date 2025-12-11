@@ -1,5 +1,6 @@
 'use client';
 
+import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
@@ -15,12 +16,11 @@ import {
 } from '@/core/components/ui/card';
 import { Label } from '@/core/components/ui/label';
 import { Textarea } from '@/core/components/ui/textarea';
-import { useRadarChart } from '@/features/radar-chart/useRadarChart';
-import { useAuditSkills } from '@/features/skill-audit/useAuditSkills';
 import { useResumeStore } from '@/stores/resumeStore';
 
-import SkillAudit from './components/SkillAudit';
+import { SkillAudit } from './components/SkillAudit';
 import SkillsRadarChart from './components/SkillsRadarChart';
+import { AnalyzeSchema } from './schemas/AnalyzeSchema';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
@@ -29,31 +29,10 @@ export default function ResumeAnalyzer() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
 
-  // const {
-  //   object,
-  //   jobDescription,
-  //   validationError,
-  //   isLoading,
-  //   error,
-  //   handleJobDescriptionChange,
-  //   handleSubmit,
-  // } = useAnalyzeFit();
-
-  const {
-    object: radarChartData,
-    submit: submitRadarChart,
-    isLoading: isLoadingRadarChart,
-    error: radarChartError,
-  } = useRadarChart();
-  const {
-    object: skillAuditData,
-    submit: submitSkillAudit,
-    isLoading: isLoadingSkillAudit,
-    error: skillAuditError,
-  } = useAuditSkills();
-
-  const isLoading = isLoadingRadarChart || isLoadingSkillAudit;
-  const error = radarChartError || skillAuditError;
+  const { object, submit, isLoading, error } = useObject({
+    api: '/api/analyze',
+    schema: AnalyzeSchema,
+  });
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
@@ -72,8 +51,7 @@ export default function ResumeAnalyzer() {
     }
 
     setValidationError(null);
-    submitRadarChart({ resumeText, jobDescriptionText });
-    submitSkillAudit({ resumeText, jobDescriptionText });
+    submit({ resumeText, jobDescriptionText });
   };
 
   return (
@@ -134,32 +112,31 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {radarChartData && (
+      {object?.radarChart && (
         <Card>
           <CardHeader>
             <CardTitle>Skills Radar Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            <SkillsRadarChart data={radarChartData} />
+            <SkillsRadarChart data={object.radarChart} />
           </CardContent>
         </Card>
       )}
 
-      {skillAuditData && (
+      {object?.skillAudit && (
         <Card>
           <CardHeader>
             <CardTitle>Skill Audit</CardTitle>
             <CardDescription>Detailed breakdown of skills match</CardDescription>
           </CardHeader>
           <CardContent>
-            <SkillAudit data={skillAuditData} />
+            <SkillAudit data={object.skillAudit} />
           </CardContent>
         </Card>
       )}
 
       <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
-        {JSON.stringify(radarChartData, null, 2)}
-        {JSON.stringify(skillAuditData, null, 2)}
+        {JSON.stringify(object, null, 2)}
       </pre>
     </div>
   );

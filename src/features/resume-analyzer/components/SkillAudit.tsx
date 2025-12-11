@@ -1,176 +1,138 @@
 'use client';
 
-import { Badge } from '@/core/components/ui/badge';
-import { Separator } from '@/core/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
 export type SkillAuditProps = {
-  data?:
-    | (
-        | Partial<{
-            skill: string;
-            status: 'verified' | 'transferable' | 'missing';
-            importance: 'critical' | 'nice-to-have';
-            resumeMatch: string;
-            reasoning: string;
-          }>
-        | undefined
-      )[]
-    | null;
+  data?: Partial<{
+    verified: (
+      | Partial<{
+          skillName: string;
+          importance: 'critical' | 'nice-to-have';
+          reasoning: string;
+        }>
+      | undefined
+    )[];
+    transferable: (
+      | Partial<{
+          skillName: string;
+          importance: 'critical' | 'nice-to-have';
+          reasoning: string;
+        }>
+      | undefined
+    )[];
+    missing: (
+      | Partial<{
+          skillName: string;
+          importance: 'critical' | 'nice-to-have';
+          reasoning: string;
+        }>
+      | undefined
+    )[];
+  }> | null;
 };
 
-type SkillAuditDataItem = NonNullable<NonNullable<SkillAuditProps['data']>[number]>;
-
-type ProcessedAuditItem = {
-  skill: string;
-  status: 'verified' | 'transferable' | 'missing';
-  importance: 'critical' | 'nice-to-have';
-  resumeMatch: string;
-  reasoning: string;
-};
-
-function VerifiedItem({ item }: { item: ProcessedAuditItem }) {
-  const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
-  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
-
-  return (
-    <div>
-      <h4 className="text-sm font-bold flex items-center gap-2">
-        {item.skill}
-        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
-      </h4>
-      {item.resumeMatch && item.resumeMatch !== 'None' && (
-        <p className="text-sm font-medium mt-1">
-          Found: <span className="text-foreground">{item.resumeMatch}</span>
-        </p>
-      )}
-      {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
-    </div>
-  );
-}
-
-function MissingItem({ item }: { item: ProcessedAuditItem }) {
-  const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
-  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
-
-  return (
-    <div>
-      <h4 className="text-sm font-bold flex items-center gap-2">
-        {item.skill}
-        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
-      </h4>
-      {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
-    </div>
-  );
-}
-
-function TransferableItem({ item }: { item: ProcessedAuditItem }) {
-  const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
-  const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
-
-  return (
-    <div>
-      <h4 className="text-sm font-bold flex items-center gap-2">
-        {item.skill}
-        <Badge variant={importanceVariant}>{importanceLabel}</Badge>
-      </h4>
-      {item.resumeMatch && item.resumeMatch !== 'None' && (
-        <p className="text-sm font-medium mt-1">
-          Bridge: <span className="text-foreground">{item.resumeMatch}</span>
-        </p>
-      )}
-      {item.reasoning && <p className="text-sm text-muted-foreground mt-1">{item.reasoning}</p>}
-    </div>
-  );
-}
-
-type SkillSectionProps<T> = {
-  title: string;
-  items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
-};
-
-function SkillSection<T>({ title, items, renderItem }: SkillSectionProps<T>) {
-  if (!items || items.length === 0) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h3 className="text-md font-bold">{title}</h3>
-      <ul className="space-y-4 mt-2">
-        {items.map((item, index) => (
-          <li key={index}>{renderItem(item, index)}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default function SkillAudit(props: SkillAuditProps) {
+export function SkillAudit(props: SkillAuditProps) {
   const { data } = props;
+  const { verified = [], transferable = [], missing = [] } = data || {};
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex h-[300px] w-full items-center justify-center text-muted-foreground">
-        No skill audit data available
-      </div>
-    );
-  }
-
-  const auditData: ProcessedAuditItem[] = data
-    .filter((item): item is SkillAuditDataItem => item !== undefined)
-    .map((item) => ({
-      skill: item.skill || '',
-      status: (item.status || 'missing') as 'verified' | 'transferable' | 'missing',
-      importance: (item.importance || 'nice-to-have') as 'critical' | 'nice-to-have',
-      resumeMatch: item.resumeMatch || '',
-      reasoning: item.reasoning || '',
-    }));
-
-  const verified = auditData.filter(
-    (item): item is ProcessedAuditItem & { status: 'verified' } => item.status === 'verified',
+  const verifiedSkills = verified.filter(
+    (
+      skill,
+    ): skill is Partial<{
+      skillName: string;
+      importance: 'critical' | 'nice-to-have';
+      reasoning: string;
+    }> => skill !== undefined,
   );
-  const missing = auditData.filter(
-    (item): item is ProcessedAuditItem & { status: 'missing' } => item.status === 'missing',
+  const transferableSkills = transferable.filter(
+    (
+      skill,
+    ): skill is Partial<{
+      skillName: string;
+      importance: 'critical' | 'nice-to-have';
+      reasoning: string;
+    }> => skill !== undefined,
   );
-  const transferable = auditData.filter(
-    (item): item is ProcessedAuditItem & { status: 'transferable' } =>
-      item.status === 'transferable',
+  const missingSkills = missing.filter(
+    (
+      skill,
+    ): skill is Partial<{
+      skillName: string;
+      importance: 'critical' | 'nice-to-have';
+      reasoning: string;
+    }> => skill !== undefined,
   );
-
-  const hasVerified = verified.length > 0;
-  const hasTransferable = transferable.length > 0;
-  const hasMissing = missing.length > 0;
 
   return (
-    <div className="space-y-6">
-      {hasVerified && (
-        <SkillSection<ProcessedAuditItem>
-          title="Verified Skills"
-          items={verified}
-          renderItem={(item) => <VerifiedItem item={item} />}
-        />
-      )}
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Verified Skills</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {verifiedSkills.map((skill, index) => (
+              <li key={index}>
+                <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
+                {skill.importance && (
+                  <div className="text-xs text-muted-foreground">
+                    {skill.importance === 'critical' ? 'Critical' : 'Nice-to-have'}
+                  </div>
+                )}
+                {skill.reasoning && (
+                  <div className="text-sm text-muted-foreground">{skill.reasoning}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
-      {hasVerified && hasTransferable && <Separator />}
+      <Card>
+        <CardHeader>
+          <CardTitle>Transferable Skills</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {transferableSkills.map((skill, index) => (
+              <li key={index}>
+                <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
+                {skill.importance && (
+                  <div className="text-xs text-muted-foreground">
+                    {skill.importance === 'critical' ? 'Critical' : 'Nice-to-have'}
+                  </div>
+                )}
+                {skill.reasoning && (
+                  <div className="text-sm text-muted-foreground">{skill.reasoning}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
-      {hasTransferable && (
-        <SkillSection<ProcessedAuditItem>
-          title="Transferable Skills"
-          items={transferable}
-          renderItem={(item) => <TransferableItem item={item} />}
-        />
-      )}
-
-      {hasTransferable && hasMissing && <Separator />}
-
-      {hasMissing && (
-        <SkillSection<ProcessedAuditItem>
-          title="Missing Requirements"
-          items={missing}
-          renderItem={(item) => <MissingItem item={item} />}
-        />
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Missing Skills</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {missingSkills.map((skill, index) => (
+              <li key={index}>
+                <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
+                {skill.importance && (
+                  <div className="text-xs text-muted-foreground">
+                    {skill.importance === 'critical' ? 'Critical' : 'Nice-to-have'}
+                  </div>
+                )}
+                {skill.reasoning && (
+                  <div className="text-sm text-muted-foreground">{skill.reasoning}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

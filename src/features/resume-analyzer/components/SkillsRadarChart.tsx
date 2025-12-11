@@ -104,7 +104,7 @@ export default function SkillsRadarChart(props: SkillsRadarChartProps) {
             );
           }}
         />
-        <PolarGrid />
+        <PolarGrid gridType="circle" />
         <PolarAngleAxis dataKey="skill" />
         <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
         <Radar dataKey="candidateLevel" fill="var(--color-candidateLevel)" fillOpacity={0.6} />
