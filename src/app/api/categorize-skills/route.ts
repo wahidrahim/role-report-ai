@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     }
 
     return streamObject({
-      model: ollama('qwen3-coder:30b'),
-      // model: 'openai/gpt-4o',
+      // model: ollama('qwen3-coder:30b'),
+      model: 'openai/gpt-4o',
       schema: CategorizedSkillsSchema,
       system: `
         You are a SKILLS ASSESSMENT SPECIALIST evaluating candidate-job fit. You must be evidence-based and derive all conclusions solely from the provided resume and job description text.

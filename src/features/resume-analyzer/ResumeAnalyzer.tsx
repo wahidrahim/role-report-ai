@@ -3,11 +3,12 @@
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 
 import { AnalyzeSchema } from '@/app/api/analyze/AnalyzeSchema';
 import { CategorizedSkillsSchema } from '@/app/api/categorize-skills/route';
 import { RadarChartDataSchema } from '@/app/api/generate-radar-chart-data/route';
+import { SuitabilityAssessmentSchema } from '@/app/api/suitability-assessment/route';
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -31,19 +32,30 @@ export default function ResumeAnalyzer() {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
+  const [isChartDataComplete, setIsChartDataComplete] = useState(false);
+  const [isCategorizedSkillsComplete, setIsCategorizedSkillsComplete] = useState(false);
+  const [isSuitabilityAssessmentSubmitted, setIsSuitabilityAssessmentSubmitted] = useState(false);
 
   const chartData = useObject({
     api: '/api/generate-radar-chart-data',
     schema: RadarChartDataSchema,
+    onFinish: () => setIsChartDataComplete(true),
   });
 
   const categorizedSkills = useObject({
     api: '/api/categorize-skills',
     schema: CategorizedSkillsSchema,
+    onFinish: () => setIsCategorizedSkillsComplete(true),
   });
 
-  const isLoading = chartData.isLoading;
-  const error = chartData.error;
+  const suitabilityAssessment = useObject({
+    api: '/api/suitability-assessment',
+    schema: SuitabilityAssessmentSchema,
+  });
+
+  const isLoading =
+    chartData.isLoading || categorizedSkills.isLoading || suitabilityAssessment.isLoading;
+  const error = chartData.error || categorizedSkills.error || suitabilityAssessment.error;
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
@@ -65,6 +77,31 @@ export default function ResumeAnalyzer() {
     chartData.submit({ resumeText, jobDescriptionText });
     categorizedSkills.submit({ resumeText, jobDescriptionText });
   };
+
+  // Submit suitability assessment after both analyses complete
+  useEffect(() => {
+    if (
+      isChartDataComplete &&
+      isCategorizedSkillsComplete &&
+      suitabilityAssessment.isLoading === false &&
+      suitabilityAssessment.object === undefined
+    ) {
+      suitabilityAssessment.submit({
+        resumeText,
+        jobDescriptionText,
+        chartData: chartData.object,
+        categorizedSkills: categorizedSkills.object,
+      });
+    }
+  }, [
+    categorizedSkills.object,
+    chartData.object,
+    isCategorizedSkillsComplete,
+    isChartDataComplete,
+    jobDescriptionText,
+    resumeText,
+    suitabilityAssessment,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -124,16 +161,20 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {/* {object?.fitScore?.toString() && object?.verdict && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Fit Score</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MatchScore matchScore={object.fitScore} verdict={object.verdict} />
-          </CardContent>
-        </Card>
-      )} */}
+      {suitabilityAssessment.object?.suitabilityScore?.toString() &&
+        suitabilityAssessment.object?.suitabilityReasoning && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Fit Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MatchScore
+                matchScore={suitabilityAssessment.object.suitabilityScore}
+                verdict={suitabilityAssessment.object.suitabilityReasoning}
+              />
+            </CardContent>
+          </Card>
+        )}
 
       {chartData.object && (
         <Card>
