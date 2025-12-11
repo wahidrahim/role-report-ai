@@ -19,22 +19,33 @@ import { Textarea } from '@/core/components/ui/textarea';
 import ActionPlan, { ActionPlanProps } from './components/ActionPlan';
 import MatchScore from './components/MatchScore';
 import SkillAudit, { SkillAuditProps } from './components/SkillAudit';
-import SkillsRadarChart from './components/SkillsRadarChart';
+import SkillsRadarChart, { SkillsRadarChartProps } from './components/SkillsRadarChart';
 import { useAnalyzeFit } from './hooks/useAnalyzeFit';
+import { useRadarChart } from './hooks/useRadarChart';
 import { SkillChartItem } from './types';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
 export default function ResumeAnalyzer() {
+  // const {
+  //   object,
+  //   jobDescription,
+  //   validationError,
+  //   isLoading,
+  //   error,
+  //   handleJobDescriptionChange,
+  //   handleSubmit,
+  // } = useAnalyzeFit();
+
   const {
-    object,
-    jobDescription,
+    object: radarChartData,
+    jobDescriptionText,
     validationError,
     isLoading,
     error,
     handleJobDescriptionChange,
     handleSubmit,
-  } = useAnalyzeFit();
+  } = useRadarChart();
 
   return (
     <div className="space-y-6">
@@ -60,7 +71,7 @@ export default function ResumeAnalyzer() {
               id="job-description"
               rows={10}
               placeholder="Paste job posting URL or job description text here"
-              value={jobDescription}
+              value={jobDescriptionText}
               onChange={handleJobDescriptionChange}
               className="field-sizing-fixed resize-none"
             />
@@ -94,7 +105,16 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {object && (
+      {
+        <Card>
+          <CardHeader>
+            <CardTitle>Analysis Results</CardTitle>
+          </CardHeader>
+          <CardContent>{radarChartData && <SkillsRadarChart data={radarChartData} />}</CardContent>
+        </Card>
+      }
+
+      {/* {object && (
         <Card>
           <CardHeader>
             <CardTitle>Analysis Results</CardTitle>
@@ -121,9 +141,9 @@ export default function ResumeAnalyzer() {
             )}
           </CardContent>
         </Card>
-      )}
+      )} */}
       <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
-        {JSON.stringify(object, null, 2)}
+        {JSON.stringify(radarChartData, null, 2)}
       </pre>
     </div>
   );

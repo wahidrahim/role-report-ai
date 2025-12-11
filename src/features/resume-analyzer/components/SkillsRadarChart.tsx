@@ -1,5 +1,6 @@
 'use client';
 
+import { StreamObjectResult } from 'ai';
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 
 import {
@@ -10,10 +11,19 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/core/components/ui/chart';
-import { SkillChartItem } from '@/features/resume-analyzer/types';
 
 export type SkillsRadarChartProps = {
-  skills: SkillChartItem[];
+  data?:
+    | (
+        | Partial<{
+            skillName: string;
+            requiredLevel: number;
+            candidateLevel: number;
+            reasoning: string;
+          }>
+        | undefined
+      )[]
+    | null;
 };
 
 const chartConfig = {
@@ -27,8 +37,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
-  if (skills.length === 0) {
+export default function SkillsRadarChart(props: SkillsRadarChartProps) {
+  const { data } = props;
+
+  if (!data || data.length === 0) {
     return (
       <div className="flex h-[300px] w-full items-center justify-center text-muted-foreground">
         No skills data available
@@ -36,14 +48,14 @@ export default function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
     );
   }
 
-  const chartData = skills
-    .map((skill) => ({
-      skill: skill.axis,
-      requiredLevel: Math.min(skill.requiredLevel || 0, 100), // Cap at 100%, default to 0
-      candidateLevel: Math.min(skill.candidateLevel || 0, 100), // Cap at 100%, default to 0
-      reasoning: skill.reasoning,
-    }))
-    .filter((item) => item.skill); // Filter out items where the skill name hasn't streamed in yet
+  const chartData = data
+    .filter((item) => item !== undefined)
+    .map((data) => ({
+      skill: data.skillName,
+      requiredLevel: Math.min(data.requiredLevel || 0, 100), // Cap at 100%, default to 0
+      candidateLevel: Math.min(data.candidateLevel || 0, 100), // Cap at 100%, default to 0
+      reasoning: data.reasoning,
+    }));
 
   // Sort by level to group similar values, then by name for stability
   const sortedData = [...chartData].sort(
