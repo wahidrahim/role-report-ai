@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
+import { AnalyzeSchema } from '@/app/api/analyze/AnalyzeSchema';
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -19,8 +20,7 @@ import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import { SkillAudit } from './components/SkillAudit';
-import SkillsRadarChart from './components/SkillsRadarChart';
-import { AnalyzeSchema } from './schemas/AnalyzeSchema';
+import { SkillsRadarChart } from './components/SkillsRadarChart';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
@@ -112,25 +112,25 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {object?.radarChart && (
+      {object?.radarChartData && (
         <Card>
           <CardHeader>
             <CardTitle>Skills Radar Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            <SkillsRadarChart data={object.radarChart} />
+            <SkillsRadarChart data={object.radarChartData} />
           </CardContent>
         </Card>
       )}
 
-      {object?.skillAudit && (
+      {object?.skillAuditData && (
         <Card>
           <CardHeader>
             <CardTitle>Skill Audit</CardTitle>
             <CardDescription>Detailed breakdown of skills match</CardDescription>
           </CardHeader>
           <CardContent>
-            <SkillAudit data={object.skillAudit} />
+            <SkillAudit data={object.skillAuditData} />
           </CardContent>
         </Card>
       )}

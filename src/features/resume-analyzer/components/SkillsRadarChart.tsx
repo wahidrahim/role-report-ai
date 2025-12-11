@@ -35,7 +35,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function SkillsRadarChart(props: SkillsRadarChartProps) {
+export function SkillsRadarChart(props: SkillsRadarChartProps) {
   const { data } = props;
 
   if (!data || data.length === 0) {
