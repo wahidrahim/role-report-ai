@@ -1,6 +1,4 @@
 'use client';
-
-import { StreamObjectResult } from 'ai';
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 
 import {

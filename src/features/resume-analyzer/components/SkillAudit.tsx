@@ -1,18 +1,34 @@
-import { z } from 'zod';
+'use client';
 
 import { Badge } from '@/core/components/ui/badge';
 import { Separator } from '@/core/components/ui/separator';
-import { AnalysisSchema } from '@/features/resume-analyzer/schemas/AnalysisSchema';
-
-type AnalysisSchemaType = z.infer<typeof AnalysisSchema>;
-type SkillAuditData = AnalysisSchemaType['skillAudit'];
-type SkillItemType = SkillAuditData[number];
 
 export type SkillAuditProps = {
-  audit: SkillAuditData;
+  data?:
+    | (
+        | Partial<{
+            skill: string;
+            status: 'verified' | 'transferable' | 'missing';
+            importance: 'critical' | 'nice-to-have';
+            resumeMatch: string;
+            reasoning: string;
+          }>
+        | undefined
+      )[]
+    | null;
 };
 
-function VerifiedItem({ item }: { item: SkillItemType }) {
+type SkillAuditDataItem = NonNullable<NonNullable<SkillAuditProps['data']>[number]>;
+
+type ProcessedAuditItem = {
+  skill: string;
+  status: 'verified' | 'transferable' | 'missing';
+  importance: 'critical' | 'nice-to-have';
+  resumeMatch: string;
+  reasoning: string;
+};
+
+function VerifiedItem({ item }: { item: ProcessedAuditItem }) {
   const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
   const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
 
@@ -32,7 +48,7 @@ function VerifiedItem({ item }: { item: SkillItemType }) {
   );
 }
 
-function MissingItem({ item }: { item: SkillItemType }) {
+function MissingItem({ item }: { item: ProcessedAuditItem }) {
   const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
   const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
 
@@ -47,7 +63,7 @@ function MissingItem({ item }: { item: SkillItemType }) {
   );
 }
 
-function TransferableItem({ item }: { item: SkillItemType }) {
+function TransferableItem({ item }: { item: ProcessedAuditItem }) {
   const importanceVariant = item.importance === 'critical' ? 'destructive' : 'secondary';
   const importanceLabel = item.importance === 'nice-to-have' ? 'nice to have' : item.importance;
 
@@ -90,15 +106,36 @@ function SkillSection<T>({ title, items, renderItem }: SkillSectionProps<T>) {
   );
 }
 
-export default function SkillAudit({ audit }: SkillAuditProps) {
-  if (!audit || audit.length === 0) {
-    return null;
+export default function SkillAudit(props: SkillAuditProps) {
+  const { data } = props;
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-[300px] w-full items-center justify-center text-muted-foreground">
+        No skill audit data available
+      </div>
+    );
   }
 
-  const verified = audit.filter((item): item is SkillItemType => item.status === 'verified');
-  const missing = audit.filter((item): item is SkillItemType => item.status === 'missing');
-  const transferable = audit.filter(
-    (item): item is SkillItemType => item.status === 'transferable',
+  const auditData: ProcessedAuditItem[] = data
+    .filter((item): item is SkillAuditDataItem => item !== undefined)
+    .map((item) => ({
+      skill: item.skill || '',
+      status: (item.status || 'missing') as 'verified' | 'transferable' | 'missing',
+      importance: (item.importance || 'nice-to-have') as 'critical' | 'nice-to-have',
+      resumeMatch: item.resumeMatch || '',
+      reasoning: item.reasoning || '',
+    }));
+
+  const verified = auditData.filter(
+    (item): item is ProcessedAuditItem & { status: 'verified' } => item.status === 'verified',
+  );
+  const missing = auditData.filter(
+    (item): item is ProcessedAuditItem & { status: 'missing' } => item.status === 'missing',
+  );
+  const transferable = auditData.filter(
+    (item): item is ProcessedAuditItem & { status: 'transferable' } =>
+      item.status === 'transferable',
   );
 
   const hasVerified = verified.length > 0;
@@ -108,7 +145,7 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
   return (
     <div className="space-y-6">
       {hasVerified && (
-        <SkillSection<SkillItemType>
+        <SkillSection<ProcessedAuditItem>
           title="Verified Skills"
           items={verified}
           renderItem={(item) => <VerifiedItem item={item} />}
@@ -118,7 +155,7 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
       {hasVerified && hasTransferable && <Separator />}
 
       {hasTransferable && (
-        <SkillSection<SkillItemType>
+        <SkillSection<ProcessedAuditItem>
           title="Transferable Skills"
           items={transferable}
           renderItem={(item) => <TransferableItem item={item} />}
@@ -128,7 +165,7 @@ export default function SkillAudit({ audit }: SkillAuditProps) {
       {hasTransferable && hasMissing && <Separator />}
 
       {hasMissing && (
-        <SkillSection<SkillItemType>
+        <SkillSection<ProcessedAuditItem>
           title="Missing Requirements"
           items={missing}
           renderItem={(item) => <MissingItem item={item} />}

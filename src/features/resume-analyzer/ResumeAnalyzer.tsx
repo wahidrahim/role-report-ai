@@ -16,8 +16,10 @@ import {
 import { Label } from '@/core/components/ui/label';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useRadarChart } from '@/features/radar-chart/useRadarChart';
+import { useAuditSkills } from '@/features/skill-audit/useAuditSkills';
 import { useResumeStore } from '@/stores/resumeStore';
 
+import SkillAudit from './components/SkillAudit';
 import SkillsRadarChart from './components/SkillsRadarChart';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
@@ -37,7 +39,21 @@ export default function ResumeAnalyzer() {
   //   handleSubmit,
   // } = useAnalyzeFit();
 
-  const { object: radarChartData, submit, isLoading, error } = useRadarChart();
+  const {
+    object: radarChartData,
+    submit: submitRadarChart,
+    isLoading: isLoadingRadarChart,
+    error: radarChartError,
+  } = useRadarChart();
+  const {
+    object: skillAuditData,
+    submit: submitSkillAudit,
+    isLoading: isLoadingSkillAudit,
+    error: skillAuditError,
+  } = useAuditSkills();
+
+  const isLoading = isLoadingRadarChart || isLoadingSkillAudit;
+  const error = radarChartError || skillAuditError;
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
@@ -45,10 +61,19 @@ export default function ResumeAnalyzer() {
   };
 
   const handleAnalyze = async () => {
-    submit({
-      resumeText,
-      jobDescriptionText,
-    });
+    if (!resumeText) {
+      setValidationError('Please upload a resume first');
+      return;
+    }
+
+    if (!jobDescriptionText.trim()) {
+      setValidationError('Please enter a job description');
+      return;
+    }
+
+    setValidationError(null);
+    submitRadarChart({ resumeText, jobDescriptionText });
+    submitSkillAudit({ resumeText, jobDescriptionText });
   };
 
   return (
@@ -109,45 +134,32 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {
+      {radarChartData && (
         <Card>
           <CardHeader>
-            <CardTitle>Analysis Results</CardTitle>
-          </CardHeader>
-          <CardContent>{radarChartData && <SkillsRadarChart data={radarChartData} />}</CardContent>
-        </Card>
-      }
-
-      {/* {object && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Analysis Results</CardTitle>
+            <CardTitle>Skills Radar Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            {object.matchScore && object.verdict && (
-              <MatchScore matchScore={object.matchScore} verdict={object.verdict} />
-            )}
-
-            {object.radarChart && (
-              <SkillsRadarChart skills={object.radarChart as SkillChartItem[]} />
-            )}
-
-            {object.radarChart && object.skillAudit && <Separator className="my-4" />}
-
-            {object.skillAudit && (
-              <SkillAudit audit={object.skillAudit as SkillAuditProps['audit']} />
-            )}
-
-            {object.skillAudit && object.actionPlan && <Separator className="my-4" />}
-
-            {object.actionPlan && (
-              <ActionPlan actionPlan={object.actionPlan as ActionPlanProps['actionPlan']} />
-            )}
+            <SkillsRadarChart data={radarChartData} />
           </CardContent>
         </Card>
-      )} */}
+      )}
+
+      {skillAuditData && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Skill Audit</CardTitle>
+            <CardDescription>Detailed breakdown of skills match</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SkillAudit data={skillAuditData} />
+          </CardContent>
+        </Card>
+      )}
+
       <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
         {JSON.stringify(radarChartData, null, 2)}
+        {JSON.stringify(skillAuditData, null, 2)}
       </pre>
     </div>
   );
