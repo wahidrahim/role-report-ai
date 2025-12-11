@@ -2,6 +2,7 @@
 
 import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { ChangeEvent, useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
@@ -13,20 +14,19 @@ import {
   CardTitle,
 } from '@/core/components/ui/card';
 import { Label } from '@/core/components/ui/label';
-import { Separator } from '@/core/components/ui/separator';
 import { Textarea } from '@/core/components/ui/textarea';
+import { useRadarChart } from '@/features/radar-chart/useRadarChart';
+import { useResumeStore } from '@/stores/resumeStore';
 
-import ActionPlan, { ActionPlanProps } from './components/ActionPlan';
-import MatchScore from './components/MatchScore';
-import SkillAudit, { SkillAuditProps } from './components/SkillAudit';
-import SkillsRadarChart, { SkillsRadarChartProps } from './components/SkillsRadarChart';
-import { useAnalyzeFit } from './hooks/useAnalyzeFit';
-import { useRadarChart } from './hooks/useRadarChart';
-import { SkillChartItem } from './types';
+import SkillsRadarChart from './components/SkillsRadarChart';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
 export default function ResumeAnalyzer() {
+  const [jobDescriptionText, setJobDescriptionText] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const { resumeText } = useResumeStore();
+
   // const {
   //   object,
   //   jobDescription,
@@ -37,15 +37,19 @@ export default function ResumeAnalyzer() {
   //   handleSubmit,
   // } = useAnalyzeFit();
 
-  const {
-    object: radarChartData,
-    jobDescriptionText,
-    validationError,
-    isLoading,
-    error,
-    handleJobDescriptionChange,
-    handleSubmit,
-  } = useRadarChart();
+  const { object: radarChartData, submit, isLoading, error } = useRadarChart();
+
+  const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setJobDescriptionText(e.target.value);
+    setValidationError(null);
+  };
+
+  const handleAnalyze = async () => {
+    submit({
+      resumeText,
+      jobDescriptionText,
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -78,7 +82,7 @@ export default function ResumeAnalyzer() {
           </div>
           <Button
             type="button"
-            onClick={handleSubmit}
+            onClick={handleAnalyze}
             disabled={isLoading}
             className="w-full sm:w-auto"
           >

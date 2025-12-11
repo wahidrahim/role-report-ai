@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { generateRadarChartData } from '@/features/radar-chart/agent';
+import { generateRadarChart } from '@/features/radar-chart/generateRadarChart';
 
 export async function POST(request: NextRequest) {
   const { resumeText, jobDescriptionText } = await request.json();
-
-  console.log({ resumeText, jobDescriptionText });
 
   if (!resumeText || !jobDescriptionText) {
     return NextResponse.json(
@@ -14,7 +12,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const result = await generateRadarChartData(resumeText, jobDescriptionText);
-
-  return result.toTextStreamResponse();
+  try {
+    return generateRadarChart({ resumeText, jobDescriptionText }).toTextStreamResponse();
+  } catch (error) {
+    console.error('Error in radar chart generation:', error);
+    return NextResponse.json({ error: 'Failed to generate radar chart analysis' }, { status: 500 });
+  }
 }
