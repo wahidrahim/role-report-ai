@@ -9,7 +9,7 @@ export const AnalyzeSchema = z.object({
           .min(1)
           .max(50)
           .describe(
-            'The specific hard skill name. MUST be a QUANTIFIABLE TECHNICAL SKILL (programming languages, frameworks, tools, databases). EXCLUDE soft skills or subjective traits. Group related skills (e.g. "React & Frontend").',
+            'The specific hard skill name, grouped where related (e.g. "React & Frontend").',
           ),
         requiredLevel: z
           .number()
@@ -37,7 +37,7 @@ export const AnalyzeSchema = z.object({
     .min(4)
     .max(8)
     .describe(
-      'PHASE 1 OUTPUT: 4-8 most critical TECHNICAL hard skills. STRICTLY quantitative and objective. No soft skills.',
+      'PHASE 1 OUTPUT: 4-8 most critical QUANTIFIABLE TECHNICAL hard skills (programming languages, frameworks, tools, databases). STRICTLY quantitative and objective. EXCLUDE soft skills or subjective traits.',
     ),
   skillAuditData: z.object({
     verified: z
@@ -48,7 +48,7 @@ export const AnalyzeSchema = z.object({
             .min(1)
             .max(50)
             .describe(
-              'The specific skill name (hard OR soft) exactly as it appears in the Job Description. Use this category ONLY if the candidate has this EXACT skill explicitly listed in their resume.',
+              'The skill name (hard OR soft) exactly as it appears in the Job Description.',
             ),
           importance: z
             .enum(['critical', 'nice-to-have'])
@@ -63,7 +63,7 @@ export const AnalyzeSchema = z.object({
         }),
       )
       .describe(
-        'PHASE 2 OUTPUT: [DIRECT MATCHES] Skills strictly required by the JD that are explicitly found in the resume.',
+        'PHASE 2 OUTPUT: [DIRECT MATCHES] Skills required by the JD where the candidate has this EXACT skill explicitly listed in their resume.',
       ),
     transferable: z
       .array(
@@ -73,7 +73,7 @@ export const AnalyzeSchema = z.object({
             .min(1)
             .max(50)
             .describe(
-              'The specific skill name exactly as it appears in the Job Description. Use this category ONLY if the candidate does NOT have this skill, but has a different skill that is a strong proxy.',
+              'The skill name from the Job Description that the candidate can address via a related skill.',
             ),
           importance: z
             .enum(['critical', 'nice-to-have'])
@@ -88,7 +88,7 @@ export const AnalyzeSchema = z.object({
         }),
       )
       .describe(
-        'PHASE 2 OUTPUT: [INDIRECT MATCHES] Skills required by the JD that are MISSING in the resume, but a related skill exists.',
+        'PHASE 2 OUTPUT: [INDIRECT MATCHES] Skills required by the JD that the candidate does NOT have directly, but has a different skill that is a strong proxy or transferable alternative.',
       ),
     missing: z
       .array(
@@ -97,9 +97,7 @@ export const AnalyzeSchema = z.object({
             .string()
             .min(1)
             .max(50)
-            .describe(
-              'A required skill with NO evidence and NO reasonable transferable alternative.',
-            ),
+            .describe('The skill name from the Job Description that is completely absent.'),
           importance: z
             .enum(['critical', 'nice-to-have'])
             .describe(
@@ -113,7 +111,7 @@ export const AnalyzeSchema = z.object({
         }),
       )
       .describe(
-        'PHASE 2 OUTPUT: [NO MATCHES] Skills required by the JD that are completely absent from the resume.',
+        'PHASE 2 OUTPUT: [NO MATCHES] Skills required by the JD with NO evidence in the resume and NO reasonable transferable alternative.',
       ),
   }),
 });
