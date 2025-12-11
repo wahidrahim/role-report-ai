@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { ChangeEvent, useState } from 'react';
 
 import { AnalyzeSchema } from '@/app/api/analyze/AnalyzeSchema';
+import { CategorizedSkillsSchema } from '@/app/api/categorize-skills/route';
 import { RadarChartDataSchema } from '@/app/api/generate-radar-chart-data/route';
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
@@ -36,6 +37,11 @@ export default function ResumeAnalyzer() {
     schema: RadarChartDataSchema,
   });
 
+  const categorizedSkills = useObject({
+    api: '/api/categorize-skills',
+    schema: CategorizedSkillsSchema,
+  });
+
   const isLoading = chartData.isLoading;
   const error = chartData.error;
 
@@ -56,10 +62,8 @@ export default function ResumeAnalyzer() {
     }
 
     setValidationError(null);
-    chartData.submit({
-      resumeText,
-      jobDescriptionText,
-    });
+    chartData.submit({ resumeText, jobDescriptionText });
+    categorizedSkills.submit({ resumeText, jobDescriptionText });
   };
 
   return (
@@ -142,17 +146,17 @@ export default function ResumeAnalyzer() {
         </Card>
       )}
 
-      {/* {object?.skillAuditData && (
+      {categorizedSkills.object && (
         <Card>
           <CardHeader>
             <CardTitle>Skill Audit</CardTitle>
             <CardDescription>Detailed breakdown of skills match</CardDescription>
           </CardHeader>
           <CardContent>
-            <SkillAudit data={object.skillAuditData} />
+            <SkillAudit skills={categorizedSkills.object.skills} />
           </CardContent>
         </Card>
-      )} */}
+      )}
 
       <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
         {JSON.stringify(chartData.object, null, 2)}

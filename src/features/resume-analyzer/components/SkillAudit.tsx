@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
 export type SkillAuditProps = {
-  data?: Partial<{
+  skills?: Partial<{
     verified: (
       | Partial<{
           skillName: string;
@@ -32,8 +32,8 @@ export type SkillAuditProps = {
 };
 
 export function SkillAudit(props: SkillAuditProps) {
-  const { data } = props;
-  const { verified = [], transferable = [], missing = [] } = data || {};
+  const { skills } = props;
+  const { verified = [], transferable = [], missing = [] } = skills || {};
 
   const verifiedSkills = verified.filter(
     (
