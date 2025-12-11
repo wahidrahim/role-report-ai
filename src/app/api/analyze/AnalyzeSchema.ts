@@ -4,128 +4,56 @@ export const AnalyzeSchema = z.object({
   radarChartData: z
     .array(
       z.object({
-        skillName: z
-          .string()
-          .min(1)
-          .max(50)
-          .describe(
-            'The specific hard skill name, grouped where related (e.g. "React & Frontend").',
-          ),
-        requiredLevel: z
-          .number()
-          .min(0)
-          .max(100)
-          .describe(
-            '0-100 percentage based on job requirements. 90-100=Expert/Lead, 80-89=Senior, 70-79=Proficient, 60-69=Intermediate, 50-59=Familiar, 30-49=Entry, 0-29=Nice-to-have.',
-          ),
-        candidateLevel: z
-          .number()
-          .min(0)
-          .max(100)
-          .describe(
-            '0-100 percentage based on resume EVIDENCE. Be conservative. 90-100=Deep Expertise, 70-79=Strong Working Knowledge, 50-59=Baseline. Do not inflate.',
-          ),
-        reasoning: z
-          .string()
-          .min(10)
-          .max(300)
-          .describe(
-            'Brief, concise justification citing specific evidence from the resume. MAX 300 CHARACTERS. Keep it punchy.',
-          ),
+        skillName: z.string().min(1).max(50).describe('Name of the skill'),
+        requiredLevel: z.number().min(0).max(100).describe('Required proficiency level (0-100)'),
+        candidateLevel: z.number().min(0).max(100).describe('Candidate proficiency level (0-100)'),
+        reasoning: z.string().min(10).max(300).describe('Brief justification for the assessment'),
       }),
     )
     .min(4)
     .max(8)
-    .describe(
-      'PHASE 1 OUTPUT: 4-8 most critical QUANTIFIABLE TECHNICAL hard skills (programming languages, frameworks, tools, databases). STRICTLY quantitative and objective. EXCLUDE soft skills or subjective traits.',
-    ),
+    .describe('Top quantifiable skills for radar chart visualization'),
   skillAuditData: z.object({
     verified: z
       .array(
         z.object({
-          skillName: z
-            .string()
-            .min(1)
-            .max(50)
-            .describe(
-              'The skill name (hard OR soft) exactly as it appears in the Job Description.',
-            ),
-          importance: z
-            .enum(['critical', 'nice-to-have'])
-            .describe(
-              'critical = "required"/"must have" deal-breakers. nice-to-have = "preferred"/"plus".',
-            ),
+          skillName: z.string().min(1).max(50).describe('Name of the verified skill'),
+          importance: z.enum(['critical', 'nice-to-have']).describe('Importance level'),
           reasoning: z
             .string()
             .min(15)
             .max(300)
-            .describe('Cite specific text/evidence from resume. MAX 300 CHARS. Be concise.'),
+            .describe('How this skill appears in JD and resume'),
         }),
       )
-      .describe(
-        'PHASE 2 OUTPUT: [DIRECT MATCHES] Skills required by the JD where the candidate has this EXACT skill explicitly listed in their resume.',
-      ),
+      .describe('Skills the job requires AND the candidate possesses'),
     transferable: z
       .array(
         z.object({
-          skillName: z
-            .string()
-            .min(1)
-            .max(50)
-            .describe(
-              'The skill name from the Job Description that the candidate can address via a related skill.',
-            ),
-          importance: z
-            .enum(['critical', 'nice-to-have'])
-            .describe('critical = addresses a core requirement. nice-to-have = adds value.'),
+          skillName: z.string().min(1).max(50).describe('Candidate skill that can transfer'),
+          importance: z.enum(['critical', 'nice-to-have']).describe('Importance level'),
           reasoning: z
             .string()
             .min(15)
             .max(300)
-            .describe(
-              'Explain the logical connection or transferability concisely. MAX 300 CHARS.',
-            ),
+            .describe('How job requires skill X and candidate has Y'),
         }),
       )
-      .describe(
-        'PHASE 2 OUTPUT: [INDIRECT MATCHES] Skills required by the JD that the candidate does NOT have directly, but has a different skill that is a strong proxy or transferable alternative.',
-      ),
+      .describe('Candidate skills that can serve as proxies for required job skills'),
     missing: z
       .array(
         z.object({
-          skillName: z
-            .string()
-            .min(1)
-            .max(50)
-            .describe('The skill name from the Job Description that is completely absent.'),
-          importance: z
-            .enum(['critical', 'nice-to-have'])
-            .describe(
-              'critical = missing this is a potential deal-breaker. nice-to-have = missing is acceptable.',
-            ),
+          skillName: z.string().min(1).max(50).describe('Required skill name'),
+          importance: z.enum(['critical', 'nice-to-have']).describe('Importance level'),
           reasoning: z
             .string()
             .min(15)
             .max(300)
-            .describe('Explain why this gap matters concisely. MAX 300 CHARS.'),
+            .describe('How job requires skill but candidate lacks it'),
         }),
       )
-      .describe(
-        'PHASE 2 OUTPUT: [NO MATCHES] Skills required by the JD with NO evidence in the resume and NO reasonable transferable alternative.',
-      ),
+      .describe('Skills required by the job that the candidate has NO mention of'),
   }),
-  fitScore: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe(
-      'PHASE 3 OUTPUT: Final candidate fit score 0-100 (e.g., 75, 82). Synthesize Phase 1 & 2 findings.',
-    ),
-  verdict: z
-    .string()
-    .min(20)
-    .max(300)
-    .describe(
-      'PHASE 3 OUTPUT: Brief verdict explaining the score and candidate suitability. MAX 300 characters.',
-    ),
+  fitScore: z.number().min(0).max(100).describe('Overall candidate fit score (0-100)'),
+  verdict: z.string().min(20).max(300).describe('Explanation of the fit score and suitability'),
 });

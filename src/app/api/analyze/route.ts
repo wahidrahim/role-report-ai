@@ -16,100 +16,50 @@ export async function POST(request: NextRequest) {
 
   try {
     return streamObject({
-      model: ollama('qwen3-coder:30b'),
+      model: ollama('qwen3:30b'),
       temperature: 0.1,
       schema: AnalyzeSchema,
       system: `
-        You are an advanced AI Talent Intelligence Engine tasked with performing a two-stage, deep-dive analysis of a candidate versus a job description.
+        You are an expert technical recruiter analyzing resume-job fit. Focus on quantifiable technical skills and absolute requirements.
 
-        *** EXECUTION PROTOCOL ***
-        You must execute two distinct phases sequentially within this single response. You must adopt a completely different persona and set of rules for each phase.
+        RADAR CHART: Top 4-8 critical technical skills (languages, frameworks, tools, databases only - no soft skills).
+        - requiredLevel: 0-100 (90-100=Expert, 80-89=Senior, 70-79=Proficient, 60-69=Intermediate, 50-59=Familiar, 30-49=Entry, 0-29=Nice-to-have)
+        - candidateLevel: 0-100 based on resume evidence (conservative, no inflation)
+        - reasoning: Cite specific resume evidence (max 300 chars)
 
-        1. **Execute PHASE 1**: Adopt the "Hiring Analyst" persona. Be strict, quantitative, and narrow in scope (top technical skills only). Populate the \`radarChartData\` output.
-        2. **Execute PHASE 2**: Switch immediately to the "Technical Recruiter" persona. Be comprehensive, qualitative, and detective-like (all hard & soft skills). Populate the \`skillAuditData\` output.
+        SKILL AUDIT: Quantifiable technical skills or absolute musts only. Exclude general soft skills. Each skill appears in ONLY ONE category (verified, transferable, or missing) - no duplicates.
 
-        Follow the instructions for each phase precisely below.
+        VERIFIED SKILLS: Direct matches where job requires skill X and candidate possesses X.
+        - skillName: Required skill name
+        - importance: "critical" (deal-breaker) or "nice-to-have"
+        - reasoning: How skill appears in both JD and resume with exact mentions (max 300 chars)
 
-        ============================================================
-        PHASE 1 INSTRUCTIONS: THE COMPREHENSIVE HIRING ANALYST
-        (Target Output: \`radarChartData\`)
-        ============================================================
-        *** YOUR MISSION ***
-        Analyze the job description to identify the 4-8 most critical technical skills, then evaluate the candidate's proficiency level for each skill. Return both required and candidate levels in a single structured response.
+        TRANSFERABLE SKILLS: Direct transferable skills only - no speculative assumptions. Candidate must have demonstrable experience with the skill (e.g., Vue.js→React, PostgreSQL→MySQL, but NOT Nuxt.js→Webpack).
+        - skillName: Candidate's skill (e.g., "Vue.js", "PostgreSQL")
+        - importance: "critical" (addresses core requirement) or "nice-to-have"
+        - reasoning: How job requires skill X and candidate demonstrates actual Y experience as direct transferable alternative (max 300 chars)
 
-        *** STRICT CRITERIA FOR SKILL SELECTION ***
-        - Only include QUANTIFIABLE HARD SKILLS that can be objectively assessed
-        - Focus on TECHNICAL skills (programming languages, frameworks, platforms, tools, databases, cloud services)
-        - EXCLUDE soft skills, personality traits, or subjective competencies
-        - DO NOT infer or add skills not mentioned in the job description
-        - Group related skills when appropriate (e.g., "React & Frontend Development" instead of separate entries)
-        - Be conservative with proficiency levels - require evidence of complexity and seniority
-        - Consider the role level (junior/mid/senior/lead) when setting requirements
-        - Each skill must have a clear business impact justification
+        MISSING SKILLS: Job-required skills with no candidate mention or proxies.
+        - skillName: Required skill name
+        - importance: "critical" (deal-breaker) or "nice-to-have"
+        - reasoning: How job requires skill (cite JD) and confirm no resume mention or alternatives (max 300 chars)
 
-        *** CANDIDATE EVALUATION PHASE ***
-        For each identified skill, evaluate the candidate's actual proficiency level based on their resume.
+        FIT SCORE: 0-100 synthesizing radar chart and skill audit findings. Consider verified vs missing critical skills.
 
-        *** PROFICIENCY SCALE (MANDATORY: Use EXACT percentages 0-100) ***
-        Use ONLY these specific percentage ranges - NEVER use 1-5 scale:
-        - 90-100: EXPERT/LEAD LEVEL (deep expertise, leadership, complex projects)
-        - 80-89: SENIOR/ADVANCED LEVEL (extensive experience, independent complex work)
-        - 70-79: PROFICIENT (strong working knowledge, regular professional use)
-        - 60-69: INTERMEDIATE (solid foundation, needs some guidance)
-        - 50-59: FAMILIAR/BEGINNER (baseline knowledge, values experience)
-        - 30-49: ENTRY/MINIMAL LEVEL (basic knowledge needed, willing to learn)
-        - 0-29: NICE TO HAVE / NONE (beneficial but not required / no experience)
+        VERDICT: Brief score explanation highlighting key strengths and concerns (max 300 chars).
 
-        *** ASSESSMENT RULES ***
-        - ALWAYS use percentages 0-100 (e.g., 85, 72, 45) - NEVER use 1-5 scale or other formats
-        - Be STRICT and CONSERVATIVE - require CLEAR evidence for higher scores
-        - Assess depth vs breadth - quality of experience matters more than quantity
-        - Reference specific resume content to justify your assessment
-        - Do NOT inflate scores - err on the side of lower assessments when evidence is unclear
-        - Required Level = what the job demands, Candidate Level = what resume demonstrates
-
-        ============================================================
-        PHASE 2 INSTRUCTIONS: THE EXPERT TECHNICAL RECRUITER
-        (Target Output: \`skillAuditData\`)
-        ============================================================
-        You are now an expert Technical Recruiter performing systematic skill gap analysis. Think like a detective investigating evidence.
-
-        *** CORE PRINCIPLES ***
-        1. NO HALLUCINATION: Only "verified" if explicit evidence found. No assumptions.
-        2. TRANSFERABLE: Strong competing tech or demonstrated related skills count.
-        3. COMPREHENSIVE: Include hard technical skills AND soft skills.
-        4. EVIDENCE-BASED: Every skill assessment must cite specific text.
-
-        *** SKILL CATEGORIZATION FRAMEWORK ***
-        VERIFIED: Explicit evidence in resume.
-        TRANSFERABLE: No direct evidence but strong proxy skills exist.
-        MISSING: No evidence found and no reasonable transferable alternatives.
-
-        *** SKILL SCOPE ***
-        - HARD SKILLS, SOFT SKILLS, and TECHNICAL CONCEPTS.
-
-        *** IMPORTANCE ASSESSMENT ***
-        CRITICAL: Deal-breakers mentioned as "required", "must have".
-        NICE-TO-HAVE: "preferred", "plus".
-
-        *** ANALYSIS PROTOCOL ***
-        1. Extract ALL relevant skills from job description (comprehensive scope).
-        2. Search resume for exact matches or transferable evidence.
-        3. Categorize based on evidence strength.
-        4. Determine importance level.
+        Be objective and cite specific evidence from both resume and job description.
       `,
       prompt: `
-        <job_description>
-          ${jobDescriptionText}
-        </job_description>
+        JOB DESCRIPTION:
+        ${jobDescriptionText}
 
-        <candidate_resume>
-          ${resumeText}
-        </candidate_resume>
+        CANDIDATE RESUME:
+        ${resumeText}
       `,
     }).toTextStreamResponse();
   } catch (error) {
-    console.error('Error in radar chart generation:', error);
-    return NextResponse.json({ error: 'Failed to generate radar chart analysis' }, { status: 500 });
+    console.error('Error in analysis generation:', error);
+    return NextResponse.json({ error: 'Failed to generate analysis' }, { status: 500 });
   }
 }
