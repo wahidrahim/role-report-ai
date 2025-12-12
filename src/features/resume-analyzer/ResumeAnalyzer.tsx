@@ -1,14 +1,9 @@
 'use client';
 
-import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 
-import { AnalyzeSchema } from '@/app/api/analyze/AnalyzeSchema';
-import { CategorizedSkillsSchema } from '@/app/api/categorize-skills/route';
-import { RadarChartDataSchema } from '@/app/api/generate-radar-chart-data/route';
-import { SuitabilityAssessmentSchema } from '@/app/api/suitability-assessment/route';
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -25,6 +20,7 @@ import { useResumeStore } from '@/stores/resumeStore';
 import MatchScore from './components/MatchScore';
 import { SkillAudit } from './components/SkillAudit';
 import { SkillsRadarChart } from './components/SkillsRadarChart';
+import { useAnalysis } from './hooks/useAnalysis';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
@@ -32,37 +28,16 @@ export default function ResumeAnalyzer() {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
-  const [isChartDataComplete, setIsChartDataComplete] = useState(false);
-  const [isCategorizedSkillsComplete, setIsCategorizedSkillsComplete] = useState(false);
-  const [isSuitabilityAssessmentSubmitted, setIsSuitabilityAssessmentSubmitted] = useState(false);
 
-  const chartData = useObject({
-    api: '/api/generate-radar-chart-data',
-    schema: RadarChartDataSchema,
-    onFinish: () => setIsChartDataComplete(true),
-  });
-
-  const categorizedSkills = useObject({
-    api: '/api/categorize-skills',
-    schema: CategorizedSkillsSchema,
-    onFinish: () => setIsCategorizedSkillsComplete(true),
-  });
-
-  const suitabilityAssessment = useObject({
-    api: '/api/suitability-assessment',
-    schema: SuitabilityAssessmentSchema,
-  });
-
-  const isLoading =
-    chartData.isLoading || categorizedSkills.isLoading || suitabilityAssessment.isLoading;
-  const error = chartData.error || categorizedSkills.error || suitabilityAssessment.error;
+  const { radarChart, categorizedSkills, suitabilityAssessment, isLoading, error, analyze } =
+    useAnalysis();
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
     setValidationError(null);
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!resumeText) {
       setValidationError('Please upload a resume first');
       return;
@@ -74,34 +49,8 @@ export default function ResumeAnalyzer() {
     }
 
     setValidationError(null);
-    chartData.submit({ resumeText, jobDescriptionText });
-    categorizedSkills.submit({ resumeText, jobDescriptionText });
+    analyze(resumeText, jobDescriptionText);
   };
-
-  // Submit suitability assessment after both analyses complete
-  useEffect(() => {
-    if (
-      isChartDataComplete &&
-      isCategorizedSkillsComplete &&
-      suitabilityAssessment.isLoading === false &&
-      suitabilityAssessment.object === undefined
-    ) {
-      suitabilityAssessment.submit({
-        resumeText,
-        jobDescriptionText,
-        chartData: chartData.object,
-        categorizedSkills: categorizedSkills.object,
-      });
-    }
-  }, [
-    categorizedSkills.object,
-    chartData.object,
-    isCategorizedSkillsComplete,
-    isChartDataComplete,
-    jobDescriptionText,
-    resumeText,
-    suitabilityAssessment,
-  ]);
 
   return (
     <div className="space-y-6">
@@ -155,53 +104,47 @@ export default function ResumeAnalyzer() {
         <Alert variant="destructive">
           <AlertCircle />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error instanceof Error ? error.message : 'An unexpected error occurred'}
-          </AlertDescription>
+          <AlertDescription>{error.message}</AlertDescription>
         </Alert>
       )}
 
-      {suitabilityAssessment.object?.suitabilityScore?.toString() &&
-        suitabilityAssessment.object?.suitabilityReasoning && (
+      {suitabilityAssessment?.suitabilityScore !== undefined &&
+        suitabilityAssessment?.suitabilityReasoning && (
           <Card>
             <CardHeader>
               <CardTitle>Fit Score</CardTitle>
             </CardHeader>
             <CardContent>
               <MatchScore
-                matchScore={suitabilityAssessment.object.suitabilityScore}
-                verdict={suitabilityAssessment.object.suitabilityReasoning}
+                matchScore={suitabilityAssessment.suitabilityScore}
+                verdict={suitabilityAssessment.suitabilityReasoning}
               />
             </CardContent>
           </Card>
         )}
 
-      {chartData.object && (
+      {radarChart?.data && (
         <Card>
           <CardHeader>
             <CardTitle>Skills Radar Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            <SkillsRadarChart data={chartData.object.data} />
+            <SkillsRadarChart data={radarChart.data} />
           </CardContent>
         </Card>
       )}
 
-      {categorizedSkills.object && (
+      {categorizedSkills?.skills && (
         <Card>
           <CardHeader>
             <CardTitle>Skill Audit</CardTitle>
             <CardDescription>Detailed breakdown of skills match</CardDescription>
           </CardHeader>
           <CardContent>
-            <SkillAudit skills={categorizedSkills.object.skills} />
+            <SkillAudit skills={categorizedSkills.skills} />
           </CardContent>
         </Card>
       )}
-
-      <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-md overflow-auto">
-        {JSON.stringify(chartData.object, null, 2)}
-      </pre>
     </div>
   );
 }
