@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 
 import {
+  ActionPlan,
   CategorizedSkills,
   RadarChartData,
   SuitabilityAssessment,
@@ -12,6 +13,8 @@ type StreamDataType =
   | 'radarChart'
   | 'categorizedSkills'
   | 'suitabilityAssessment'
+  | 'resumeOptimizations'
+  | 'learningPriorities'
   | 'done'
   | 'error';
 
@@ -26,6 +29,8 @@ export function useAnalysis() {
   const [suitabilityAssessment, setSuitabilityAssessment] = useState<SuitabilityAssessment | null>(
     null,
   );
+  const [resumeOptimizations, setResumeOptimizations] = useState<ActionPlan | null>(null);
+  const [learningPriorities, setLearningPriorities] = useState<ActionPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -35,6 +40,8 @@ export function useAnalysis() {
     setRadarChart(null);
     setCategorizedSkills(null);
     setSuitabilityAssessment(null);
+    setResumeOptimizations(null);
+    setLearningPriorities(null);
 
     try {
       const response = await fetch('/api/analyze', {
@@ -88,6 +95,12 @@ export function useAnalysis() {
               case 'suitabilityAssessment':
                 setSuitabilityAssessment(data as SuitabilityAssessment);
                 break;
+              case 'resumeOptimizations':
+                setResumeOptimizations(data as ActionPlan);
+                break;
+              case 'learningPriorities':
+                setLearningPriorities(data as ActionPlan);
+                break;
               case 'error':
                 setError(new Error(data as string));
                 break;
@@ -111,6 +124,8 @@ export function useAnalysis() {
     radarChart,
     categorizedSkills,
     suitabilityAssessment,
+    resumeOptimizations,
+    learningPriorities,
     isLoading,
     error,
     analyze,

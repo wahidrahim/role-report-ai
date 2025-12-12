@@ -44,6 +44,17 @@ export const CategorizedSkillsSchema = z.object({
   }),
 });
 
+export const ActionPlanSchema = z.object({
+  plan: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      priority: z.enum(['high', 'medium', 'low']),
+    }),
+  ),
+});
+
 export type RadarChartData = z.infer<typeof RadarChartDataSchema>;
 export type CategorizedSkills = z.infer<typeof CategorizedSkillsSchema>;
 export type SuitabilityAssessment = z.infer<typeof SuitabilityAssessmentSchema>;
+export type ActionPlan = z.infer<typeof ActionPlanSchema>;

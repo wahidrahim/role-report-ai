@@ -30,8 +30,16 @@ export default function ResumeAnalyzer() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
 
-  const { radarChart, categorizedSkills, suitabilityAssessment, isLoading, error, analyze } =
-    useAnalysis();
+  const {
+    radarChart,
+    categorizedSkills,
+    suitabilityAssessment,
+    resumeOptimizations,
+    learningPriorities,
+    isLoading,
+    error,
+    analyze,
+  } = useAnalysis();
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescriptionText(e.target.value);
@@ -150,6 +158,44 @@ export default function ResumeAnalyzer() {
           </CardHeader>
           <CardContent>
             <SkillAudit skills={categorizedSkills.skills} />
+          </CardContent>
+        </Card>
+      )}
+
+      {resumeOptimizations?.plan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Resume Optimizations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul>
+              {resumeOptimizations.plan.map((item) => (
+                <li key={`resume-optimization-${item.title}`}>
+                  <div className="font-medium">{item.title}</div>
+                  <div className="text-xs text-muted-foreground">{item.priority}</div>
+                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {learningPriorities?.plan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Learning Priorities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul>
+              {learningPriorities.plan.map((item) => (
+                <li key={`learning-priority-${item.title}`}>
+                  <div className="font-medium">{item.title}</div>
+                  <div className="text-xs text-muted-foreground">{item.priority}</div>
+                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

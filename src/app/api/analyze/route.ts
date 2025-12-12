@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ollama } from 'ollama-ai-provider-v2';
 
 import {
+  ActionPlanSchema,
   CategorizedSkillsSchema,
   RadarChartDataSchema,
   SuitabilityAssessmentSchema,
 } from './schemas';
 
-const model = ollama('qwen3:30b');
-// const model: LanguageModel = 'anthropic/claude-sonnet-4.5';
+// const model = ollama('qwen3:30b');
+const model: LanguageModel = 'openai/gpt-4o';
 
 export async function POST(request: NextRequest) {
   const { resumeText, jobDescriptionText } = await request.json();
@@ -235,7 +236,79 @@ export async function POST(request: NextRequest) {
           sendData('suitabilityAssessment', partial);
         }
 
-        await suitabilityResult.object;
+        const suitabilityAssessment = await suitabilityResult.object;
+
+        const resumeOptimizationsResult = streamObject({
+          model,
+          schema: ActionPlanSchema,
+          system: `
+            You are a season career coach providing actionable advice to improve a candidate's resume.
+            
+            Your recommendations should be based on comparing the candidate's resume to the job description.
+
+            Your priority is to help the candidate pass the initial screen.
+
+            Ground your recommendations on the candidate's particular skills and experience, and a pre-determined suitability assessment.
+          `,
+          prompt: `
+          RESUME:
+          ${resumeText}
+
+          JOB DESCRIPTION:
+          ${jobDescriptionText}
+
+          SKILLS RADAR CHART DATA:
+          ${JSON.stringify(radarChartData, null, 2)}
+
+          CATEGORIZED SKILLS ANALYSIS:
+          ${JSON.stringify(categorizedSkills, null, 2)}
+          
+          SUITABILITY ASSESSMENT:
+          ${suitabilityAssessment.suitabilityReasoning}
+          `,
+        });
+
+        const learningPrioritiesResult = streamObject({
+          model,
+          schema: ActionPlanSchema,
+          system: `
+            You are an seasoned career coach helping a candidate prepare for a screening call and potential interview.
+
+            Your task is to generate a list of learning priorities for the candidate.
+
+            Ground your recommendations based on the candidate's resume, their skills, and the job description.
+          `,
+          prompt: `
+            RESUME:
+            ${resumeText}
+
+            JOB DESCRIPTION:
+            ${jobDescriptionText}
+
+            SKILLS RADAR CHART DATA:
+            ${JSON.stringify(radarChartData, null, 2)}
+
+            CATEGORIZED SKILLS ANALYSIS:
+            ${JSON.stringify(categorizedSkills, null, 2)}
+
+            SUITABILITY ASSESSMENT:
+            ${suitabilityAssessment.suitabilityReasoning}
+            `,
+        });
+
+        const streamResumeOptimizations = (async () => {
+          for await (const partial of resumeOptimizationsResult.partialObjectStream) {
+            sendData('resumeOptimizations', partial);
+          }
+        })();
+
+        const streamLearningPriorities = (async () => {
+          for await (const partial of learningPrioritiesResult.partialObjectStream) {
+            sendData('learningPriorities', partial);
+          }
+        })();
+
+        await Promise.all([streamResumeOptimizations, streamLearningPriorities]);
 
         // Signal completion
         sendData('done', null);
