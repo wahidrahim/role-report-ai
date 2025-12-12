@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from '@/core/components/ui/card';
 import { Label } from '@/core/components/ui/label';
+import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
@@ -108,20 +109,27 @@ export default function ResumeAnalyzer() {
         </Alert>
       )}
 
-      {suitabilityAssessment?.suitabilityScore !== undefined &&
-        suitabilityAssessment?.suitabilityReasoning && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Fit Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MatchScore
-                matchScore={suitabilityAssessment.suitabilityScore}
-                verdict={suitabilityAssessment.suitabilityReasoning}
-              />
-            </CardContent>
-          </Card>
+      <Card>
+        {suitabilityAssessment?.suitabilityScore !== undefined &&
+          suitabilityAssessment?.suitabilityReasoning && (
+            <>
+              <CardHeader>
+                <CardTitle>Fit Score</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MatchScore
+                  matchScore={suitabilityAssessment?.suitabilityScore}
+                  verdict={suitabilityAssessment?.suitabilityReasoning}
+                />
+              </CardContent>
+            </>
+          )}
+        {isLoading && (
+          <CardContent>
+            <Spinner />
+          </CardContent>
         )}
+      </Card>
 
       {radarChart?.data && (
         <Card>

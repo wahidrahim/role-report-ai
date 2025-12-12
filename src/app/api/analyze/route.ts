@@ -1,4 +1,4 @@
-import { streamObject } from 'ai';
+import { LanguageModel, streamObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { ollama } from 'ollama-ai-provider-v2';
 
@@ -9,6 +9,7 @@ import {
 } from './schemas';
 
 const model = ollama('qwen3:30b');
+// const model: LanguageModel = 'anthropic/claude-sonnet-4.5';
 
 export async function POST(request: NextRequest) {
   const { resumeText, jobDescriptionText } = await request.json();
