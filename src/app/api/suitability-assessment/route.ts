@@ -37,15 +37,15 @@ export async function POST(request: NextRequest) {
         You should provide a suitability score between 0 and 100 (\`suitabilityScore\`) and a reasoning for the score (\`suitabilityReasoning\`).
 
         You can consider the following scale as a guide:
-        - 100 = Perfect Match
-        - >= 90: Very Good Match
-        - >= 80: Good Match
-        - >= 70: Average Match
-        - >= 60: Below Average Match
-        - >= 50: Poor Match
-        - >= 40: Very Poor Match
-        - >= 30: Terrible Match
-        -  < 30: Absolutely terrible fit
+        -   100: Perfect Fit
+        - >= 90: Very Good Fit
+        - >= 80: Good Fit
+        - >= 70: Average Fit
+        - >= 60: Below Average Fit
+        - >= 50: Poor Fit
+        - >= 40: Very Poor Fit
+        - >= 30: Terrible Fit
+        -  < 30: Absolutely Terrible Fit
       `,
       prompt: `
         RESUME TEXT:
