@@ -1,9 +1,10 @@
 import { streamObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { ollama } from 'ollama-ai-provider-v2';
 import * as z from 'zod';
 
 export const SuitabilityAssessmentSchema = z.object({
-  suitabilityScore: z.number().min(0).max(100),
+  suitabilityScore: z.number().min(0).max(10),
   suitabilityReasoning: z.string(),
 });
 
@@ -20,46 +21,59 @@ export async function POST(request: NextRequest) {
     }
 
     return streamObject({
-      // model: ollama('qwen3-coder:30b'),
-      model: 'openai/gpt-4o',
+      model: ollama('qwen3-coder:30b'),
       schema: SuitabilityAssessmentSchema,
       system: `
-        You are assessing a candidate's suitability for a certain role, based on the candidate's resume and the job description.
+        You are an expert technical recruiter conducting a candidate suitability assessment. Your evaluations are fair, evidence-based, and concise.
 
-        You will be provided:
-        - The candidate's resume
-        - The job description
-        - A radar chart data which indicates the most important skills for the role, the level of proficiency required for the role, and the level of proficiency the candidate has for each skill.
-        - A categorized list of skills which indicates the relevant skills the candidate has, any skills that are potentially transferable for the role, and any missing skills of the client for the role.
+        ## Input Data
+        You will receive:
+        1. **Resume** - The candidate's background and qualifications
+        2. **Job Description** - Role requirements and responsibilities
+        3. **Skills Radar Chart Data** - Required vs. candidate proficiency levels for key skills
+        4. **Categorized Skills** - Skills classified as relevant, transferable, or missing
 
-        You should use ALL the provided data to make an informed assessment of the candidate's suitability for the role.
+        ## Assessment Criteria (Weight each appropriately)
+        - **Core Skills Match (35%)**: Alignment with must-have requirements
+        - **Experience Relevance (25%)**: Relevant work history and accomplishments
+        - **Skill Gaps & Severity (20%)**: Critical missing skills and learnability
+        - **Transferable Skills (10%)**: Existing skills that bridge gaps
+        - **Overall Potential (10%)**: Growth trajectory and adaptability
 
-        You should provide a suitability score between 0 and 100 (\`suitabilityScore\`) and a reasoning for the score (\`suitabilityReasoning\`).
+        ## Scoring Guide (0-10 scale, use one decimal place as needed)
+        - **9.0-10**: Exceptional fit. Exceeds requirements, minimal gaps.
+        - **8.0-8.9**: Strong fit. Meets core requirements, minor gaps.
+        - **7.0-7.9**: Good fit. Solid foundation, some training needed.
+        - **6.0-6.9**: Moderate fit. Relevant experience but notable gaps.
+        - **5.0-5.9**: Weak fit. Transferable skills present but significant gaps.
+        - **4.0-4.9**: Poor fit. Major skill misalignment.
+        - **Below 4.0**: Not suitable. Fundamental mismatch.
 
-        You can consider the following scale as a guide:
-        -   100: Perfect Fit
-        - >= 90: Very Good Fit
-        - >= 80: Good Fit
-        - >= 70: Average Fit
-        - >= 60: Below Average Fit
-        - >= 50: Poor Fit
-        - >= 40: Very Poor Fit
-        - >= 30: Terrible Fit
-        -  < 30: Absolutely Terrible Fit
-      `,
+        ## Reasoning Guidelines
+        Be CONCISE. Write 2-4 sentences maximum:
+        - State the key strength(s) or concern(s)
+        - Note the most significant skill match or gap
+        - Give a brief bottom-line recommendation
+
+        Keep it direct and professional. No fluff or filler phrases.`,
       prompt: `
-        RESUME TEXT:
+        Assess this candidate's suitability for the role. Provide a score (0-10, one decimal place) and a concise reasoning (2-4 sentences).
+
+        ---
+        ## CANDIDATE RESUME
         ${resumeText}
 
-        JOB DESCRIPTION TEXT:
+        ---
+        ## JOB DESCRIPTION
         ${jobDescriptionText}
 
-        SKILLS RADAR CHART DATA (JSON format):
-        ${chartData ? JSON.stringify(chartData) : 'Not provided'}
+        ---
+        ## SKILLS RADAR CHART DATA
+        ${chartData ? JSON.stringify(chartData, null, 2) : 'Not available'}
 
-        CATEGORIZED SKILLS (JSON format):
-        ${categorizedSkills ? JSON.stringify(categorizedSkills) : 'Not provided'}
-      `,
+        ---
+        ## CATEGORIZED SKILLS ANALYSIS
+        ${categorizedSkills ? JSON.stringify(categorizedSkills, null, 2) : 'Not available'}`,
     }).toTextStreamResponse();
   } catch (error) {
     console.error('Error in suitability assessment:', error);
