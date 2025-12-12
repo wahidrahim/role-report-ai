@@ -1,16 +1,14 @@
 import { Prompt } from 'ai';
 
-import {
-  CategorizedSkills,
-  RadarChartData,
-  SuitabilityAssessment,
-} from '@/app/api/analyze/schemas';
+import { RadarChart } from '@/agents/schemas/radarChart.schema';
+import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
 
 export const learningPrioritiesPrompt = (
   resumeText: string,
   jobDescriptionText: string,
-  radarChartData: RadarChartData,
-  categorizedSkills: CategorizedSkills,
+  radarChart: RadarChart,
+  skillAssessment: SkillAssessment,
   suitabilityAssessment: SuitabilityAssessment,
 ): Prompt => ({
   system: `
@@ -28,10 +26,10 @@ export const learningPrioritiesPrompt = (
     ${jobDescriptionText}
 
     SKILLS RADAR CHART DATA:
-    ${JSON.stringify(radarChartData, null, 2)}
+    ${JSON.stringify(radarChart, null, 2)}
 
-    CATEGORIZED SKILLS ANALYSIS:
-    ${JSON.stringify(categorizedSkills, null, 2)}
+    SKILL ASSESSMENT:
+    ${JSON.stringify(skillAssessment, null, 2)}
 
     SUITABILITY ASSESSMENT:
     ${suitabilityAssessment.suitabilityReasoning}

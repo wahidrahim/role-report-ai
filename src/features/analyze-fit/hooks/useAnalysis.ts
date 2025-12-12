@@ -2,30 +2,28 @@
 
 import { useCallback, useState } from 'react';
 
-import {
-  ActionPlan,
-  CategorizedSkills,
-  RadarChartData,
-  SuitabilityAssessment,
-} from '@/app/api/analyze/schemas';
+import { ActionPlan } from '@/agents/schemas/actionPlan.schema';
+import { RadarChart } from '@/agents/schemas/radarChart.schema';
+import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
 
 type StreamDataType =
   | 'radarChart'
-  | 'categorizedSkills'
+  | 'skillAssessment'
   | 'suitabilityAssessment'
   | 'resumeOptimizations'
   | 'learningPriorities'
   | 'done'
   | 'error';
 
-interface StreamMessage {
+type StreamMessage = {
   type: StreamDataType;
   data: unknown;
-}
+};
 
 export function useAnalysis() {
-  const [radarChart, setRadarChart] = useState<RadarChartData | null>(null);
-  const [categorizedSkills, setCategorizedSkills] = useState<CategorizedSkills | null>(null);
+  const [radarChart, setRadarChart] = useState<RadarChart | null>(null);
+  const [skillAssessment, setSkillAssessment] = useState<SkillAssessment | null>(null);
   const [suitabilityAssessment, setSuitabilityAssessment] = useState<SuitabilityAssessment | null>(
     null,
   );
@@ -38,7 +36,7 @@ export function useAnalysis() {
     setIsLoading(true);
     setError(null);
     setRadarChart(null);
-    setCategorizedSkills(null);
+    setSkillAssessment(null);
     setSuitabilityAssessment(null);
     setResumeOptimizations(null);
     setLearningPriorities(null);
@@ -87,10 +85,10 @@ export function useAnalysis() {
 
             switch (type) {
               case 'radarChart':
-                setRadarChart(data as RadarChartData);
+                setRadarChart(data as RadarChart);
                 break;
-              case 'categorizedSkills':
-                setCategorizedSkills(data as CategorizedSkills);
+              case 'skillAssessment':
+                setSkillAssessment(data as SkillAssessment);
                 break;
               case 'suitabilityAssessment':
                 setSuitabilityAssessment(data as SuitabilityAssessment);
@@ -122,7 +120,7 @@ export function useAnalysis() {
 
   return {
     radarChart,
-    categorizedSkills,
+    skillAssessment,
     suitabilityAssessment,
     resumeOptimizations,
     learningPriorities,

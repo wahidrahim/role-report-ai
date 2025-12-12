@@ -12,3 +12,5 @@ export const radarChartSchema = z.object({
     )
     .max(8),
 });
+
+export type RadarChart = z.infer<typeof radarChartSchema>;

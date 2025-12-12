@@ -9,3 +9,5 @@ export const actionPlanSchema = z.object({
     }),
   ),
 });
+
+export type ActionPlan = z.infer<typeof actionPlanSchema>;

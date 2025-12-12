@@ -19,20 +19,20 @@ import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import MatchScore from './components/MatchScore';
-import { SkillAudit } from './components/SkillAudit';
+import { SkillAssessment } from './components/SkillAssessment';
 import { SkillsRadarChart } from './components/SkillsRadarChart';
 import { useAnalysis } from './hooks/useAnalysis';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
-export default function ResumeAnalyzer() {
+export function AnalyzeFit() {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
 
   const {
     radarChart,
-    categorizedSkills,
+    skillAssessment,
     suitabilityAssessment,
     resumeOptimizations,
     learningPriorities,
@@ -150,14 +150,16 @@ export default function ResumeAnalyzer() {
         </Card>
       )}
 
-      {categorizedSkills?.skills && (
+      {skillAssessment?.skills && (
         <Card>
           <CardHeader>
-            <CardTitle>Skill Audit</CardTitle>
-            <CardDescription>Detailed breakdown of skills match</CardDescription>
+            <CardTitle>Skill Assessment</CardTitle>
+            <CardDescription>
+              How your resume evidence maps to the job’s required technologies
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <SkillAudit skills={categorizedSkills.skills} />
+            <SkillAssessment skills={skillAssessment.skills} />
           </CardContent>
         </Card>
       )}

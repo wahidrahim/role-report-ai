@@ -1,12 +1,13 @@
 import { Prompt } from 'ai';
 
-import { CategorizedSkills, RadarChartData } from '@/app/api/analyze/schemas';
+import { RadarChart } from '@/agents/schemas/radarChart.schema';
+import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
 
 export const suitabilityAssessmentPrompt = (
   resumeText: string,
   jobDescriptionText: string,
-  radarChart: RadarChartData,
-  skillAssessment: CategorizedSkills,
+  radarChart: RadarChart,
+  skillAssessment: SkillAssessment,
 ): Prompt => ({
   system: `
     You are an expert technical recruiter conducting a candidate suitability assessment. Your evaluations are fair, evidence-based, and concise.
@@ -16,7 +17,7 @@ export const suitabilityAssessmentPrompt = (
     1. **Resume** - The candidate's background and qualifications
     2. **Job Description** - Role requirements and responsibilities
     3. **Skills Radar Chart Data** - Required vs. candidate proficiency levels for key skills
-    4. **Categorized Skills** - Skills classified as relevant, transferable, or missing
+    4. **Skill Assessment** - A list of skills with status (verified/transferable/missing), importance, and reasoning
 
     ## Assessment Criteria (Weight each appropriately)
     - **Core Skills Match (35%)**: Alignment with must-have requirements
@@ -58,7 +59,7 @@ export const suitabilityAssessmentPrompt = (
     ${JSON.stringify(radarChart, null, 2)}
 
     ---
-    ## CATEGORIZED SKILLS ANALYSIS
+    ## SKILL ASSESSMENT
     ${JSON.stringify(skillAssessment, null, 2)}
   `,
 });

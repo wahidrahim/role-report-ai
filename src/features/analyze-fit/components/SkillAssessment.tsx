@@ -1,66 +1,27 @@
 'use client';
 
+import type { SkillAssessment as SkillAssessmentResult } from '@/agents/schemas/skillAssessment.schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
-export type SkillAuditProps = {
-  skills?: Partial<{
-    verified: (
-      | Partial<{
-          skillName: string;
-          importance: 'critical' | 'nice-to-have';
-          reasoning: string;
-        }>
-      | undefined
-    )[];
-    transferable: (
-      | Partial<{
-          skillName: string;
-          importance: 'critical' | 'nice-to-have';
-          reasoning: string;
-        }>
-      | undefined
-    )[];
-    missing: (
-      | Partial<{
-          skillName: string;
-          importance: 'critical' | 'nice-to-have';
-          reasoning: string;
-        }>
-      | undefined
-    )[];
-  }> | null;
+type SkillItem = Partial<SkillAssessmentResult['skills'][number]>;
+
+export type SkillAssessmentProps = {
+  /**
+   * Skill assessment results.
+   * During streaming this may contain partial items or undefined entries.
+   */
+  skills?: (SkillItem | undefined)[] | null;
 };
 
-export function SkillAudit(props: SkillAuditProps) {
-  const { skills } = props;
-  const { verified = [], transferable = [], missing = [] } = skills || {};
+export function SkillAssessment(props: SkillAssessmentProps) {
+  const items = (props.skills ?? []).filter((skill): skill is SkillItem => skill !== undefined);
 
-  const verifiedSkills = verified.filter(
-    (
-      skill,
-    ): skill is Partial<{
-      skillName: string;
-      importance: 'critical' | 'nice-to-have';
-      reasoning: string;
-    }> => skill !== undefined,
-  );
-  const transferableSkills = transferable.filter(
-    (
-      skill,
-    ): skill is Partial<{
-      skillName: string;
-      importance: 'critical' | 'nice-to-have';
-      reasoning: string;
-    }> => skill !== undefined,
-  );
-  const missingSkills = missing.filter(
-    (
-      skill,
-    ): skill is Partial<{
-      skillName: string;
-      importance: 'critical' | 'nice-to-have';
-      reasoning: string;
-    }> => skill !== undefined,
+  const verifiedSkills = items.filter((skill) => skill.status === 'verified');
+  const transferableSkills = items.filter((skill) => skill.status === 'transferable');
+  const missingSkills = items.filter((skill) => skill.status === 'missing');
+  const unknownStatusSkills = items.filter(
+    (skill) =>
+      skill.status !== 'verified' && skill.status !== 'transferable' && skill.status !== 'missing',
   );
 
   return (
@@ -72,7 +33,7 @@ export function SkillAudit(props: SkillAuditProps) {
         <CardContent>
           <ul className="space-y-4">
             {verifiedSkills.map((skill, index) => (
-              <li key={index}>
+              <li key={`${skill.skillName ?? 'unknown'}-verified-${index}`}>
                 <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
                 {skill.importance && (
                   <div className="text-xs text-muted-foreground">
@@ -95,7 +56,7 @@ export function SkillAudit(props: SkillAuditProps) {
         <CardContent>
           <ul className="space-y-4">
             {transferableSkills.map((skill, index) => (
-              <li key={index}>
+              <li key={`${skill.skillName ?? 'unknown'}-transferable-${index}`}>
                 <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
                 {skill.importance && (
                   <div className="text-xs text-muted-foreground">
@@ -118,7 +79,7 @@ export function SkillAudit(props: SkillAuditProps) {
         <CardContent>
           <ul className="space-y-4">
             {missingSkills.map((skill, index) => (
-              <li key={index}>
+              <li key={`${skill.skillName ?? 'unknown'}-missing-${index}`}>
                 <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
                 {skill.importance && (
                   <div className="text-xs text-muted-foreground">
@@ -133,6 +94,26 @@ export function SkillAudit(props: SkillAuditProps) {
           </ul>
         </CardContent>
       </Card>
+
+      {unknownStatusSkills.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Other</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {unknownStatusSkills.map((skill, index) => (
+                <li key={`${skill.skillName ?? 'unknown'}-other-${index}`}>
+                  <div className="font-medium">{skill.skillName || 'Unknown Skill'}</div>
+                  {skill.reasoning && (
+                    <div className="text-sm text-muted-foreground">{skill.reasoning}</div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
