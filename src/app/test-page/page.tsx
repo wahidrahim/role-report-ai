@@ -11,26 +11,10 @@ import { useResumeStore } from '@/stores/resumeStore';
 
 export default function TestPage() {
   const [textareaValue, setTextareaValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
 
   const { resumeText } = useResumeStore();
-
-  const deepResearch = useObject({
-    api: '/api/deep-research',
-    schema: z.object({
-      companyIntel: z.object({
-        recentNews: z.array(z.string()),
-        interviewTips: z.array(z.string()),
-        techStack: z.array(z.string()),
-      }),
-      studyPlan: z.array(
-        z.object({
-          topic: z.string(),
-          priority: z.enum(['critical', 'high', 'medium']),
-          resources: z.array(z.string()),
-        }),
-      ),
-    }),
-  });
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setTextareaValue(e.target.value);
@@ -39,10 +23,18 @@ export default function TestPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    deepResearch.submit({
-      resumeText,
-      jobDescriptionText: textareaValue,
+    setIsLoading(true);
+
+    const response = await fetch('/api/deep-research', {
+      method: 'POST',
+      body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
     });
+
+    const data = await response.json();
+
+    setData(data);
+
+    setIsLoading(false);
   };
 
   return (
@@ -60,14 +52,14 @@ export default function TestPage() {
             className="field-sizing-fixed resize-none"
           />
         </div>
-        <Button type="submit" disabled={deepResearch.isLoading} className="w-full sm:w-auto">
-          {deepResearch.isLoading ? 'Loading...' : 'Deep Research'}
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+          {isLoading ? 'Loading...' : 'Deep Research'}
         </Button>
       </form>
-      {deepResearch.object && (
+      {data && (
         <div className="mt-4">
           <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
-            {JSON.stringify(deepResearch.object, null, 2)}
+            {JSON.stringify(data, null, 2)}
           </pre>
         </div>
       )}
