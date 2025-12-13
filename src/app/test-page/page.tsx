@@ -1,8 +1,8 @@
 'use client';
 
-import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
+import { createParser } from 'eventsource-parser';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { z } from 'zod';
+import ReactMarkdown from 'react-markdown';
 
 import { Button } from '@/core/components/ui/button';
 import { Label } from '@/core/components/ui/label';
@@ -24,15 +24,41 @@ export default function TestPage() {
     e.preventDefault();
 
     setIsLoading(true);
+    setData(null);
 
     const response = await fetch('/api/deep-research', {
       method: 'POST',
       body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
     });
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    setData(data);
+    // setData(data);
+
+    const decoder = new TextDecoder();
+    const reader = response.body?.getReader();
+
+    if (!reader) {
+      return;
+    }
+
+    const parser = createParser({
+      onEvent: ({ data }) => {
+        if (data) {
+          setData(JSON.parse(data));
+        }
+      },
+    });
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      parser.feed(decoder.decode(value));
+    }
 
     setIsLoading(false);
   };
