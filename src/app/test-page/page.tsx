@@ -1,20 +1,48 @@
 'use client';
 
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { UIMessage } from 'ai';
 import { createParser } from 'eventsource-parser';
+import merge from 'lodash/merge';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 
 import { Button } from '@/core/components/ui/button';
 import { Label } from '@/core/components/ui/label';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
+// Define your custom message type with data part schemas
+export type MyUIMessage = UIMessage<
+  never, // metadata type
+  {
+    weather: {
+      city: string;
+      weather?: string;
+      status: 'loading' | 'success';
+    };
+    notification: {
+      message: string;
+      level: 'info' | 'warning' | 'error';
+    };
+  } // data parts type
+>;
+
 export default function TestPage() {
   const [textareaValue, setTextareaValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<unknown>(null);
 
   const { resumeText } = useResumeStore();
+
+  const { messages, sendMessage } = useChat<MyUIMessage>({
+    transport: new DefaultChatTransport({
+      api: '/api/deep-research',
+    }),
+    onData: (dataPart) => {
+      console.log({ dataPart });
+    },
+  });
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setTextareaValue(e.target.value);
@@ -31,34 +59,45 @@ export default function TestPage() {
       body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
     });
 
-    // const data = await response.json();
+    const data = await response.json();
 
-    // setData(data);
+    setData(data);
 
-    const decoder = new TextDecoder();
-    const reader = response.body?.getReader();
+    // sendMessage();
 
-    if (!reader) {
-      return;
-    }
+    // const response = await fetch('/api/deep-research', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
+    // });
 
-    const parser = createParser({
-      onEvent: ({ data }) => {
-        if (data) {
-          setData(JSON.parse(data));
-        }
-      },
-    });
+    // // const data = await response.json();
 
-    while (true) {
-      const { done, value } = await reader.read();
+    // // setData(data);
 
-      if (done) {
-        break;
-      }
+    // const decoder = new TextDecoder();
+    // const reader = response.body?.getReader();
 
-      parser.feed(decoder.decode(value));
-    }
+    // if (!reader) {
+    //   return;
+    // }
+
+    // const parser = createParser({
+    //   onEvent: (event) => {
+    //     if (event.data) {
+    //       setData(merge(data, event.data));
+    //     }
+    //   },
+    // });
+
+    // while (true) {
+    //   const { done, value } = await reader.read();
+
+    //   if (done) {
+    //     break;
+    //   }
+
+    //   parser.feed(decoder.decode(value));
+    // }
 
     setIsLoading(false);
   };
