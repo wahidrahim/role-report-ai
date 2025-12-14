@@ -1,4 +1,4 @@
-import { InterviewPrepGuide } from '@/agents/schemas/interviewPrepGuide.schema';
+import { InterviewPrepGuide } from '@/ai/schemas/interviewPrepGuide.schema';
 
 type ResearchReportPromptArgs = {
   companyName: string;

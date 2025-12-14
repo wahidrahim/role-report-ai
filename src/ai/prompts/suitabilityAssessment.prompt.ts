@@ -1,7 +1,7 @@
 import { Prompt } from 'ai';
 
-import { RadarChart } from '@/agents/schemas/radarChart.schema';
-import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
+import { RadarChart } from '@/ai/schemas/radarChart.schema';
+import { SkillAssessment } from '@/ai/schemas/skillAssessment.schema';
 
 export const suitabilityAssessmentPrompt = (
   resumeText: string,

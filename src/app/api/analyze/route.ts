@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { analyzeFitWorkflow } from '@/agents/workflows/analyzeFit.workflow';
+import { analyzeFitWorkflow } from '@/ai/workflows/analyzeFit.workflow';
 
 export async function POST(request: NextRequest) {
   const { resumeText, jobDescriptionText } = await request.json();

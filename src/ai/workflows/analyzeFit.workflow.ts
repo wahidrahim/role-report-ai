@@ -1,15 +1,15 @@
 import { streamObject } from 'ai';
 
-import { model } from '@/agents/config';
-import { learningPrioritiesPrompt } from '@/agents/prompts/learningPriorities.prompt';
-import { radarChartPrompt } from '@/agents/prompts/radarChart.prompt';
-import { resumeOptimizationsPrompt } from '@/agents/prompts/resumeOptimizations.prompt';
-import { skillAssessmentPrompt } from '@/agents/prompts/skillAssessment.prompt';
-import { suitabilityAssessmentPrompt } from '@/agents/prompts/suitabilityAssessment.prompt';
-import { actionPlanSchema } from '@/agents/schemas/actionPlan.schema';
-import { radarChartSchema } from '@/agents/schemas/radarChart.schema';
-import { skillAssessmentSchema } from '@/agents/schemas/skillAssessment.schema';
-import { suitabilityAssessmentSchema } from '@/agents/schemas/suitabilityAssessment.schema';
+import { model } from '@/ai/config';
+import { learningPrioritiesPrompt } from '@/ai/prompts/learningPriorities.prompt';
+import { radarChartPrompt } from '@/ai/prompts/radarChart.prompt';
+import { resumeOptimizationsPrompt } from '@/ai/prompts/resumeOptimizations.prompt';
+import { skillAssessmentPrompt } from '@/ai/prompts/skillAssessment.prompt';
+import { suitabilityAssessmentPrompt } from '@/ai/prompts/suitabilityAssessment.prompt';
+import { actionPlanSchema } from '@/ai/schemas/actionPlan.schema';
+import { radarChartSchema } from '@/ai/schemas/radarChart.schema';
+import { skillAssessmentSchema } from '@/ai/schemas/skillAssessment.schema';
+import { suitabilityAssessmentSchema } from '@/ai/schemas/suitabilityAssessment.schema';
 
 const encoder = new TextEncoder();
 

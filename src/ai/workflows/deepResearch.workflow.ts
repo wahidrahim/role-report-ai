@@ -3,20 +3,20 @@ import { tavily } from '@tavily/core';
 import { generateObject, streamObject } from 'ai';
 import z from 'zod';
 
-import { model } from '@/agents/config';
-import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
-import { interviewPrepGuidePrompt } from '@/agents/prompts/interviewPrepGuide.prompt';
-import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
-import { researchReportPrompt } from '@/agents/prompts/researchReport.prompt';
-import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
+import { model } from '@/ai/config';
+import { extractCompanyNameAndJobTitlePrompt } from '@/ai/prompts/extractCompanyNameAndJobTitle.prompt';
+import { interviewPrepGuidePrompt } from '@/ai/prompts/interviewPrepGuide.prompt';
+import { deepResearchPlanPrompt } from '@/ai/prompts/planDeepResearch.prompt';
+import { researchReportPrompt } from '@/ai/prompts/researchReport.prompt';
+import { extractCompanyNameAndJobTitleSchema } from '@/ai/schemas/extractCompanyNameAndJobTitle.schema';
 import {
   InterviewPrepGuide,
   interviewPrepGuideSchema,
-} from '@/agents/schemas/interviewPrepGuide.schema';
-import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
-import { ResearchReport, researchReportSchema } from '@/agents/schemas/researchReport.schema';
-import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
-import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
+} from '@/ai/schemas/interviewPrepGuide.schema';
+import { DeepResearchPlanSchema } from '@/ai/schemas/planDeepResearch.schema';
+import { ResearchReport, researchReportSchema } from '@/ai/schemas/researchReport.schema';
+import { SkillAssessment } from '@/ai/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/ai/schemas/suitabilityAssessment.schema';
 
 const tavilyClient = tavily({
   apiKey: process.env.TAVILY_API_KEY,

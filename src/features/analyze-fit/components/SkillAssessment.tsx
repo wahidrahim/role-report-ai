@@ -1,6 +1,6 @@
 'use client';
 
-import type { SkillAssessment as SkillAssessmentResult } from '@/agents/schemas/skillAssessment.schema';
+import type { SkillAssessment as SkillAssessmentResult } from '@/ai/schemas/skillAssessment.schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
 type SkillItem = Partial<SkillAssessmentResult['skills'][number]>;

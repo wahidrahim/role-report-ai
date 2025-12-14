@@ -1,7 +1,7 @@
 import { UIMessage } from 'ai';
 import { NextResponse } from 'next/server';
 
-import { deepResearchWorkflow } from '@/agents/workflows/deepResearch.workflow';
+import { deepResearchWorkflow } from '@/ai/workflows/deepResearch.workflow';
 
 export type DeepResearchUIMessage = UIMessage<
   never,

@@ -1,8 +1,8 @@
 import { Prompt } from 'ai';
 
-import { RadarChart } from '@/agents/schemas/radarChart.schema';
-import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
-import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
+import { RadarChart } from '@/ai/schemas/radarChart.schema';
+import { SkillAssessment } from '@/ai/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/ai/schemas/suitabilityAssessment.schema';
 
 export const learningPrioritiesPrompt = (
   resumeText: string,

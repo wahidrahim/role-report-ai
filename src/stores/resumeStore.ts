@@ -2,8 +2,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
-import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
+import { SkillAssessment } from '@/ai/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/ai/schemas/suitabilityAssessment.schema';
 
 type ResumeState = {
   resumeText: string;
