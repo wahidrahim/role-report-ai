@@ -222,15 +222,20 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
             {researchReport.interviewPrepGuide && (
               <div>
                 <h3 className="font-semibold mb-3">Interview Prep Guide</h3>
-                {researchReport.interviewPrepGuide.interviewFormat?.format && (
+                {researchReport.interviewPrepGuide.interviewFormat?.style && (
                   <div className="mb-4">
                     <h4 className="text-sm font-semibold mb-2">Interview Format</h4>
-                    <p className="text-sm font-medium mb-1">
-                      {researchReport.interviewPrepGuide.interviewFormat.format}
-                    </p>
-                    {researchReport.interviewPrepGuide.interviewFormat.rationale && (
-                      <p className="text-sm text-muted-foreground">
-                        {researchReport.interviewPrepGuide.interviewFormat.rationale}
+                    <Badge variant="outline" className="mb-2">
+                      {researchReport.interviewPrepGuide.interviewFormat.style}
+                    </Badge>
+                    {researchReport.interviewPrepGuide.interviewFormat.description && (
+                      <p className="text-sm mb-2">
+                        {researchReport.interviewPrepGuide.interviewFormat.description}
+                      </p>
+                    )}
+                    {researchReport.interviewPrepGuide.interviewFormat.evidence && (
+                      <p className="text-sm text-muted-foreground italic">
+                        &ldquo;{researchReport.interviewPrepGuide.interviewFormat.evidence}&rdquo;
                       </p>
                     )}
                   </div>
@@ -279,16 +284,17 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
                     <div>
                       <h4 className="text-sm font-semibold mb-3">Strategic Questions</h4>
                       <ul className="space-y-3">
-                        {researchReport.interviewPrepGuide.strategicQuestions.map(
-                          (question, index) => (
-                            <li key={index} className="text-sm">
-                              <span className="font-medium text-muted-foreground">
-                                {index + 1}.
-                              </span>{' '}
-                              {question || 'Loading...'}
-                            </li>
-                          ),
-                        )}
+                        {researchReport.interviewPrepGuide.strategicQuestions.map((item, index) => (
+                          <li key={index} className="text-sm">
+                            <span className="font-medium text-muted-foreground">{index + 1}.</span>{' '}
+                            {item?.question || 'Loading...'}
+                            {item?.context && (
+                              <p className="text-xs text-muted-foreground mt-1 ml-4">
+                                {item.context}
+                              </p>
+                            )}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
