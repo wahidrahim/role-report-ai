@@ -3,8 +3,8 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 
 import { model } from '@/ai/config';
-import { emitNodeEnd, emitNodeStart } from '@/ai/workflows/deep-research/events';
-import type { DeepResearchState } from '@/ai/workflows/deep-research/state';
+import { emitNodeEnd, emitNodeStart } from '@/ai/deep-research/events';
+import type { DeepResearchState } from '@/ai/deep-research/state';
 
 export const extractCompanyNameAndJobTitleSchema = z.object({
   companyName: z.string(),
@@ -14,14 +14,14 @@ export const extractCompanyNameAndJobTitleSchema = z.object({
 
 export type ExtractCompanyNameAndJobTitle = z.infer<typeof extractCompanyNameAndJobTitleSchema>;
 
-export const inferCompanyNameAndJobTitle = async (
+export const extractCompanyNameAndJobTitle = async (
   state: DeepResearchState,
   config: LangGraphRunnableConfig,
 ) => {
-  console.log('[NODE] inferring company name and job title');
+  console.log('[NODE] extracting company name and job title');
   emitNodeStart(config, {
-    node: 'INFER_COMPANY_NAME_AND_JOB_TITLE',
-    message: 'Inferring company name and job title...',
+    node: 'EXTRACT_COMPANY_NAME_AND_JOB_TITLE',
+    message: 'Extracting company name and job title...',
   });
 
   const { jobDescription } = state;
@@ -50,7 +50,7 @@ export const inferCompanyNameAndJobTitle = async (
 
     JOB TITLE RULES (be maximally specific and accurate):
     - Use the exact title from the posting when present.
-    - If the posting does not state a title but the role is clearly implied, infer a title using only evidence in the text.
+    - If the posting does not state a title but the role is clearly implied, extract a title using only evidence in the text.
     - The title should include seniority/level and specialization when supported (e.g., "Senior Machine Learning Engineer, Recommender Systems", not "Engineer" or "ML Role").
     - Do NOT include company name, location, remote/hybrid, contract type, or compensation in the title.
     - Prefer the primary role if multiple levels/titles are listed (choose the best match for the described responsibilities).
@@ -74,7 +74,7 @@ export const inferCompanyNameAndJobTitle = async (
   }
 
   emitNodeEnd(config, {
-    node: 'INFER_COMPANY_NAME_AND_JOB_TITLE',
+    node: 'EXTRACT_COMPANY_NAME_AND_JOB_TITLE',
     message: `Company: ${object.companyName}, Job Title: ${object.jobTitle}`,
     data: {
       companyName: object.companyName,
@@ -87,3 +87,4 @@ export const inferCompanyNameAndJobTitle = async (
     jobTitle: object.jobTitle,
   };
 };
+

@@ -1,8 +1,8 @@
 import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 
-import { emitNodeStart, emitToolCall } from '@/ai/workflows/deep-research/events';
-import type { DeepResearchState } from '@/ai/workflows/deep-research/state';
-import { tavilyClient } from '@/ai/workflows/deep-research/tools/tavily';
+import { emitNodeStart, emitToolCall } from '@/ai/deep-research/events';
+import type { DeepResearchState } from '@/ai/deep-research/state';
+import { tavilyClient } from '@/ai/deep-research/tools';
 
 export const searchForInformation = async (
   state: DeepResearchState,

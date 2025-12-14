@@ -7,9 +7,9 @@ import {
   emitNodeStart,
   emitResearchReportCreated,
   emitResearchReportPartial,
-} from '@/ai/workflows/deep-research/events';
-import { interviewPrepGuideSchema } from '@/ai/workflows/deep-research/nodes/createInterviewPrepGuide';
-import type { DeepResearchState } from '@/ai/workflows/deep-research/state';
+} from '@/ai/deep-research/events';
+import { interviewPrepGuideSchema } from '@/ai/deep-research/nodes/createInterviewPrepGuide';
+import type { DeepResearchState } from '@/ai/deep-research/state';
 
 export const researchReportSchema = z.object({
   companyHealth: z.object({

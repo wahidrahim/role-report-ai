@@ -15,7 +15,7 @@ export const shouldProceedWithDeepResearch = async (
   if (!isValidCompanyName || !isValidJobTitle) {
     emitNodeEnd(config, {
       node: 'SHOULD_PROCEED_WITH_DEEP_RESEARCH',
-      message: 'Unable to infer company name or job title',
+      message: 'Unable to extract company name or job title',
     });
   }
 

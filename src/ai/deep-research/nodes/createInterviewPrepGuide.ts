@@ -3,8 +3,8 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 
 import { model } from '@/ai/config';
-import { emitNodeEnd, emitNodeStart } from '@/ai/workflows/deep-research/events';
-import type { DeepResearchState } from '@/ai/workflows/deep-research/state';
+import { emitNodeEnd, emitNodeStart } from '@/ai/deep-research/events';
+import type { DeepResearchState } from '@/ai/deep-research/state';
 
 export const interviewPrepGuideSchema = z.object({
   interviewFormat: z.object({
