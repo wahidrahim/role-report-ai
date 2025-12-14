@@ -37,6 +37,7 @@ export default function TestPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setStreamEvents([]);
 
     const response = await fetch('/api/deep-research', {
       method: 'POST',
