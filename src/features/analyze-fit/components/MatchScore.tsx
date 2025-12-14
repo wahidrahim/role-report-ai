@@ -1,5 +1,3 @@
-import { Loader2 } from 'lucide-react';
-
 type MatchScoreProps = {
   matchScore?: number;
   verdict?: string;
@@ -10,9 +8,43 @@ export default function MatchScore({ matchScore, verdict, isLoading }: MatchScor
   // Only show loading state if we're loading AND we don't have a score yet
   if (isLoading && matchScore === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-4 py-8">
-        <Loader2 className="h-16 w-16 animate-spin text-primary/50" />
-        <p className="text-muted-foreground animate-pulse">Analyzing fit...</p>
+      <div className="flex flex-col items-center justify-center space-y-6 py-12 animate-in fade-in duration-500">
+        <style jsx>{`
+          @keyframes scan {
+            0% {
+              background-position: 200% 0;
+            }
+            100% {
+              background-position: -200% 0;
+            }
+          }
+          .animate-scan {
+            background: linear-gradient(
+              90deg,
+              transparent 0%,
+              rgba(255, 255, 255, 0.5) 50%,
+              transparent 100%
+            );
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: scan 3s linear infinite;
+          }
+        `}</style>
+
+        <div className="relative">
+          {/* Base subtext */}
+          <p className="text-xs font-mono text-primary/40 text-center uppercase tracking-[0.2em] relative z-0">
+            Processing Data Streams...
+          </p>
+          {/* Overlay bright shimmer subtext */}
+          <div className="absolute inset-0 overflow-hidden z-10 w-full text-center">
+            <p className="text-xs font-mono text-center uppercase tracking-[0.2em] animate-scan">
+              Processing Data Streams...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
