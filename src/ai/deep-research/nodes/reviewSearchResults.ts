@@ -18,7 +18,11 @@ export const reviewSearchResults = async (
 
   if (searchResultsReviewCount >= 3) {
     console.log(`Max retries reached (${searchResultsReviewCount}). Forcing progress.`);
-    return { quality: 'pass', feedback: 'Max retries exceeded.' };
+    return {
+      searchResultsQuality: 'PASS',
+      searchResultsReviewFeedback: 'Max retries exceeded.',
+      searchResultsReviewCount: searchResultsReviewCount + 1,
+    };
   }
 
   emitNodeStart(config, {

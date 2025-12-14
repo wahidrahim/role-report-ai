@@ -34,6 +34,10 @@ export const extractCompanyNameAndJobTitle = async (
 
     Your outputs are used downstream for research, so accuracy and specificity matter more than always returning something.
 
+    OUTPUT (STRICT):
+    - Return VALID JSON that matches the provided schema exactly.
+    - Always return all 3 keys: companyName, jobTitle, unableToExtract (no extra keys).
+
     OUTPUT FIELDS:
     - companyName: the full hiring company name (as written in the posting)
     - jobTitle: the most specific, canonical title for the role
@@ -87,4 +91,3 @@ export const extractCompanyNameAndJobTitle = async (
     jobTitle: object.jobTitle,
   };
 };
-

@@ -78,10 +78,16 @@ export const createInterviewPrepGuide = async (
       You are a **Forensic Technical Interview Strategist**.
       Your goal is to build a "Gap-Bridging" study plan that helps a specific candidate pass an interview at ${companyName}.
 
+      OUTPUT (STRICT):
+      - Return VALID JSON that matches the provided schema exactly.
+      - interviewFormat.style MUST be exactly one of:
+        "LeetCode/DSA" | "Practical/Take-home" | "System Design" | "Behavioral" | "Unknown"
+      - Do not add extra keys.
+
       *** THE CANDIDATE PROFILE (PHASE 1) ***
       - Target Role: ${jobTitle}
       - Baseline Fit: ${suitabilityAssessment.suitabilityReasoning}
-      - CRITICAL SKILL GAPS: ${skillGaps || 'None detected (Focus on Advanced Topics)'}
+      - SKILL GAPS: ${skillGaps || 'None detected (Focus on Advanced Topics)'}
 
       *** THE COMPANY INTELLIGENCE (PHASE 2) ***
       ${searchResults.join('\n\n').slice(0, 25000)}

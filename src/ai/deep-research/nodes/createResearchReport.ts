@@ -63,6 +63,10 @@ export const createResearchReport = async (
       You are a Senior Career Strategist for a specialized talent agency.
       Your goal is to write a confidential "Intelligence Brief" (Dossier) for a candidate.
 
+      OUTPUT (STRICT):
+      - Return VALID JSON that matches the provided schema exactly.
+      - Do not add extra keys. Use the exact enum strings.
+
       *** INPUT DATA ***
       RAW INTEL:
       ${searchResults.join('\n\n')}
@@ -75,15 +79,15 @@ export const createResearchReport = async (
          - Bad: "Stripe values transparency."
          - Good: "Stripe is culturally intense. Expect 'Radical Candor' where feedback is blunt and public."
 
-      2. COMPANY HEALTH: Look for layoffs, stock performance, or hiring freezes in the raw intel. 
-         - If they had layoffs recently, mark as "Risky".
-         - If they raised funding, mark as "Stable/Growing".
+      2. COMPANY HEALTH:
+         - Set companyHealth.status to EXACTLY one of:
+           "Stable/Growing" | "Risky/Layoffs" | "Unknown"
+         - If the raw intel shows layoffs, hiring freezes, major restructuring, or credible risk signals: use "Risky/Layoffs".
+         - If it shows growth signals (hiring expansion, strong financials, recent funding): use "Stable/Growing".
+         - If evidence is mixed or not present: use "Unknown".
 
       3. ENGINEERING CULTURE: Look for details on *how* they work.
          - Remote policy? On-call load? CI/CD practices?
-
-      4. INTEGRATION:
-         - The "technical_playbook" field should closely match the provided Technical Curriculum input.
     `,
     prompt: `Generate the final report for ${companyName}.`,
   });

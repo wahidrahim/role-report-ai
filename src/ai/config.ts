@@ -1,4 +1,6 @@
-import { ollama } from 'ollama-ai-provider-v2';
+import { LanguageModel } from 'ai';
 
-export const model = ollama('qwen3:30b');
-// export const model: Model = 'openai/gpt-4o';
+// import { ollama } from 'ollama-ai-provider-v2';
+
+// export const model = ollama('qwen3:30b');
+export const model: LanguageModel = 'openai/gpt-4o';
