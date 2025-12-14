@@ -30,13 +30,7 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log({
-    messages: body.messages,
-  });
-
-  // Get the abort signal from the request to stop generation when client disconnects
   const abortSignal = request.signal;
-
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start: async (controller) => {

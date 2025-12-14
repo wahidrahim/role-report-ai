@@ -4,8 +4,13 @@ import { generateObject } from 'ai';
 import z from 'zod';
 
 import { model } from '@/agents/config';
+import { createInterviewPrepGuidePrompt } from '@/agents/prompts/createInterviewPrepGuide.prompt';
 import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
 import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
+import {
+  InterviewPrepGuide,
+  interviewPrepGuideSchema,
+} from '@/agents/schemas/createInterviewPrepGuide.schema';
 import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
 import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
 import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
@@ -32,6 +37,7 @@ const stateAnnotation = Annotation.Root({
     default: () => 0,
   }),
   searchResultsReviewFeedback: Annotation<string>,
+  interviewPrepGuide: Annotation<InterviewPrepGuide>,
 });
 
 // NODE 1: Extract company name and job title
@@ -182,19 +188,28 @@ const searchForInformation = async (
   };
 };
 
-const reviewSearchResults = async (state: typeof stateAnnotation.State) => {
+const reviewSearchResults = async (
+  state: typeof stateAnnotation.State,
+  config: LangGraphRunnableConfig,
+) => {
   const { searchResults, searchResultsReviewCount } = state;
 
   if (!searchResults) {
     throw new Error('Missing search results at REVIEW_SEARCH_RESULTS node');
   }
 
-  console.log({ searchResultsReviewCount });
-
   if (searchResultsReviewCount >= 3) {
     console.log(`Max retries reached (${searchResultsReviewCount}). Forcing progress.`);
     return { quality: 'pass', feedback: 'Max retries exceeded.' };
   }
+
+  config.writer?.({
+    event: 'NODE_START',
+    data: {
+      node: 'REVIEW_SEARCH_RESULTS',
+      message: 'Reviewing search results...',
+    },
+  });
 
   const { object } = await generateObject({
     model,
@@ -231,11 +246,56 @@ const shouldReGenerateSearchQueries = async (state: typeof stateAnnotation.State
   return state.searchResultsQuality === 'FAIL' ? 'YES' : 'NO';
 };
 
+const createInterviewPrepGuide = async (
+  state: typeof stateAnnotation.State,
+  config: LangGraphRunnableConfig,
+) => {
+  const { searchResults, skillAssessment, suitabilityAssessment, companyName, jobTitle } = state;
+
+  if (!searchResults || !skillAssessment || !suitabilityAssessment || !companyName || !jobTitle) {
+    throw new Error('Missing required state at CREATE_INTERVIEW_PREP_GUIDE node');
+  }
+
+  config.writer?.({
+    event: 'NODE_START',
+    data: {
+      node: 'CREATE_INTERVIEW_PREP_GUIDE',
+      message: 'Creating interview prep guide...',
+    },
+  });
+
+  const { object } = await generateObject({
+    model,
+    schema: interviewPrepGuideSchema,
+    ...createInterviewPrepGuidePrompt({
+      companyName,
+      jobTitle,
+      skillAssessment,
+      suitabilityAssessment,
+      searchResults,
+    }),
+  });
+
+  config.writer?.({
+    event: 'INTERVIEW_PREP_GUIDE_CREATED',
+    data: {
+      node: 'CREATE_INTERVIEW_PREP_GUIDE',
+      message: 'Interview prep guide created successfully',
+      interviewPrepGuide: object,
+    },
+  });
+
+  return {
+    interviewPrepGuide: object,
+  };
+};
+
 export const deepResearchWorkflow = new StateGraph(stateAnnotation)
   .addNode('INFER_COMPANY_NAME_AND_JOB_TITLE', inferCompanyNameAndJobTitle)
   .addNode('PLAN_DEEP_RESEARCH', planDeepResearch)
   .addNode('SEARCH_FOR_INFORMATION', searchForInformation)
   .addNode('REVIEW_SEARCH_RESULTS', reviewSearchResults)
+  .addNode('CREATE_INTERVIEW_PREP_GUIDE', createInterviewPrepGuide)
   .addEdge(START, 'INFER_COMPANY_NAME_AND_JOB_TITLE')
   .addConditionalEdges('INFER_COMPANY_NAME_AND_JOB_TITLE', shouldProceedWithDeepResearch, {
     YES: 'PLAN_DEEP_RESEARCH',
@@ -246,6 +306,7 @@ export const deepResearchWorkflow = new StateGraph(stateAnnotation)
 
   .addConditionalEdges('REVIEW_SEARCH_RESULTS', shouldReGenerateSearchQueries, {
     YES: 'PLAN_DEEP_RESEARCH',
-    NO: END,
+    NO: 'CREATE_INTERVIEW_PREP_GUIDE',
   })
+  .addEdge('CREATE_INTERVIEW_PREP_GUIDE', END)
   .compile();
