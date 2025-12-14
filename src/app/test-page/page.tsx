@@ -1,48 +1,34 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, readUIMessageStream } from 'ai';
 import { UIMessage } from 'ai';
 import { createParser } from 'eventsource-parser';
 import merge from 'lodash/merge';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 
+import { DeepResearchUIMessage } from '@/app/api/deep-research/route';
 import { Button } from '@/core/components/ui/button';
 import { Label } from '@/core/components/ui/label';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
-// Define your custom message type with data part schemas
-export type MyUIMessage = UIMessage<
-  never, // metadata type
-  {
-    weather: {
-      city: string;
-      weather?: string;
-      status: 'loading' | 'success';
-    };
-    notification: {
-      message: string;
-      level: 'info' | 'warning' | 'error';
-    };
-  } // data parts type
->;
+type StreamEvent = {
+  id: string;
+  event: 'NODE_START' | 'NODE_END';
+  data?: Partial<{
+    node?: string;
+    message?: string;
+    data?: Record<string, unknown>;
+  }>;
+};
 
 export default function TestPage() {
   const [textareaValue, setTextareaValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<unknown>(null);
+  const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
 
   const { resumeText } = useResumeStore();
-
-  const { messages, sendMessage } = useChat<MyUIMessage>({
-    transport: new DefaultChatTransport({
-      api: '/api/deep-research',
-    }),
-    onData: (dataPart) => {
-      console.log({ dataPart });
-    },
-  });
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setTextareaValue(e.target.value);
@@ -50,57 +36,56 @@ export default function TestPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setIsLoading(true);
-    setData(null);
 
     const response = await fetch('/api/deep-research', {
       method: 'POST',
-      body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
+      body: JSON.stringify({
+        resumeText,
+        jobDescriptionText: textareaValue,
+      }),
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error('Request failed');
+    }
+    if (!response.body) {
+      throw new Error('No response body');
+    }
 
-    setData(data);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-    // sendMessage();
+    const parser = createParser({
+      onEvent: (event) => {
+        console.log({ event });
+        const parsedData = JSON.parse(event.data);
+        const newStreamEvent = {
+          id: event.id as string,
+          event: event.event as 'NODE_START' | 'NODE_END',
+          data: parsedData,
+        };
 
-    // const response = await fetch('/api/deep-research', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ resumeText, jobDescriptionText: textareaValue }),
-    // });
+        setStreamEvents((prev) => [...prev, newStreamEvent]);
+      },
+    });
 
-    // // const data = await response.json();
+    while (true) {
+      const { done, value } = await reader.read();
 
-    // // setData(data);
+      if (done) {
+        break;
+      }
 
-    // const decoder = new TextDecoder();
-    // const reader = response.body?.getReader();
-
-    // if (!reader) {
-    //   return;
-    // }
-
-    // const parser = createParser({
-    //   onEvent: (event) => {
-    //     if (event.data) {
-    //       setData(merge(data, event.data));
-    //     }
-    //   },
-    // });
-
-    // while (true) {
-    //   const { done, value } = await reader.read();
-
-    //   if (done) {
-    //     break;
-    //   }
-
-    //   parser.feed(decoder.decode(value));
-    // }
+      parser.feed(decoder.decode(value, { stream: true }));
+    }
 
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    console.log({ streamEvents });
+  }, [streamEvents]);
 
   return (
     <div className="container mx-auto max-w-4xl p-6">
@@ -121,13 +106,11 @@ export default function TestPage() {
           {isLoading ? 'Loading...' : 'Deep Research'}
         </Button>
       </form>
-      {data && (
-        <div className="mt-4">
-          <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        </div>
-      )}
+      <div>
+        {streamEvents.map((event) => (
+          <div key={event.id}>{event.data?.message}</div>
+        ))}
+      </div>
     </div>
   );
 }

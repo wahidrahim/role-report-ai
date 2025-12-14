@@ -1,12 +1,45 @@
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
-import { generateObject } from 'ai';
+import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
+import {
+  UIMessage,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  generateObject,
+} from 'ai';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { model } from '@/agents/config';
 
+export type DeepResearchUIMessage = UIMessage<
+  never,
+  {
+    nodeStart: {
+      nodeName: string;
+      message: string;
+      data?: Record<string, unknown>;
+    };
+    nodeEnd: {
+      nodeName: string;
+      message: string;
+      data?: Record<string, unknown>;
+    };
+  }
+>;
+
 export async function POST(request: Request) {
-  const { jobDescriptionText } = await request.json();
+  const body = await request.json();
+  const { resumeText, jobDescriptionText } = body;
+
+  if (!resumeText || !jobDescriptionText) {
+    return NextResponse.json(
+      { error: 'Both resume text and job description are required' },
+      { status: 400 },
+    );
+  }
+
+  console.log({
+    messages: body.messages,
+  });
 
   const stateAnnotation = Annotation.Root({
     jobDescription: Annotation<string>,
@@ -14,18 +47,40 @@ export async function POST(request: Request) {
     jobTitle: Annotation<string | null>,
   });
 
-  const extractCompanyNameAndJobTitle = async (state: typeof stateAnnotation.State) => {
-    console.log('[NODE] extracting company name and job title');
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start: async (controller) => {
+      const emit = (event: string, data: unknown) => {
+        controller.enqueue(
+          encoder.encode(
+            `id: ${crypto.randomUUID()}\nevent: ${event}\ndata: ${JSON.stringify(data)}\n\n`,
+          ),
+        );
+      };
 
-    const { jobDescription } = state;
-    const { object } = await generateObject({
-      model,
-      schema: z.object({
-        companyName: z.string(),
-        jobTitle: z.string(),
-        unableToExtract: z.boolean(),
-      }),
-      system: `
+      // NODE 1: Extract company name and job title
+      const extractCompanyNameAndJobTitle = async (
+        state: typeof stateAnnotation.State,
+        config: LangGraphRunnableConfig,
+      ) => {
+        console.log('[NODE] extracting company name and job title');
+        config.writer?.({
+          event: 'NODE_START',
+          data: {
+            node: 'EXTRACT_COMPANY_NAME_AND_JOB_TITLE',
+            message: 'Extracting company name and job title...',
+          },
+        });
+
+        const { jobDescription } = state;
+        const { object } = await generateObject({
+          model,
+          schema: z.object({
+            companyName: z.string(),
+            jobTitle: z.string(),
+            unableToExtract: z.boolean(),
+          }),
+          system: `
         You extract the hiring company name and the job title from a job description.
 
         Your outputs are used downstream for research, so accuracy and specificity matter more than always returning something.
@@ -54,53 +109,101 @@ export async function POST(request: Request) {
         FAILURE CONDITIONS:
         - If you cannot confidently determine BOTH a companyName and jobTitle, set unableToExtract to true and return empty strings for companyName and jobTitle.
       `,
-      prompt: `
+          prompt: `
         Extract the hiring company name and job title from the job description below.
 
         JOB DESCRIPTION:
         ${jobDescription}
       `,
-    });
+        });
 
-    if (object.unableToExtract) {
-      console.log('[NODE] unable to extract company name and job title');
-      return {
-        companyName: null,
-        jobTitle: null,
+        if (object.unableToExtract) {
+          console.log('[NODE] unable to extract company name and job title');
+          config.writer?.({
+            event: 'NODE_END',
+            nodeName: 'EXTRACT_COMPANY_NAME_AND_JOB_TITLE',
+            message: 'Unable to extract company name and job title',
+          });
+          return {
+            companyName: null,
+            jobTitle: null,
+          };
+        }
+
+        console.log('[NODE] extracted company name and job title', {
+          companyName: object.companyName,
+          jobTitle: object.jobTitle,
+        });
+        config.writer?.({
+          event: 'NODE_END',
+          data: {
+            node: 'EXTRACT_COMPANY_NAME_AND_JOB_TITLE',
+            message: 'Extracted company name and job title',
+            companyName: object.companyName,
+            jobTitle: object.jobTitle,
+          },
+        });
+
+        return {
+          companyName: object.companyName,
+          jobTitle: object.jobTitle,
+        };
       };
-    }
 
-    console.log('[NODE] extracted company name and job title', {
-      companyName: object.companyName,
-      jobTitle: object.jobTitle,
-    });
-    return {
-      companyName: object.companyName,
-      jobTitle: object.jobTitle,
-    };
-  };
+      // NODE 2: Determine if we should proceed with deep research
+      const shouldProceedWithDeepResearch = async (
+        state: typeof stateAnnotation.State,
+        config: LangGraphRunnableConfig,
+      ) => {
+        console.log('[NODE] determining if we should proceed with deep research');
+        config.writer?.({
+          event: 'NODE_START',
+          data: {
+            node: 'SHOULD_PROCEED_WITH_DEEP_RESEARCH',
+            message: 'Determining if we should proceed with deep research...',
+          },
+        });
 
-  const shouldProceedWithDeepResearch = async (state: typeof stateAnnotation.State) => {
-    console.log('[NODE] determining if we should proceed with deep research');
+        const { companyName, jobTitle } = state;
+        const isValidCompanyName = typeof companyName === 'string' && companyName.length > 0;
+        const isValidJobTitle = typeof jobTitle === 'string' && jobTitle.length > 0;
+        const shouldProceed = isValidCompanyName && isValidJobTitle;
 
-    const { companyName, jobTitle } = state;
-    const isValidCompanyName = typeof companyName === 'string' && companyName.length > 0;
-    const isValidJobTitle = typeof jobTitle === 'string' && jobTitle.length > 0;
-    const shouldProceed = isValidCompanyName && isValidJobTitle;
+        console.log('[NODE] should proceed with deep research', { shouldProceed });
+        config.writer?.({
+          event: 'NODE_END',
+          data: {
+            node: 'SHOULD_PROCEED_WITH_DEEP_RESEARCH',
+            message: shouldProceed
+              ? 'Proceeding with deep research'
+              : 'Not proceeding with deep research',
+          },
+        });
 
-    console.log('[NODE] should proceed with deep research', { shouldProceed });
-    return shouldProceed ? 'YES' : 'NO';
-  };
+        return shouldProceed ? 'YES' : 'NO';
+      };
 
-  const planDeepResearch = async (state: typeof stateAnnotation.State) => {
-    console.log('[NODE] planning deep research');
-    const { companyName, jobTitle } = state;
-    const { object } = await generateObject({
-      model,
-      schema: z.object({
-        plan: z.array(z.string()),
-      }),
-      system: `
+      // NODE 3: Plan deep research
+      const planDeepResearch = async (
+        state: typeof stateAnnotation.State,
+        config: LangGraphRunnableConfig,
+      ) => {
+        console.log('[NODE] planning deep research');
+        config.writer?.({
+          event: 'NODE_START',
+          data: {
+            node: 'PLAN_DEEP_RESEARCH',
+            message: 'Planning deep research...',
+          },
+        });
+
+        const { companyName, jobTitle } = state;
+        const { object } = await generateObject({
+          model,
+          schema: z.object({
+            plan: z.array(z.string()),
+          }),
+          system: `
       You are a deep research planner.
 
       You will be given a company name and a job title.
@@ -110,233 +213,58 @@ export async function POST(request: Request) {
       INSTRUCTIONS:
       - you need to plan a deep research strategy to uncover deep intel about the company and the job title.
     `,
-      prompt: `
+          prompt: `
       COMPANY NAME:
       ${companyName}
 
       JOB TITLE:
       ${jobTitle}
     `,
-    });
+        });
 
-    console.log('[NODE] planned deep research', { plan: object.plan });
-    return {
-      plan: object.plan,
-    };
-  };
+        console.log('[NODE] planned deep research', { plan: object.plan });
+        config.writer?.({
+          event: 'NODE_END',
+          data: {
+            node: 'PLAN_DEEP_RESEARCH',
+            message: 'Planned deep research',
+            plan: object.plan,
+          },
+        });
 
-  const workflow = new StateGraph(stateAnnotation)
-    .addNode('extractCompanyNameAndJobTitle', extractCompanyNameAndJobTitle)
-    .addNode('planDeepResearch', planDeepResearch)
-    .addEdge(START, 'extractCompanyNameAndJobTitle')
-    .addConditionalEdges('extractCompanyNameAndJobTitle', shouldProceedWithDeepResearch, {
-      YES: 'planDeepResearch',
-      NO: END,
-    })
-    .addEdge('planDeepResearch', END)
-    .compile();
+        return {
+          plan: object.plan,
+        };
+      };
 
-  const state = await workflow.invoke({ jobDescription: jobDescriptionText });
+      const workflow = new StateGraph(stateAnnotation)
+        .addNode('extractCompanyNameAndJobTitle', extractCompanyNameAndJobTitle)
+        .addNode('planDeepResearch', planDeepResearch)
+        .addEdge(START, 'extractCompanyNameAndJobTitle')
+        .addConditionalEdges('extractCompanyNameAndJobTitle', shouldProceedWithDeepResearch, {
+          YES: 'planDeepResearch',
+          NO: END,
+        })
+        .addEdge('planDeepResearch', END)
+        .compile();
 
-  return NextResponse.json(state);
+      const state = await workflow.stream(
+        { jobDescription: jobDescriptionText },
+        { streamMode: 'custom' },
+      );
 
-  // const companyNameAndJobTitle = await generateObject({
-  //   model,
-  //   schema: z.object({
-  //     companyName: z.string(),
-  //     jobTitle: z.string(),
-  //   }),
-  //   system: `
-  //     You are a company name and job title generator.
+      for await (const chunk of state) {
+        emit(chunk.event, chunk.data);
+      }
+      controller.close();
+    },
+  });
 
-  //     You will be given a job description.
-
-  //     You need to generate a company name and a job title that are relevant to the job description.
-
-  //     INSTRUCTIONS:
-  //     - company name should be the full name of the company
-  //     - job title should be the full title of the role, avoid generalizations
-  //   `,
-  //   prompt: `
-  //     Figure out the company name and job title from the following job description:
-
-  //     JOB DESCRIPTION:
-  //     ${jobDescriptionText}
-  //   `,
-  // });
-
-  // const searchQueries = await generateObject({
-  //   model,
-  //   schema: z.object({
-  //     queries: z
-  //       .array(
-  //         z.object({
-  //           query: z.string(),
-  //           category: z.enum(['news', 'culture', 'interview', 'tech']),
-  //           reasoning: z.string(),
-  //         }),
-  //       )
-  //       .min(12)
-  //       .max(12),
-  //   }),
-  //   system: `
-  //     You are the Lead Investigator. Your goal is to generate 3 targeted search queries to uncover deep intel about {companyName} for the role of {jobTitle}.
-
-  //     GUIDELINES:
-  //     - you must produce queries for each category: news, culture, interview, tech
-  //     - come up with up to 3 queries for each category
-  //     - keep your reasoning concise and to the point
-  //   `,
-  //   prompt: `
-  //     COMPANY NAME:
-  //     ${companyNameAndJobTitle.object.companyName}
-
-  //     JOB TITLE:
-  //     ${companyNameAndJobTitle.object.jobTitle}
-  //   `,
-  // });
-
-  // const searchResults = await Promise.all(
-  //   searchQueries.object.queries.map(async (query) => {
-  //     const results = await tavilyClient.search(query.query, {
-  //       maxResults: 5,
-  //       searchType: 'advanced',
-  //     });
-
-  //     return {
-  //       query: query.query,
-  //       results: results.results.map((result) => result.content),
-  //     };
-  //   }),
-  // );
-
-  // ------------------------------------------------------------
-
-  // const StateAnnotation = Annotation.Root({
-  //   topic: Annotation<string>,
-  //   joke: Annotation<string>,
-  //   improvedJoke: Annotation<string>,
-  //   finalJoke: Annotation<string>,
-  // });
-
-  // const stream = createUIMessageStream({
-  //   execute: async ({ writer }) => {
-  //     const makeJokeNode = async (
-  //       state: typeof StateAnnotation.State,
-  //       config: LangGraphRunnableConfig,
-  //     ) => {
-  //       const jokeStream = streamObject({
-  //         model,
-  //         schema: z.object({
-  //           joke: z.string(),
-  //         }),
-  //         prompt: `Write a short joke about ${state.topic}`,
-  //       });
-
-  //       for await (const chunk of jokeStream.partialObjectStream) {
-  //         config.writer?.({ joke: chunk.joke });
-  //       }
-
-  //       const { joke } = await jokeStream.object;
-
-  //       config.writer?.({ joke });
-
-  //       return { joke };
-  //     };
-
-  //     const checkPunchline = (state: typeof StateAnnotation.State) => {
-  //       if (state.joke?.includes('?') || state.joke?.includes('!')) {
-  //         return 'Pass';
-  //       }
-  //       return 'Fail';
-  //     };
-
-  //     const improveJokeNode = async (
-  //       state: typeof StateAnnotation.State,
-  //       config: LangGraphRunnableConfig,
-  //     ) => {
-  //       const improvedJokeStream = streamObject({
-  //         model,
-  //         schema: z.object({
-  //           improvedJoke: z.string(),
-  //         }),
-  //         prompt: `Improve the joke: ${state.joke}`,
-  //       });
-
-  //       for await (const chunk of improvedJokeStream.partialObjectStream) {
-  //         config.writer?.({
-  //           improvedJoke: chunk.improvedJoke,
-  //         });
-  //       }
-
-  //       const { improvedJoke } = await improvedJokeStream.object;
-
-  //       config.writer?.({
-  //         improvedJoke,
-  //       });
-
-  //       return { improvedJoke };
-  //     };
-
-  //     const polishJokeNode = async (
-  //       state: typeof StateAnnotation.State,
-  //       config: LangGraphRunnableConfig,
-  //     ) => {
-  //       const finalJokeStream = streamObject({
-  //         model,
-  //         schema: z.object({
-  //           finalJoke: z.string(),
-  //         }),
-  //         prompt: `Add a surprise twist to this joke: ${state.improvedJoke}`,
-  //       });
-
-  //       for await (const chunk of finalJokeStream.partialObjectStream) {
-  //         config.writer?.({
-  //           finalJoke: chunk.finalJoke,
-  //         });
-  //       }
-
-  //       const { finalJoke } = await finalJokeStream.object;
-
-  //       config.writer?.({ finalJoke });
-
-  //       return { finalJoke };
-  //     };
-
-  //     const workflow = new StateGraph(StateAnnotation)
-  //       .addNode('makeJoke', makeJokeNode)
-  //       .addNode('improveJoke', improveJokeNode)
-  //       .addNode('polishJoke', polishJokeNode)
-  //       .addEdge(START, 'makeJoke')
-  //       .addConditionalEdges('makeJoke', checkPunchline, {
-  //         Pass: 'improveJoke',
-  //         Fail: END,
-  //       })
-  //       .addEdge('improveJoke', 'polishJoke')
-  //       .addEdge('polishJoke', END)
-  //       .compile();
-
-  //     const state = await workflow.stream(
-  //       {
-  //         topic: 'AI',
-  //         joke: '',
-  //         improvedJoke: '',
-  //         finalJoke: '',
-  //       },
-  //       {
-  //         streamMode: 'custom',
-  //       },
-  //     );
-
-  //     for await (const chunk of state) {
-  //       console.log({ chunk });
-  //       writer.write({
-  //         type: 'data-stream',
-  //         data: chunk,
-  //       });
-  //     }
-  //   },
-  // });
-
-  // return createUIMessageStreamResponse({ stream });
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
 }
