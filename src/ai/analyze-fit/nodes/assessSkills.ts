@@ -5,12 +5,47 @@ import { z } from 'zod';
 import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import { model } from '@/ai/config';
 
+const skillImportanceSchema = z.preprocess(
+  (value) => {
+    if (typeof value !== 'string') return value;
+
+    const normalized = value.trim().toLowerCase().replace(/_/g, '-');
+
+    // Coerce common variants the model may emit into the supported enum values.
+    // We intentionally default unknown strings to "nice-to-have" to avoid hard-failing the workflow.
+    if (
+      normalized === 'critical' ||
+      normalized === 'required' ||
+      normalized === 'must-have' ||
+      normalized === 'must have' ||
+      normalized === 'mandatory'
+    ) {
+      return 'critical';
+    }
+
+    if (
+      normalized === 'nice-to-have' ||
+      normalized === 'nice to have' ||
+      normalized === 'preferred' ||
+      normalized === 'strongly-preferred' ||
+      normalized === 'strongly preferred' ||
+      normalized === 'bonus' ||
+      normalized === 'plus'
+    ) {
+      return 'nice-to-have';
+    }
+
+    return 'nice-to-have';
+  },
+  z.enum(['critical', 'nice-to-have']),
+);
+
 export const skillAssessmentSchema = z.object({
   skills: z.array(
     z.object({
       status: z.enum(['verified', 'transferable', 'missing']),
       skillName: z.string(),
-      importance: z.enum(['critical', 'nice-to-have']),
+      importance: skillImportanceSchema,
       reasoning: z.string(),
     }),
   ),
@@ -38,7 +73,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       SKILL OBJECT FIELDS:
       - status: "verified" | "transferable" | "missing"
       - skillName: Normalized technology name (e.g., "React" not "React.js", "PostgreSQL" not "Postgres")
-      - importance: "critical" | "nice-to-have"
+      - importance: "critical" | "nice-to-have" (MUST be exactly one of these two strings)
       - reasoning: Brief evidence-based justification
 
       STATUS DEFINITIONS:
@@ -56,6 +91,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - Only include CONCRETE TECHNOLOGIES (React, Docker, AWS, PostgreSQL, Kubernetes)
       - Exclude vague concepts (async programming, version control, agile, soft skills)
       - Each skill must have exactly ONE status
+      - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
     `,
     prompt: `
@@ -76,8 +112,6 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
   }
 
   const skillAssessment = await skillAssessmentStream.object;
-
-  console.log(JSON.stringify(skillAssessment, null, 2));
 
   emitAnalysisCreated(config, {
     node: 'ASSESS_SKILLS',

@@ -31,6 +31,7 @@ export default function Home() {
 
   const {
     isLoading: isResearching,
+    error: deepResearchError,
     streamEvents,
     researchReport,
     startDeepResearch,
@@ -102,12 +103,16 @@ export default function Home() {
         className="lg:col-span-8 space-y-8 pb-20"
       >
         {/* If nothing happened yet */}
-        {!suitabilityAssessment && !researchReport && !isAnalyzing && !isResearching && (
-          <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
-            <Sparkles className="size-12 mb-4 opacity-20" />
-            <p>Ready to analyze. Upload a resume and job description to begin.</p>
-          </div>
-        )}
+        {!suitabilityAssessment &&
+          !researchReport &&
+          !isAnalyzing &&
+          !isResearching &&
+          !deepResearchError && (
+            <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
+              <Sparkles className="size-12 mb-4 opacity-20" />
+              <p>Ready to analyze. Upload a resume and job description to begin.</p>
+            </div>
+          )}
 
         <AnalyzeResults
           radarChart={radarChart}
@@ -120,6 +125,7 @@ export default function Home() {
 
         <DeepResearchReport
           isLoading={isResearching}
+          error={deepResearchError}
           streamEvents={streamEvents}
           researchReport={researchReport}
         />

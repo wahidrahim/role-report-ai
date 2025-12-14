@@ -29,10 +29,11 @@ const itemVariants = {
 
 export function DeepResearchReport({
   isLoading,
+  error,
   streamEvents,
   researchReport,
-}: DeepResearchReportProps) {
-  if (!isLoading && !researchReport && streamEvents.length === 0) {
+}: DeepResearchReportProps & { error?: string | null }) {
+  if (!isLoading && !researchReport && streamEvents.length === 0 && !error) {
     return null;
   }
 
@@ -43,9 +44,17 @@ export function DeepResearchReport({
       initial="hidden"
       animate="visible"
     >
+      {error && (
+        <Card className="border-red-500/50 bg-red-500/10">
+          <CardContent className="p-4 text-red-200">
+            <span className="font-bold">Error:</span> {error}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Streaming Events / Terminal Log style */}
-      {streamEvents.length > 0 && isLoading && (
-        <Card className="bg-black/40 border-primary/20 font-mono text-sm max-h-48 overflow-y-auto">
+      {(isLoading || streamEvents.length > 0) && (
+        <Card className="bg-black/40 border-primary/20 font-mono text-sm max-h-48 overflow-y-auto mb-6">
           <CardContent className="p-4 space-y-1">
             {streamEvents.map((event) => (
               <div key={event.id} className="text-muted-foreground">
@@ -53,13 +62,13 @@ export function DeepResearchReport({
                 {event.data?.message}
               </div>
             ))}
-            <div className="animate-pulse text-primary">_</div>
+            {isLoading && <div className="animate-pulse text-primary">_</div>}
           </CardContent>
         </Card>
       )}
 
       {researchReport && (
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="border-secondary/20 bg-secondary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
@@ -170,6 +179,39 @@ export function DeepResearchReport({
                     </div>
                   )}
 
+                  {/* Skill Gap Crash Courses */}
+                  {researchReport.interviewPrepGuide.skillGapCrashCourses &&
+                    researchReport.interviewPrepGuide.skillGapCrashCourses.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-muted-foreground">
+                          Skill Gap Crash Courses
+                        </h4>
+                        <div className="grid gap-3">
+                          {researchReport.interviewPrepGuide.skillGapCrashCourses.map(
+                            (course, i) => (
+                              <Card key={i} className="bg-white/5 border-white/5 pt-4">
+                                <CardContent className="p-4 pt-0 space-y-2">
+                                  <div className="font-semibold text-primary font-outfit">
+                                    {course.topic}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    <span className="font-semibold text-foreground/80 block mb-1">
+                                      Company Context:
+                                    </span>
+                                    {course.companyContext}
+                                  </div>
+                                  <div className="text-sm bg-primary/10 border border-primary/20 p-3 rounded-md text-primary-foreground/90">
+                                    <span className="font-bold mr-1 text-primary">Study Tip:</span>
+                                    {course.studyTip}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                   {/* Strategic Questions */}
                   {researchReport.interviewPrepGuide.strategicQuestions?.length > 0 && (
                     <div className="space-y-2">
@@ -193,7 +235,7 @@ export function DeepResearchReport({
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
     </motion.div>
   );

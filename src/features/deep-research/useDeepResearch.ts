@@ -17,6 +17,7 @@ export type StreamEvent = {
 
 export function useDeepResearch(jobDescriptionText: string) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
   const [researchReport, setResearchReport] = useState<Partial<ResearchReport> | null>(null);
 
@@ -46,6 +47,7 @@ export function useDeepResearch(jobDescriptionText: string) {
     if (!resumeText || !jobDescriptionText) return;
 
     setIsLoading(true);
+    setError(null);
     setStreamEvents([]);
     setResearchReport(null);
 
@@ -96,6 +98,7 @@ export function useDeepResearch(jobDescriptionText: string) {
       }
     } catch (error) {
       console.error('Deep research error:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +106,7 @@ export function useDeepResearch(jobDescriptionText: string) {
 
   return {
     isLoading,
+    error,
     streamEvents,
     researchReport,
     startDeepResearch,
