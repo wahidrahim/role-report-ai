@@ -131,14 +131,14 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
         ))}
       </div>
       {researchReport && (
-        <Card>
+        <Card className="mt-4">
           <CardHeader>
             <CardTitle>
               Research Report
               {isLoading && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  (Streaming...)
-                </span>
+                <Badge variant="secondary" className="ml-2">
+                  Streaming...
+                </Badge>
               )}
             </CardTitle>
           </CardHeader>
@@ -146,19 +146,21 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
             {researchReport.companyHealth && (
               <div>
                 <h3 className="font-semibold mb-2">Company Health</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    variant={
-                      researchReport.companyHealth.status === 'Stable/Growing'
-                        ? 'default'
-                        : researchReport.companyHealth.status === 'Risky/Layoffs'
-                          ? 'destructive'
-                          : 'secondary'
-                    }
-                  >
-                    {researchReport.companyHealth.status}
-                  </Badge>
-                </div>
+                {researchReport.companyHealth.status && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge
+                      variant={
+                        researchReport.companyHealth.status === 'Stable/Growing'
+                          ? 'default'
+                          : researchReport.companyHealth.status === 'Risky/Layoffs'
+                            ? 'destructive'
+                            : 'secondary'
+                      }
+                    >
+                      {researchReport.companyHealth.status}
+                    </Badge>
+                  </div>
+                )}
                 {researchReport.companyHealth.summary && (
                   <p className="text-sm mb-3">{researchReport.companyHealth.summary}</p>
                 )}
@@ -244,11 +246,11 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
                             <Card key={index}>
                               <CardHeader>
                                 <CardTitle className="text-base">
-                                  {course.topic || 'Loading...'}
+                                  {course?.topic || 'Loading...'}
                                 </CardTitle>
                               </CardHeader>
                               <CardContent className="space-y-2">
-                                {course.companyContext && (
+                                {course?.companyContext && (
                                   <div>
                                     <div className="text-xs font-medium text-muted-foreground mb-1">
                                       Company Context
@@ -256,7 +258,7 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
                                     <p className="text-sm">{course.companyContext}</p>
                                   </div>
                                 )}
-                                {course.studyTip && (
+                                {course?.studyTip && (
                                   <div>
                                     <div className="text-xs font-medium text-muted-foreground mb-1">
                                       Study Tip
@@ -288,6 +290,13 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
                           ),
                         )}
                       </ul>
+                    </div>
+                  )}
+                {isLoading &&
+                  (!researchReport.interviewPrepGuide.strategicQuestions ||
+                    researchReport.interviewPrepGuide.strategicQuestions.length === 0) && (
+                    <div className="text-sm text-muted-foreground italic">
+                      Generating strategic questions...
                     </div>
                   )}
               </div>

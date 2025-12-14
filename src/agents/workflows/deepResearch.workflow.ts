@@ -1,6 +1,6 @@
 import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
 import { tavily } from '@tavily/core';
-import { generateObject } from 'ai';
+import { generateObject, streamObject } from 'ai';
 import z from 'zod';
 
 import { model } from '@/agents/config';
@@ -324,7 +324,7 @@ const createResearchReport = async (
     },
   });
 
-  const { object } = await generateObject({
+  const researchReportStream = streamObject({
     model,
     schema: researchReportSchema,
     ...researchReportPrompt({
@@ -334,16 +334,28 @@ const createResearchReport = async (
     }),
   });
 
+  for await (const partial of researchReportStream.partialObjectStream) {
+    config.writer?.({
+      event: 'RESEARCH_REPORT_STREAM_PARTIAL',
+      data: {
+        node: 'CREATE_RESEARCH_REPORT',
+        researchReport: partial,
+      },
+    });
+  }
+
+  const researchReport = await researchReportStream.object;
+
   config.writer?.({
     event: 'RESEARCH_REPORT_CREATED',
     data: {
       node: 'CREATE_RESEARCH_REPORT',
       message: 'Research report created successfully',
-      researchReport: object,
+      researchReport,
     },
   });
 
-  return { researchReport: object };
+  return { researchReport };
 };
 
 export const deepResearchWorkflow = new StateGraph(stateAnnotation)
