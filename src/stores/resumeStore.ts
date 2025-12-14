@@ -2,7 +2,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import type { SkillAssessment, SuitabilityAssessment } from '@/ai/workflows/analyzeFit.workflow';
+import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
+import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 
 type ResumeState = {
   resumeText: string;

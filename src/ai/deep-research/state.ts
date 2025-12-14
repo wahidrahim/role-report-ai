@@ -1,8 +1,9 @@
 import { Annotation } from '@langchain/langgraph';
 
+import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
+import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import { InterviewPrepGuide } from '@/ai/deep-research/nodes/createInterviewPrepGuide';
 import { ResearchReport } from '@/ai/deep-research/nodes/createResearchReport';
-import type { SkillAssessment, SuitabilityAssessment } from '@/ai/workflows/analyzeFit.workflow';
 
 export const stateAnnotation = Annotation.Root({
   jobDescription: Annotation<string>,

@@ -1,6 +1,6 @@
 'use client';
 
-import type { SkillAssessment as SkillAssessmentResult } from '@/ai/workflows/analyzeFit.workflow';
+import type { SkillAssessment as SkillAssessmentResult } from '@/ai/analyze-fit/nodes/assessSkills';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
 type SkillItem = Partial<SkillAssessmentResult['skills'][number]>;

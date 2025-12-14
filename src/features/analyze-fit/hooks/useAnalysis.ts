@@ -2,12 +2,10 @@
 
 import { useCallback, useState } from 'react';
 
-import type {
-  ActionPlan,
-  RadarChart,
-  SkillAssessment,
-  SuitabilityAssessment,
-} from '@/ai/workflows/analyzeFit.workflow';
+import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
+import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
+import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
+import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
 import { useResumeStore } from '@/stores/resumeStore';
 
 type StreamDataType =
