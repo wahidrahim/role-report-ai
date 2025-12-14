@@ -1,6 +1,6 @@
 # Role Report AI
 
-A technical exploration of orchestrating multi-step LLM workflows with LangGraph, paired with a streaming UI (SSE + ReadableStreams). It compares a resume against a job description to generate a fit analysis and recommendations, and can optionally run a deeper research pass to produce company/job context and interview prep.
+A technical exploration of orchestrating multi-step LLM workflows with LangGraph, paired with a streaming UI (SSE + ReadableStreams). It compares a resume against a job description to generate a fit analysis and recommendations, and can optionally conduct deeper research to produce company/job context and interview prep guides.
 
 ## Analyze Fit
 
