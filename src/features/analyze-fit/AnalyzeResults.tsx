@@ -1,3 +1,4 @@
+import { Badge } from '@/core/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -20,6 +21,32 @@ type AnalyzeResultsProps = {
   isLoading: boolean;
 };
 
+const getPriorityValue = (priority: string) => {
+  switch (priority?.toLowerCase()) {
+    case 'high':
+      return 3;
+    case 'medium':
+      return 2;
+    case 'low':
+      return 1;
+    default:
+      return 0;
+  }
+};
+
+const getPriorityBadgeStyle = (priority: string) => {
+  switch (priority?.toLowerCase()) {
+    case 'high':
+      return 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20';
+    case 'medium':
+      return 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20';
+    case 'low':
+      return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20';
+    default:
+      return 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20';
+  }
+};
+
 export function AnalyzeResults({
   radarChart,
   skillAssessment,
@@ -37,6 +64,18 @@ export function AnalyzeResults({
       </div>
     );
   }
+
+  const sortedResumeOptimizations = resumeOptimizations?.plan
+    ? [...resumeOptimizations.plan].sort(
+        (a: any, b: any) => getPriorityValue(b.priority) - getPriorityValue(a.priority),
+      )
+    : null;
+
+  const sortedLearningPriorities = learningPriorities?.plan
+    ? [...learningPriorities.plan].sort(
+        (a: any, b: any) => getPriorityValue(b.priority) - getPriorityValue(a.priority),
+      )
+    : null;
 
   return (
     <div className="space-y-6">
@@ -85,54 +124,74 @@ export function AnalyzeResults({
         </div>
       )}
 
-      {/* Resume Optimizations */}
-      {resumeOptimizations?.plan && (
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Resume Optimizations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {resumeOptimizations.plan.map((item: any, i: number) => (
-                  <li key={`opt-${i}`} className="p-3 bg-white/5 rounded-lg border border-white/5">
-                    <div className="font-semibold text-primary-foreground">{item.title}</div>
-                    <div className="text-xs text-primary uppercase tracking-wider mb-1 mt-1">
-                      {item.priority}
-                    </div>
-                    <div className="text-sm text-muted-foreground">{item.description}</div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Resume Optimizations & Learning Priorities */}
+      {(sortedResumeOptimizations || sortedLearningPriorities) && (
+        <div className="grid md:grid-cols-2 gap-6">
+          {sortedResumeOptimizations && (
+            <Card className="h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>Resume Optimizations</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-3">
+                  {sortedResumeOptimizations.map((item: any, i: number) => (
+                    <li
+                      key={`opt-${i}`}
+                      className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-semibold text-primary-foreground text-sm">
+                          {item.title}
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
+                        >
+                          {item.priority}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Learning Priorities */}
-      {learningPriorities?.plan && (
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Learning Priorities</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {learningPriorities.plan.map((item: any, i: number) => (
-                  <li
-                    key={`learning-${i}`}
-                    className="p-3 bg-white/5 rounded-lg border border-white/5"
-                  >
-                    <div className="font-semibold text-primary-foreground">{item.title}</div>
-                    <div className="text-xs text-primary uppercase tracking-wider mb-1 mt-1">
-                      {item.priority}
-                    </div>
-                    <div className="text-sm text-muted-foreground">{item.description}</div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          {sortedLearningPriorities && (
+            <Card className="h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>Learning Priorities</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-3">
+                  {sortedLearningPriorities.map((item: any, i: number) => (
+                    <li
+                      key={`learning-${i}`}
+                      className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-semibold text-primary-foreground text-sm">
+                          {item.title}
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
+                        >
+                          {item.priority}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
