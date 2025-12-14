@@ -19,7 +19,7 @@ export const stateAnnotation = Annotation.Root({
   searchResultsQuality: Annotation<string>,
   searchResultsReviewCount: Annotation<number>({
     reducer: (prev, curr) => curr,
-    default: () => 0,
+    default: () => 1,
   }),
   searchResultsReviewFeedback: Annotation<string>,
   interviewPrepGuide: Annotation<InterviewPrepGuide>,

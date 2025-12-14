@@ -40,6 +40,12 @@ export const reviewSearchResults = async (
       You are a Research Quality Assurance Officer.
       Evaluate the gathered data for the "Deep Research Dossier".
 
+      OUTPUT (STRICT):
+      - Return a JSON OBJECT (an instance), not a schema/description.
+      - Return EXACTLY these keys: "status", "feedback" (no extra keys).
+      - "status" MUST be exactly one of: "PASS" | "FAIL" (case-sensitive).
+      - "feedback" MUST be a non-empty string. If status is PASS, briefly explain why it passed.
+
       Assign "PASS" if ALL of the following are true:
       1. Contains specific interview questions (not just generic advice).
       2. Contains specific engineering values or tech stack details (e.g. "Apollo Federation", "Radical Candor").
@@ -51,7 +57,7 @@ export const reviewSearchResults = async (
       DATA TO REVIEW:
       ${searchResults.join('\n\n---\n\n')}
     `,
-    prompt: `Evaluate the data quality and assign "PASS" or "FAIL" based on the criteria above.`,
+    prompt: `Return { "status": "PASS" | "FAIL", "feedback": string } based on the criteria above.`,
     abortSignal: config.signal,
   });
 
