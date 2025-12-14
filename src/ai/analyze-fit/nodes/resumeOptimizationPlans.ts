@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
@@ -71,9 +71,19 @@ export const resumeOptimizationPlans = async (
   });
 
   for await (const partial of resumeOptimizationsStream.partialObjectStream) {
-    emitAnalysisPartial(config, { type: 'resumeOptimizations', data: partial });
+    emitAnalysisPartial(config, {
+      node: 'RESUME_OPTIMIZATION_PLANS',
+      type: 'resumeOptimizations',
+      data: partial,
+    });
   }
 
   const resumeOptimizations = await resumeOptimizationsStream.object;
+  emitAnalysisCreated(config, {
+    node: 'RESUME_OPTIMIZATION_PLANS',
+    type: 'resumeOptimizations',
+    message: 'Resume optimizations created successfully',
+    data: resumeOptimizations,
+  });
   return { resumeOptimizations };
 };

@@ -1,7 +1,7 @@
 import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 
-import { emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
@@ -58,9 +58,19 @@ export const learningPrioritiesPlan = async (
   });
 
   for await (const partial of learningPrioritiesStream.partialObjectStream) {
-    emitAnalysisPartial(config, { type: 'learningPriorities', data: partial });
+    emitAnalysisPartial(config, {
+      node: 'LEARNING_PRIORITIES_PLAN',
+      type: 'learningPriorities',
+      data: partial,
+    });
   }
 
   const learningPriorities = await learningPrioritiesStream.object;
+  emitAnalysisCreated(config, {
+    node: 'LEARNING_PRIORITIES_PLAN',
+    type: 'learningPriorities',
+    message: 'Learning priorities created successfully',
+    data: learningPriorities,
+  });
   return { learningPriorities: learningPriorities as ActionPlan };
 };

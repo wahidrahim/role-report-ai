@@ -1,5 +1,6 @@
 'use client';
 
+import { createParser } from 'eventsource-parser';
 import { useCallback, useState } from 'react';
 
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
@@ -8,19 +9,18 @@ import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
 import { useResumeStore } from '@/stores/resumeStore';
 
-type StreamDataType =
-  | 'radarChart'
-  | 'skillAssessment'
-  | 'suitabilityAssessment'
-  | 'resumeOptimizations'
-  | 'learningPriorities'
-  | 'done'
-  | 'error';
-
-type StreamMessage = {
-  type: StreamDataType;
-  data: unknown;
-};
+type StreamEventName =
+  | 'RADAR_CHART_STREAM_PARTIAL'
+  | 'RADAR_CHART_CREATED'
+  | 'SKILL_ASSESSMENT_STREAM_PARTIAL'
+  | 'SKILL_ASSESSMENT_CREATED'
+  | 'SUITABILITY_ASSESSMENT_STREAM_PARTIAL'
+  | 'SUITABILITY_ASSESSMENT_CREATED'
+  | 'RESUME_OPTIMIZATIONS_STREAM_PARTIAL'
+  | 'RESUME_OPTIMIZATIONS_CREATED'
+  | 'LEARNING_PRIORITIES_STREAM_PARTIAL'
+  | 'LEARNING_PRIORITIES_CREATED'
+  | 'ERROR';
 
 export function useAnalysis() {
   const {
@@ -37,97 +37,97 @@ export function useAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const analyze = useCallback(async (resumeText: string, jobDescriptionText: string) => {
-    setIsLoading(true);
-    setError(null);
-    setRadarChart(null);
-    setSkillAssessment(null);
-    setSuitabilityAssessment(null);
-    setStoreSkillAssessment(null);
-    setStoreSuitabilityAssessment(null);
-    setResumeOptimizations(null);
-    setLearningPriorities(null);
+  const analyze = useCallback(
+    async (resumeText: string, jobDescriptionText: string) => {
+      setIsLoading(true);
+      setError(null);
+      setRadarChart(null);
+      setSkillAssessment(null);
+      setSuitabilityAssessment(null);
+      setStoreSkillAssessment(null);
+      setStoreSuitabilityAssessment(null);
+      setResumeOptimizations(null);
+      setLearningPriorities(null);
 
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeText, jobDescriptionText }),
-      });
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeText, jobDescriptionText }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Analysis failed');
-      }
-
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
+        if (!response.ok) {
+          throw new Error('Analysis failed');
         }
 
-        buffer += decoder.decode(value, { stream: true });
+        if (!response.body) {
+          throw new Error('No response body');
+        }
 
-        // Parse SSE format: "data: {...}\n\n"
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
-        for (const line of lines) {
-          if (!line.trim()) {
-            continue;
-          }
+        const parser = createParser({
+          onEvent: (event) => {
+            try {
+              const parsedData = JSON.parse(event.data) as unknown;
+              const eventName = event.event as StreamEventName;
+              const payload =
+                parsedData && typeof parsedData === 'object'
+                  ? (parsedData as Record<string, unknown>)
+                  : null;
 
-          // Extract JSON from "data: {...}" format
-          const match = line.match(/^data:\s*(.+)$/);
-          if (!match) {
-            continue;
-          }
-
-          try {
-            const message = JSON.parse(match[1]) as StreamMessage;
-            const { type, data } = message;
-
-            switch (type) {
-              case 'radarChart':
-                setRadarChart(data as RadarChart);
-                break;
-              case 'skillAssessment':
-                const skillAssessmentData = data as SkillAssessment;
-                setSkillAssessment(skillAssessmentData);
-                setStoreSkillAssessment(skillAssessmentData);
-                break;
-              case 'suitabilityAssessment':
-                const suitabilityAssessmentData = data as SuitabilityAssessment;
-                setSuitabilityAssessment(suitabilityAssessmentData);
-                setStoreSuitabilityAssessment(suitabilityAssessmentData);
-                break;
-              case 'resumeOptimizations':
-                setResumeOptimizations(data as ActionPlan);
-                break;
-              case 'learningPriorities':
-                setLearningPriorities(data as ActionPlan);
-                break;
-              case 'error':
-                setError(new Error(data as string));
-                break;
-              case 'done':
-                // Stream completed successfully
-                break;
+              switch (eventName) {
+                case 'RADAR_CHART_STREAM_PARTIAL':
+                case 'RADAR_CHART_CREATED':
+                  setRadarChart(payload?.radarChart as RadarChart);
+                  break;
+                case 'SKILL_ASSESSMENT_STREAM_PARTIAL':
+                case 'SKILL_ASSESSMENT_CREATED': {
+                  const skillAssessmentData = payload?.skillAssessment as SkillAssessment;
+                  setSkillAssessment(skillAssessmentData);
+                  setStoreSkillAssessment(skillAssessmentData);
+                  break;
+                }
+                case 'SUITABILITY_ASSESSMENT_STREAM_PARTIAL':
+                case 'SUITABILITY_ASSESSMENT_CREATED': {
+                  const suitabilityAssessmentData =
+                    payload?.suitabilityAssessment as SuitabilityAssessment;
+                  setSuitabilityAssessment(suitabilityAssessmentData);
+                  setStoreSuitabilityAssessment(suitabilityAssessmentData);
+                  break;
+                }
+                case 'RESUME_OPTIMIZATIONS_STREAM_PARTIAL':
+                case 'RESUME_OPTIMIZATIONS_CREATED':
+                  setResumeOptimizations(payload?.resumeOptimizations as ActionPlan);
+                  break;
+                case 'LEARNING_PRIORITIES_STREAM_PARTIAL':
+                case 'LEARNING_PRIORITIES_CREATED':
+                  setLearningPriorities(payload?.learningPriorities as ActionPlan);
+                  break;
+                case 'ERROR':
+                  setError(new Error((payload?.message as string) ?? 'Analysis failed'));
+                  break;
+              }
+            } catch {
+              // Skip malformed JSON chunks
             }
-          } catch {
-            // Skip malformed JSON chunks
-          }
+          },
+        });
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          parser.feed(decoder.decode(value, { stream: true }));
         }
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error('Unknown error'));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error('Unknown error'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [setStoreSkillAssessment, setStoreSuitabilityAssessment],
+  );
 
   return {
     radarChart,

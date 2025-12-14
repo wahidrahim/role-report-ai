@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import { model } from '@/ai/config';
 
 export const radarChartSchema = z.object({
@@ -85,9 +85,15 @@ export const plotRadarChart = async (
   });
 
   for await (const partial of radarChartStream.partialObjectStream) {
-    emitAnalysisPartial(config, { type: 'radarChart', data: partial });
+    emitAnalysisPartial(config, { node: 'PLOT_RADAR_CHART', type: 'radarChart', data: partial });
   }
 
   const radarChart = await radarChartStream.object;
+  emitAnalysisCreated(config, {
+    node: 'PLOT_RADAR_CHART',
+    type: 'radarChart',
+    message: 'Radar chart created successfully',
+    data: radarChart,
+  });
   return { radarChart };
 };

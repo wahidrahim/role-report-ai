@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import { model } from '@/ai/config';
 
 export const skillAssessmentSchema = z.object({
@@ -68,9 +68,15 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
   });
 
   for await (const partial of skillAssessmentStream.partialObjectStream) {
-    emitAnalysisPartial(config, { type: 'skillAssessment', data: partial });
+    emitAnalysisPartial(config, { node: 'ASSESS_SKILLS', type: 'skillAssessment', data: partial });
   }
 
   const skillAssessment = await skillAssessmentStream.object;
+  emitAnalysisCreated(config, {
+    node: 'ASSESS_SKILLS',
+    type: 'skillAssessment',
+    message: 'Skill assessment created successfully',
+    data: skillAssessment,
+  });
   return { skillAssessment };
 };

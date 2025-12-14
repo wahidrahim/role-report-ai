@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { model } from '@/ai/config';
@@ -91,9 +91,19 @@ export const assessSuitability = async (
   });
 
   for await (const partial of suitabilityAssessmentStream.partialObjectStream) {
-    emitAnalysisPartial(config, { type: 'suitabilityAssessment', data: partial });
+    emitAnalysisPartial(config, {
+      node: 'ASSESS_SUITABILITY',
+      type: 'suitabilityAssessment',
+      data: partial,
+    });
   }
 
   const suitabilityAssessment = await suitabilityAssessmentStream.object;
+  emitAnalysisCreated(config, {
+    node: 'ASSESS_SUITABILITY',
+    type: 'suitabilityAssessment',
+    message: 'Suitability assessment created successfully',
+    data: suitabilityAssessment,
+  });
   return { suitabilityAssessment };
 };
