@@ -1,10 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/core/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/core/components/ui/tooltip';
 import { AnalyzeInputs } from '@/features/analyze-fit/AnalyzeInputs';
 import { AnalyzeResults } from '@/features/analyze-fit/AnalyzeResults';
 import { useAnalysis } from '@/features/analyze-fit/hooks/useAnalysis';
@@ -83,15 +89,35 @@ export default function Home() {
           <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
             Advanced Intelligence
           </h3>
-          <Button
-            variant="outline"
-            onClick={startDeepResearch}
-            disabled={isResearching || !canResearch}
-            className="w-full h-12 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-base"
-          >
-            <Sparkles className="mr-2 size-4 text-primary" />
-            {isResearching ? 'Researching Entity...' : 'Start Deep Research'}
-          </Button>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <span className="w-full" tabIndex={0}>
+                  <Button
+                    variant="outline"
+                    onClick={startDeepResearch}
+                    disabled={isResearching || !canResearch || !suitabilityAssessment}
+                    className="w-full h-12 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-base disabled:opacity-50"
+                  >
+                    {!suitabilityAssessment ? (
+                      <Lock className="mr-2 size-4 text-muted-foreground" />
+                    ) : (
+                      <Sparkles className="mr-2 size-4 text-primary" />
+                    )}
+                    {isResearching ? 'Researching Entity...' : 'Start Deep Research'}
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!suitabilityAssessment && (
+                <TooltipContent
+                  side="top"
+                  className="bg-destructive text-destructive-foreground border-destructive/20"
+                >
+                  <p>Running "Analyze Fit" is required to unlock this feature</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </motion.div>
 
