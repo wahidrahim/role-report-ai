@@ -14,8 +14,6 @@ export const deepResearchPlanPrompt = (args: DeepResearchPlanPromptArgs) => {
     (skill) => skill.status === 'missing' || skill.status === 'transferable',
   );
 
-  console.log({ gapsList });
-
   return {
     system: `
     You are a Lead Investigator for a Career Intelligence Unit.

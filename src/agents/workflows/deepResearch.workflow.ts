@@ -21,10 +21,7 @@ const stateAnnotation = Annotation.Root({
   companyName: Annotation<string | null>,
   jobTitle: Annotation<string | null>,
   searchQueries: Annotation<string[] | null>,
-  searchResults: Annotation<string[]>({
-    reducer: (acc, curr) => (acc && curr ? [...acc, ...curr] : (acc ?? curr)),
-    default: () => [],
-  }),
+  searchResults: Annotation<string | null>,
 });
 
 // NODE 1: Extract company name and job title
@@ -109,8 +106,6 @@ const planDeepResearch = async (
     ...deepResearchPlanPrompt({ companyName, jobTitle, skillAssessment, suitabilityAssessment }),
   });
 
-  console.log('[NODE] planned deep research', { searchQueries: object.searchQueries });
-
   return {
     searchQueries: object.searchQueries.map(({ query }) => query.trim()),
   };
@@ -136,7 +131,6 @@ const searchForInformation = async (
   }
 
   let totalPages = 0;
-
   const searchResults = await Promise.all(
     searchQueries.map(async (query) => {
       const results = await tavilyClient.search(query);
@@ -154,9 +148,10 @@ const searchForInformation = async (
         .join('\n\n---\n\n');
     }),
   );
+  const combinedSearchResults = searchResults.join('\n\n---\n\n');
 
   return {
-    searchResults,
+    searchResults: combinedSearchResults,
   };
 };
 
