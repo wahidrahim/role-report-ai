@@ -18,9 +18,7 @@ import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
 import { useResumeStore } from '@/stores/resumeStore';
 
-import MatchScore from './components/MatchScore';
-import { SkillAssessment } from './components/SkillAssessment';
-import { SkillsRadarChart } from './components/SkillsRadarChart';
+import { AnalyzeResults } from './AnalyzeResults';
 import { useAnalysis } from './hooks/useAnalysis';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
@@ -121,90 +119,14 @@ export function AnalyzeFit({ jobDescriptionText, onJobDescriptionChange }: Analy
         </Alert>
       )}
 
-      <Card>
-        {suitabilityAssessment?.suitabilityScore !== undefined &&
-          suitabilityAssessment?.suitabilityReasoning && (
-            <>
-              <CardHeader>
-                <CardTitle>Fit Score</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MatchScore
-                  matchScore={suitabilityAssessment?.suitabilityScore}
-                  verdict={suitabilityAssessment?.suitabilityReasoning}
-                />
-              </CardContent>
-            </>
-          )}
-        {isLoading && (
-          <CardContent>
-            <Spinner />
-          </CardContent>
-        )}
-      </Card>
-
-      {radarChart?.data && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Skills Radar Chart</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SkillsRadarChart data={radarChart.data} />
-          </CardContent>
-        </Card>
-      )}
-
-      {skillAssessment?.skills && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Skill Assessment</CardTitle>
-            <CardDescription>
-              How your resume evidence maps to the job’s required technologies
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SkillAssessment skills={skillAssessment.skills} />
-          </CardContent>
-        </Card>
-      )}
-
-      {resumeOptimizations?.plan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resume Optimizations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul>
-              {resumeOptimizations.plan.map((item) => (
-                <li key={`resume-optimization-${item.title}`}>
-                  <div className="font-medium">{item.title}</div>
-                  <div className="text-xs text-muted-foreground">{item.priority}</div>
-                  <div className="text-sm text-muted-foreground">{item.description}</div>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-
-      {learningPriorities?.plan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Learning Priorities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul>
-              {learningPriorities.plan.map((item) => (
-                <li key={`learning-priority-${item.title}`}>
-                  <div className="font-medium">{item.title}</div>
-                  <div className="text-xs text-muted-foreground">{item.priority}</div>
-                  <div className="text-sm text-muted-foreground">{item.description}</div>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+      <AnalyzeResults
+        radarChart={radarChart}
+        skillAssessment={skillAssessment}
+        suitabilityAssessment={suitabilityAssessment}
+        resumeOptimizations={resumeOptimizations}
+        learningPriorities={learningPriorities}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

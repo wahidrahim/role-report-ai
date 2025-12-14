@@ -8,8 +8,8 @@ import { model } from '@/ai/config';
 export const skillAssessmentSchema = z.object({
   skills: z.array(
     z.object({
-      skillName: z.string(),
       status: z.enum(['verified', 'transferable', 'missing']),
+      skillName: z.string(),
       importance: z.enum(['critical', 'nice-to-have']),
       reasoning: z.string(),
     }),
@@ -36,8 +36,8 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       OUTPUT FORMAT: Return a JSON object with a single field \`skills\`, which is a flat array of skill objects. Each skill appears exactly once with its assessed status.
 
       SKILL OBJECT FIELDS:
-      - skillName: Normalized technology name (e.g., "React" not "React.js", "PostgreSQL" not "Postgres")
       - status: "verified" | "transferable" | "missing"
+      - skillName: Normalized technology name (e.g., "React" not "React.js", "PostgreSQL" not "Postgres")
       - importance: "critical" | "nice-to-have"
       - reasoning: Brief evidence-based justification
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, HelpCircle, XCircle } from 'lucide-react';
 
 import type { SkillAssessment as SkillAssessmentResult } from '@/ai/analyze-fit/nodes/assessSkills';
@@ -23,7 +22,9 @@ export function SkillAssessment({ skills }: SkillAssessmentProps) {
     verified: items.filter((s) => s.status === 'verified'),
     transferable: items.filter((s) => s.status === 'transferable'),
     missing: items.filter((s) => s.status === 'missing'),
-    other: items.filter((s) => !['verified', 'transferable', 'missing'].includes(s.status || '')),
+    other: items.filter(
+      (s) => s.status && !['verified', 'transferable', 'missing'].includes(s.status),
+    ),
   };
 
   if (items.length === 0) return null;
@@ -136,9 +137,9 @@ function SkillBadge({
       <HoverCardTrigger asChild>
         <Badge
           variant="outline"
-          className={`cursor-default px-3 py-1.5 text-sm transition-all border ${styles[variant]}`}
+          className={`cursor-default px-3 py-1.5 text-sm transition-all border ${styles[variant]} max-w-full shrink`}
         >
-          {skill.skillName}
+          <span className="truncate">{skill.skillName}</span>
         </Badge>
       </HoverCardTrigger>
       <HoverCardContent className="w-80 backdrop-blur-xl bg-black/80 border-white/10 text-white relative overflow-hidden">

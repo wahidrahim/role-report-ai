@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 import {
   Card,
   CardContent,
@@ -22,21 +20,6 @@ type AnalyzeResultsProps = {
   isLoading: boolean;
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export function AnalyzeResults({
   radarChart,
   skillAssessment,
@@ -56,21 +39,17 @@ export function AnalyzeResults({
   }
 
   return (
-    <motion.div className="space-y-6" layout>
+    <div className="space-y-6">
       {isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-2 text-sm text-primary animate-pulse"
-        >
+        <div className="flex items-center gap-2 text-sm text-primary animate-pulse">
           <Spinner className="size-4" />
           Streaming analysis data...
-        </motion.div>
+        </div>
       )}
 
       {/* Fit Score */}
       {suitabilityAssessment?.suitabilityScore !== undefined && (
-        <motion.div layout>
+        <div>
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="text-2xl">Fit Score</CardTitle>
@@ -82,12 +61,12 @@ export function AnalyzeResults({
               />
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Radar Chart */}
       {radarChart?.data && (
-        <motion.div layout>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle>Skills Radar</CardTitle>
@@ -96,28 +75,52 @@ export function AnalyzeResults({
               <SkillsRadarChart data={radarChart.data} />
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Skill Assessment */}
       {skillAssessment?.skills && (
-        <motion.div layout>
+        <div>
           <SkillAssessment skills={skillAssessment.skills} />
-        </motion.div>
+        </div>
       )}
 
       {/* Resume Optimizations */}
       {resumeOptimizations?.plan && (
-        <motion.div layout>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle>Resume Optimizations</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
-                {resumeOptimizations.plan.map((item: any) => (
+                {resumeOptimizations.plan.map((item: any, i: number) => (
+                  <li key={`opt-${i}`} className="p-3 bg-white/5 rounded-lg border border-white/5">
+                    <div className="font-semibold text-primary-foreground">{item.title}</div>
+                    <div className="text-xs text-primary uppercase tracking-wider mb-1 mt-1">
+                      {item.priority}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{item.description}</div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Learning Priorities */}
+      {learningPriorities?.plan && (
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Learning Priorities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-4">
+                {learningPriorities.plan.map((item: any, i: number) => (
                   <li
-                    key={`opt-${item.title}`}
+                    key={`learning-${i}`}
                     className="p-3 bg-white/5 rounded-lg border border-white/5"
                   >
                     <div className="font-semibold text-primary-foreground">{item.title}</div>
@@ -130,8 +133,8 @@ export function AnalyzeResults({
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }
