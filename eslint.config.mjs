@@ -15,7 +15,6 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      curly: ['error', 'all'],
       'no-restricted-imports': ['error', { patterns: ['../*'] }],
     },
   },

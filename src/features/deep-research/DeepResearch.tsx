@@ -102,9 +102,7 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
       while (true) {
         const { done, value } = await reader.read();
 
-        if (done) {
-          break;
-        }
+        if (done) break;
 
         parser.feed(decoder.decode(value, { stream: true }));
       }
@@ -114,6 +112,11 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoading) return;
+    console.log({ researchReport });
+  }, [researchReport, isLoading]);
 
   return (
     <>
