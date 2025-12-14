@@ -1,6 +1,6 @@
 import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
 import { tavily } from '@tavily/core';
-import { generateObject } from 'ai';
+import { generateObject, streamObject } from 'ai';
 import z from 'zod';
 
 import { model } from '@/agents/config';
@@ -277,7 +277,7 @@ const createInterviewPrepGuide = async (
     },
   });
 
-  const { object } = await generateObject({
+  const interviewPrepGuideStream = streamObject({
     model,
     schema: interviewPrepGuideSchema,
     ...interviewPrepGuidePrompt({
@@ -289,17 +289,29 @@ const createInterviewPrepGuide = async (
     }),
   });
 
+  for await (const partial of interviewPrepGuideStream.partialObjectStream) {
+    config.writer?.({
+      event: 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL',
+      data: {
+        node: 'CREATE_INTERVIEW_PREP_GUIDE',
+        interviewPrepGuide: partial,
+      },
+    });
+  }
+
+  const interviewPrepGuide = await interviewPrepGuideStream.object;
+
   config.writer?.({
-    event: 'INTERVIEW_PREP_GUIDE_CREATED',
+    event: 'NODE_END',
     data: {
       node: 'CREATE_INTERVIEW_PREP_GUIDE',
       message: 'Interview prep guide created successfully',
-      interviewPrepGuide: object,
+      interviewPrepGuide,
     },
   });
 
   return {
-    interviewPrepGuide: object,
+    interviewPrepGuide,
   };
 };
 

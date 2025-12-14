@@ -10,12 +10,16 @@ import { useResumeStore } from '@/stores/resumeStore';
 
 type StreamEvent = {
   id: string;
-  event: 'NODE_START' | 'NODE_END' | 'INTERVIEW_PREP_GUIDE_CREATED';
+  event:
+    | 'NODE_START'
+    | 'NODE_END'
+    | 'INTERVIEW_PREP_GUIDE_CREATED'
+    | 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL';
   data?: Partial<{
     node?: string;
     message?: string;
     data?: Record<string, unknown>;
-    interviewPrepGuide?: InterviewPrepGuide;
+    interviewPrepGuide?: Partial<InterviewPrepGuide>;
   }>;
 };
 
@@ -26,7 +30,9 @@ type DeepResearchProps = {
 export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
-  const [interviewPrepGuide, setInterviewPrepGuide] = useState<InterviewPrepGuide | null>(null);
+  const [interviewPrepGuide, setInterviewPrepGuide] = useState<Partial<InterviewPrepGuide> | null>(
+    null,
+  );
   const {
     resumeText,
     skillAssessment,
@@ -81,14 +87,18 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
           const parsedData = JSON.parse(event.data);
           const newStreamEvent = {
             id: event.id as string,
-            event: event.event as 'NODE_START' | 'NODE_END' | 'INTERVIEW_PREP_GUIDE_CREATED',
+            event: event.event as
+              | 'NODE_START'
+              | 'NODE_END'
+              | 'INTERVIEW_PREP_GUIDE_CREATED'
+              | 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL',
             data: parsedData,
           };
 
           setStreamEvents((prev) => [...prev, newStreamEvent]);
 
-          // Extract interview prep guide if present
-          if (event.event === 'INTERVIEW_PREP_GUIDE_CREATED' && parsedData.interviewPrepGuide) {
+          // Update interview prep guide from streaming or final event
+          if (parsedData.interviewPrepGuide) {
             setInterviewPrepGuide(parsedData.interviewPrepGuide);
           }
         },
@@ -128,47 +138,65 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
       {interviewPrepGuide && (
         <Card>
           <CardHeader>
-            <CardTitle>Interview Prep Guide</CardTitle>
+            <CardTitle>
+              Interview Prep Guide
+              {isLoading && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  (Streaming...)
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-2">Interview Format</h3>
-              <p className="text-sm font-medium mb-1">
-                {interviewPrepGuide.interviewFormat.format}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {interviewPrepGuide.interviewFormat.rationale}
-              </p>
-            </div>
-
-            {interviewPrepGuide.skillGapCrashCourses.length > 0 && (
+            {interviewPrepGuide.interviewFormat?.format && (
               <div>
-                <h3 className="font-semibold mb-3">Skill Gap Crash Courses</h3>
-                <div className="space-y-4">
-                  {interviewPrepGuide.skillGapCrashCourses.map((course, index) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className="text-base">{course.topic}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <div>
-                          <div className="text-xs font-medium text-muted-foreground mb-1">
-                            Company Context
-                          </div>
-                          <p className="text-sm">{course.companyContext}</p>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-muted-foreground mb-1">
-                            Study Tip
-                          </div>
-                          <p className="text-sm">{course.studyTip}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <h3 className="font-semibold mb-2">Interview Format</h3>
+                <p className="text-sm font-medium mb-1">
+                  {interviewPrepGuide.interviewFormat.format}
+                </p>
+                {interviewPrepGuide.interviewFormat.rationale && (
+                  <p className="text-sm text-muted-foreground">
+                    {interviewPrepGuide.interviewFormat.rationale}
+                  </p>
+                )}
               </div>
             )}
+
+            {interviewPrepGuide.skillGapCrashCourses &&
+              interviewPrepGuide.skillGapCrashCourses.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3">Skill Gap Crash Courses</h3>
+                  <div className="space-y-4">
+                    {interviewPrepGuide.skillGapCrashCourses.map((course, index) => (
+                      <Card key={index}>
+                        <CardHeader>
+                          <CardTitle className="text-base">
+                            {course.topic || 'Loading...'}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {course.companyContext && (
+                            <div>
+                              <div className="text-xs font-medium text-muted-foreground mb-1">
+                                Company Context
+                              </div>
+                              <p className="text-sm">{course.companyContext}</p>
+                            </div>
+                          )}
+                          {course.studyTip && (
+                            <div>
+                              <div className="text-xs font-medium text-muted-foreground mb-1">
+                                Study Tip
+                              </div>
+                              <p className="text-sm">{course.studyTip}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {interviewPrepGuide.strategicQuestions &&
               interviewPrepGuide.strategicQuestions.length > 0 && (
@@ -178,7 +206,7 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
                     {interviewPrepGuide.strategicQuestions.map((question, index) => (
                       <li key={index} className="text-sm">
                         <span className="font-medium text-muted-foreground">{index + 1}.</span>{' '}
-                        {question}
+                        {question || 'Loading...'}
                       </li>
                     ))}
                   </ul>
