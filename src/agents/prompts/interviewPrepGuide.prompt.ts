@@ -1,7 +1,7 @@
 import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
 import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
 
-type CreateInterviewPrepGuidePromptArgs = {
+type InterviewPrepGuidePromptArgs = {
   companyName: string;
   jobTitle: string;
   skillAssessment: SkillAssessment;
@@ -9,7 +9,7 @@ type CreateInterviewPrepGuidePromptArgs = {
   searchResults: string[];
 };
 
-export const createInterviewPrepGuidePrompt = (args: CreateInterviewPrepGuidePromptArgs) => {
+export const interviewPrepGuidePrompt = (args: InterviewPrepGuidePromptArgs) => {
   const { companyName, jobTitle, skillAssessment, suitabilityAssessment, searchResults } = args;
   const gapsList = skillAssessment.skills.filter(
     (skill) => skill.status === 'missing' || skill.status === 'transferable',
@@ -30,7 +30,7 @@ export const createInterviewPrepGuidePrompt = (args: CreateInterviewPrepGuidePro
       *** INSTRUCTION PROTOCOL ***
       1. ANALYZE INTERVIEW STYLE: 
          - Scan the research for keywords like "HackerRank", "Take-home", "Whiteboard", "System Design".
-         - Predict the most likely format.
+         - Predict the most likely format, and give a brief rationale for your prediction.
 
       2. BRIDGE THE GAPS (CRITICAL):
          - For every candidate weakness, check the research to see how the company implements that technology.

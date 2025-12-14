@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 export const interviewPrepGuideSchema = z.object({
   interviewFormat: z
-    .string()
+    .object({
+      format: z.string(),
+      rationale: z.string(),
+    })
     .describe(
       'The predicted style of the interview (e.g., "LeetCode-heavy", "Practical Take-home", "System Design focus", "Behavioral-first").',
     ),
@@ -26,9 +29,11 @@ export const interviewPrepGuideSchema = z.object({
     .describe('Create a bridge lesson for every user gap identified.'),
 
   strategicQuestions: z
-    .string()
+    .array(z.string())
+    .min(3)
+    .max(3)
     .describe(
-      'A highly specific, intelligent question the candidate should ask the interviewer to demonstrate deep research (e.g., "How has the migration to Next.js App Router affected your CI/CD pipelines?").',
+      '3 highly specific, intelligent question the candidate should ask the interviewer to demonstrate deep research (e.g., "How has the migration to Next.js App Router affected your CI/CD pipelines?").',
     ),
 });
 

@@ -16,7 +16,6 @@ import {
 import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
-import { DeepResearch } from '@/features/deep-research/DeepResearch';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import MatchScore from './components/MatchScore';
@@ -26,8 +25,12 @@ import { useAnalysis } from './hooks/useAnalysis';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
 
-export function AnalyzeFit() {
-  const [jobDescriptionText, setJobDescriptionText] = useState('');
+type AnalyzeFitProps = {
+  jobDescriptionText: string;
+  onJobDescriptionChange: (value: string) => void;
+};
+
+export function AnalyzeFit({ jobDescriptionText, onJobDescriptionChange }: AnalyzeFitProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { resumeText } = useResumeStore();
 
@@ -43,7 +46,7 @@ export function AnalyzeFit() {
   } = useAnalysis();
 
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setJobDescriptionText(e.target.value);
+    onJobDescriptionChange(e.target.value);
     setValidationError(null);
   };
 
@@ -202,26 +205,6 @@ export function AnalyzeFit() {
           </CardContent>
         </Card>
       )}
-
-      {!isLoading &&
-        (suitabilityAssessment ||
-          radarChart?.data ||
-          skillAssessment?.skills ||
-          resumeOptimizations?.plan ||
-          learningPriorities?.plan) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Deep Research</CardTitle>
-              <CardDescription>
-                Conduct in-depth research on the company and role to better prepare for your
-                application
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DeepResearch jobDescriptionText={jobDescriptionText} />
-            </CardContent>
-          </Card>
-        )}
     </div>
   );
 }

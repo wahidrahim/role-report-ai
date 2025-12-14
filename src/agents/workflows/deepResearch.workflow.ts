@@ -4,14 +4,14 @@ import { generateObject } from 'ai';
 import z from 'zod';
 
 import { model } from '@/agents/config';
-import { createInterviewPrepGuidePrompt } from '@/agents/prompts/createInterviewPrepGuide.prompt';
 import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
+import { interviewPrepGuidePrompt } from '@/agents/prompts/interviewPrepGuide.prompt';
 import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
+import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
 import {
   InterviewPrepGuide,
   interviewPrepGuideSchema,
-} from '@/agents/schemas/createInterviewPrepGuide.schema';
-import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
+} from '@/agents/schemas/interviewPrepGuide.schema';
 import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
 import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
 import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
@@ -86,11 +86,24 @@ const inferCompanyNameAndJobTitle = async (
 };
 
 // NODE 2: Determine if we should proceed with deep research
-const shouldProceedWithDeepResearch = async (state: typeof stateAnnotation.State) => {
+const shouldProceedWithDeepResearch = async (
+  state: typeof stateAnnotation.State,
+  config: LangGraphRunnableConfig,
+) => {
   const { companyName, jobTitle } = state;
   const isValidCompanyName = typeof companyName === 'string' && companyName.length > 0;
   const isValidJobTitle = typeof jobTitle === 'string' && jobTitle.length > 0;
   const shouldProceed = isValidCompanyName && isValidJobTitle;
+
+  if (!isValidCompanyName || !isValidJobTitle) {
+    config.writer?.({
+      event: 'NODE_END',
+      data: {
+        node: 'SHOULD_PROCEED_WITH_DEEP_RESEARCH',
+        message: 'Unable to infer company name or job title',
+      },
+    });
+  }
 
   return shouldProceed ? 'YES' : 'NO';
 };
@@ -267,7 +280,7 @@ const createInterviewPrepGuide = async (
   const { object } = await generateObject({
     model,
     schema: interviewPrepGuideSchema,
-    ...createInterviewPrepGuidePrompt({
+    ...interviewPrepGuidePrompt({
       companyName,
       jobTitle,
       skillAssessment,
