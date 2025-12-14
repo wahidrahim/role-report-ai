@@ -1,8 +1,31 @@
-import { motion } from 'framer-motion';
+'use client';
+
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Activity,
+  AlertTriangle,
+  BrainCircuit,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  Code2,
+  Fingerprint,
+  Globe,
+  Grip,
+  Search,
+  Shield,
+  Sparkles,
+  Users,
+  Zap,
+} from 'lucide-react';
+import { useState } from 'react';
 
 import type { ResearchReport } from '@/ai/deep-research/nodes/createResearchReport';
 import { Badge } from '@/core/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
+import { ScrollArea } from '@/core/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
+import { cn } from '@/core/lib/utils';
 
 import { StreamEvent } from './useDeepResearch';
 
@@ -10,233 +33,375 @@ type DeepResearchReportProps = {
   isLoading: boolean;
   streamEvents: StreamEvent[];
   researchReport: Partial<ResearchReport> | null;
+  error?: string | null;
 };
 
+// --- Animations ---
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.1 },
   },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 100, damping: 15 },
+  },
 };
+
+// --- Components ---
+
+function StatusLine({ event, isLoading }: { event?: StreamEvent; isLoading: boolean }) {
+  if (!event && !isLoading) return null;
+
+  const displayMessage = event?.data?.message || 'Initializing research protocols...';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="group relative overflow-hidden rounded-xl bg-black/40 border border-primary/20 p-4 font-mono text-sm"
+    >
+      {/* Scanning effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+
+      <div className="flex items-center gap-4 relative z-10">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary animate-pulse">
+          <Activity className="h-4 w-4" />
+        </div>
+        <div className="flex-1 space-y-1">
+          <div className="flex items-center gap-2 text-xs text-primary/70 uppercase tracking-widest">
+            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+            System Active
+          </div>
+          <div className="text-primary font-medium tracking-wide">
+            <span className="mr-2 text-primary/50">›</span>
+            {displayMessage}
+            <span className="ml-1 animate-pulse">_</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function CompanyHealthWidget({ health }: { health: NonNullable<ResearchReport['companyHealth']> }) {
+  const statusColors = {
+    'Stable/Growing': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    'Risky/Layoffs': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+    Unknown: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  };
+
+  const statusIcons = {
+    'Stable/Growing': CheckCircle2,
+    'Risky/Layoffs': AlertTriangle,
+    Unknown: Activity,
+  };
+
+  const Icon = statusIcons[health.status] || Activity;
+
+  return (
+    <Card className="h-full bg-white/5 border-white/10 overflow-hidden relative group">
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/20" />
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center gap-2 text-lg font-outfit text-white/90">
+          <Shield className="h-5 w-5 text-primary" />
+          Company Health
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="relative space-y-6">
+        <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              'flex h-16 w-16 items-center justify-center rounded-2xl border-2 shadow-[0_0_15px_rgba(0,0,0,0.3)]',
+              statusColors[health.status] ?? statusColors.Unknown,
+            )}
+          >
+            <Icon className="h-8 w-8" />
+          </div>
+          <div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
+              Current Status
+            </div>
+            <div
+              className={cn(
+                'text-xl font-bold font-outfit',
+                (statusColors[health.status] ?? statusColors.Unknown).split(' ')[0],
+              )}
+            >
+              {health.status || 'Loading...'}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-sm leading-relaxed text-white/80 bg-black/20 p-3 rounded-lg border border-white/5">
+            {health.summary}
+          </div>
+
+          {health.redFlags && health.redFlags.length > 0 && (
+            <div className="animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-rose-400 mb-2 uppercase tracking-wide">
+                <AlertTriangle className="h-3 w-3" />
+                Risk Factors Detected
+              </div>
+              <ul className="space-y-2">
+                {health.redFlags.map((flag, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-rose-200/80">
+                    <span className="mt-1.5 h-1 w-1 rounded-full bg-rose-400 shrink-0" />
+                    {flag}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CultureRadarWidget({ culture }: { culture: NonNullable<ResearchReport['cultureIntel']> }) {
+  return (
+    <Card className="h-full bg-white/5 border-white/10 overflow-hidden relative">
+      <div className="absolute top-0 right-0 p-32 bg-primary/5 blur-3xl rounded-full translate-x-10 -translate-y-10" />
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg font-outfit text-white/90">
+          <Fingerprint className="h-5 w-5 text-primary" />
+          Cultural Fingerprint
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6 relative">
+        <div className="flex flex-wrap gap-2">
+          {culture.keywords?.map((k, i) => (
+            <Badge
+              key={i}
+              variant="outline"
+              className="bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary text-xs px-3 py-1 transition-colors"
+            >
+              #{k}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="grid gap-4">
+          <div className="group rounded-xl bg-black/20 p-4 border border-white/5 hover:border-white/10 transition-colors">
+            <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm font-medium">
+              <Users className="h-4 w-4 text-sky-400" />
+              Manager Vibe
+            </div>
+            <p className="text-sm text-white/80 leading-relaxed">{culture.managerVibe}</p>
+          </div>
+
+          <div className="group rounded-xl bg-black/20 p-4 border border-white/5 hover:border-white/10 transition-colors">
+            <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm font-medium">
+              <Code2 className="h-4 w-4 text-violet-400" />
+              Engineering Culture
+            </div>
+            <p className="text-sm text-white/80 leading-relaxed">{culture.engineeringCulture}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PrepHubWidget({ guide }: { guide: NonNullable<ResearchReport['interviewPrepGuide']> }) {
+  return (
+    <Card className="col-span-full h-full bg-white/5 border-white/10 overflow-hidden">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg font-outfit text-white/90">
+          <BrainCircuit className="h-5 w-5 text-primary" />
+          Strategic Prep Hub
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="format" className="w-full">
+          <TabsList className="bg-black/20 p-1 border border-white/5 w-full justify-start gap-2">
+            <TabsTrigger
+              value="format"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            >
+              <Grip className="h-4 w-4 mr-2" />
+              The Process
+            </TabsTrigger>
+            <TabsTrigger
+              value="courses"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Crash Courses
+            </TabsTrigger>
+            <TabsTrigger
+              value="questions"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Strategic Qs
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="format" className="mt-6 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10"
+            >
+              <h3 className="text-xl font-outfit font-semibold text-white mb-2">
+                {guide.interviewFormat?.style}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {guide.interviewFormat?.description}
+              </p>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="courses" className="mt-6">
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="grid gap-4">
+                {guide.skillGapCrashCourses?.map((course, i) => (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    key={i}
+                    className="group relative overflow-hidden rounded-xl bg-black/20 border border-white/5 hover:border-primary/20 transition-all p-5"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <h4 className="flex items-center gap-2 text-base font-semibold text-primary/90 mb-3">
+                      <Zap className="h-4 w-4" />
+                      {course.topic}
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                          Company Context
+                        </div>
+                        <p className="text-sm text-white/80">{course.companyContext}</p>
+                      </div>
+                      <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+                        <div className="text-xs uppercase tracking-wider text-primary mb-1 font-semibold">
+                          Study Tip
+                        </div>
+                        <p className="text-sm text-primary/80">{course.studyTip}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="questions" className="mt-6">
+            <div className="grid gap-3">
+              {guide.strategicQuestions?.map((q, i) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  key={i}
+                  className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-circle bg-primary/10 text-primary font-bold font-mono text-sm">
+                    {i + 1}
+                  </div>
+                  <div className="pt-1.5 text-sm text-white/90 leading-relaxed font-medium">
+                    {q.question}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function DeepResearchReport({
   isLoading,
   error,
   streamEvents,
   researchReport,
-}: DeepResearchReportProps & { error?: string | null }) {
+}: DeepResearchReportProps) {
   if (!isLoading && !researchReport && streamEvents.length === 0 && !error) {
     return null;
   }
 
+  const latestEvent = streamEvents[streamEvents.length - 1];
+
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <section className="space-y-8 py-4">
+      {/* Error State */}
       {error && (
         <Card className="border-red-500/50 bg-red-500/10">
-          <CardContent className="p-4 text-red-200">
-            <span className="font-bold">Error:</span> {error}
+          <CardContent className="p-4 text-red-200 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5" />
+            <div>
+              <span className="font-bold block">Analysis Failed</span>
+              {error}
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Streaming Events / Terminal Log style */}
-      {(isLoading || streamEvents.length > 0) && (
-        <Card className="bg-black/40 border-primary/20 font-mono text-sm max-h-48 overflow-y-auto mb-6">
-          <CardContent className="p-4 space-y-1">
-            {streamEvents.map((event) => (
-              <div key={event.id} className="text-muted-foreground">
-                <span className="text-primary mr-2">›</span>
-                {event.data?.message}
-              </div>
-            ))}
-            {isLoading && <div className="animate-pulse text-primary">_</div>}
-          </CardContent>
-        </Card>
+      {/* Streaming Status Line */}
+      {(isLoading || (!researchReport && streamEvents.length > 0)) && (
+        <StatusLine event={latestEvent} isLoading={isLoading} />
       )}
 
+      {/* Main Dashboard */}
       {researchReport && (
-        <div>
-          <Card className="border-secondary/20 bg-secondary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                Deep Research Report
-                {isLoading && (
-                  <Badge variant="secondary" className="animate-pulse bg-primary/20 text-primary">
-                    Streaming...
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              {/* Company Health */}
-              {researchReport.companyHealth && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-outfit font-semibold text-primary/90">
-                    Company Health
-                  </h3>
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3">
-                    {researchReport.companyHealth.status && (
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          className={
-                            researchReport.companyHealth.status === 'Stable/Growing'
-                              ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                              : researchReport.companyHealth.status === 'Risky/Layoffs'
-                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
-                          }
-                        >
-                          {researchReport.companyHealth.status}
-                        </Badge>
-                      </div>
-                    )}
-                    {researchReport.companyHealth.summary && (
-                      <p className="text-sm leading-relaxed">
-                        {researchReport.companyHealth.summary}
-                      </p>
-                    )}
-                    {researchReport.companyHealth.redFlags &&
-                      researchReport.companyHealth.redFlags.length > 0 && (
-                        <div className="mt-2 text-sm text-red-500">
-                          <span className="font-semibold">Risks: </span>
-                          {researchReport.companyHealth.redFlags.join(', ')}
-                        </div>
-                      )}
-                  </div>
-                </div>
-              )}
+        <motion.div
+          variants={containerVariants}
+          initial="visible"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          {/* Header */}
+          <motion.div variants={itemVariants} className="col-span-full mb-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-outfit font-bold flex items-center gap-3">
+                <Globe className="h-6 w-6 text-primary" />
+                Intelligence Dossier
+              </h2>
+              <Badge
+                variant="outline"
+                className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-3 py-1"
+              >
+                CONFIDENTIAL
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-1">
+              Generated deep-dive intelligence report based on public data sources.
+            </p>
+          </motion.div>
 
-              {/* Culture Intelligence */}
-              {researchReport.cultureIntel && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-outfit font-semibold text-primary/90">
-                    Culture Intelligence
-                  </h3>
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
-                    {researchReport.cultureIntel.keywords && (
-                      <div className="flex flex-wrap gap-2">
-                        {researchReport.cultureIntel.keywords.map((k, i) => (
-                          <Badge
-                            key={i}
-                            variant="outline"
-                            className="text-xs bg-primary/10 border-primary/20 text-primary-foreground"
-                          >
-                            {k}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    {researchReport.cultureIntel.managerVibe && (
-                      <div className="text-sm">
-                        <span className="font-medium text-muted-foreground mr-2">
-                          Manager Vibe:
-                        </span>
-                        {researchReport.cultureIntel.managerVibe}
-                      </div>
-                    )}
-                    {researchReport.cultureIntel.engineeringCulture && (
-                      <div className="text-sm">
-                        <span className="font-medium text-muted-foreground mr-2">Eng Culture:</span>
-                        {researchReport.cultureIntel.engineeringCulture}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+          {/* Widgets */}
+          {researchReport.companyHealth && (
+            <motion.div variants={itemVariants} className="h-full">
+              <CompanyHealthWidget health={researchReport.companyHealth} />
+            </motion.div>
+          )}
 
-              {/* Interview Prep */}
-              {researchReport.interviewPrepGuide && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-outfit font-semibold text-primary/90">
-                    Interview Prep Guide
-                  </h3>
+          {researchReport.cultureIntel && (
+            <motion.div variants={itemVariants} className="h-full">
+              <CultureRadarWidget culture={researchReport.cultureIntel} />
+            </motion.div>
+          )}
 
-                  {/* Format */}
-                  {researchReport.interviewPrepGuide.interviewFormat && (
-                    <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
-                        Format Expectation
-                      </h4>
-                      <div className="mb-2 font-medium">
-                        {researchReport.interviewPrepGuide.interviewFormat.style}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {researchReport.interviewPrepGuide.interviewFormat.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Skill Gap Crash Courses */}
-                  {researchReport.interviewPrepGuide.skillGapCrashCourses &&
-                    researchReport.interviewPrepGuide.skillGapCrashCourses.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-semibold text-muted-foreground">
-                          Skill Gap Crash Courses
-                        </h4>
-                        <div className="grid gap-3">
-                          {researchReport.interviewPrepGuide.skillGapCrashCourses.map(
-                            (course, i) => (
-                              <Card key={i} className="bg-white/5 border-white/5 pt-4">
-                                <CardContent className="p-4 pt-0 space-y-2">
-                                  <div className="font-semibold text-primary font-outfit">
-                                    {course.topic}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    <span className="font-semibold text-foreground/80 block mb-1">
-                                      Company Context:
-                                    </span>
-                                    {course.companyContext}
-                                  </div>
-                                  <div className="text-sm bg-primary/10 border border-primary/20 p-3 rounded-md text-primary-foreground/90">
-                                    <span className="font-bold mr-1 text-primary">Study Tip:</span>
-                                    {course.studyTip}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                  {/* Strategic Questions */}
-                  {researchReport.interviewPrepGuide.strategicQuestions?.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-muted-foreground">
-                        Strategic Questions to Ask
-                      </h4>
-                      <ul className="space-y-2">
-                        {researchReport.interviewPrepGuide.strategicQuestions.map((q, i) => (
-                          <li
-                            key={i}
-                            className="p-3 rounded-lg bg-primary/5 border border-primary/10 text-sm"
-                          >
-                            <span className="text-primary font-bold mr-2">{i + 1}.</span>
-                            {q.question}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+          {researchReport.interviewPrepGuide && (
+            <motion.div variants={itemVariants} className="col-span-full">
+              <PrepHubWidget guide={researchReport.interviewPrepGuide} />
+            </motion.div>
+          )}
+        </motion.div>
       )}
-    </motion.div>
+    </section>
   );
 }
