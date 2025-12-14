@@ -1,18 +1,20 @@
 import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
 import { tavily } from '@tavily/core';
-import { generateObject, streamObject } from 'ai';
+import { generateObject } from 'ai';
 import z from 'zod';
 
 import { model } from '@/agents/config';
 import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
 import { interviewPrepGuidePrompt } from '@/agents/prompts/interviewPrepGuide.prompt';
 import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
+import { researchReportPrompt } from '@/agents/prompts/researchReport.prompt';
 import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
 import {
   InterviewPrepGuide,
   interviewPrepGuideSchema,
 } from '@/agents/schemas/interviewPrepGuide.schema';
 import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
+import { ResearchReport, researchReportSchema } from '@/agents/schemas/researchReport.schema';
 import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
 import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
 
@@ -38,6 +40,7 @@ const stateAnnotation = Annotation.Root({
   }),
   searchResultsReviewFeedback: Annotation<string>,
   interviewPrepGuide: Annotation<InterviewPrepGuide>,
+  researchReport: Annotation<ResearchReport>,
 });
 
 // NODE 1: Extract company name and job title
@@ -246,6 +249,7 @@ const reviewSearchResults = async (
       ${searchResults.join('\n\n---\n\n')}
     `,
     prompt: `Evaluate the data quality and assign "PASS" or "FAIL" based on the criteria above.`,
+    abortSignal: config.signal,
   });
 
   return {
@@ -277,7 +281,7 @@ const createInterviewPrepGuide = async (
     },
   });
 
-  const interviewPrepGuideStream = streamObject({
+  const { object } = await generateObject({
     model,
     schema: interviewPrepGuideSchema,
     ...interviewPrepGuidePrompt({
@@ -287,32 +291,59 @@ const createInterviewPrepGuide = async (
       suitabilityAssessment,
       searchResults,
     }),
+    abortSignal: config.signal,
   });
-
-  for await (const partial of interviewPrepGuideStream.partialObjectStream) {
-    config.writer?.({
-      event: 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL',
-      data: {
-        node: 'CREATE_INTERVIEW_PREP_GUIDE',
-        interviewPrepGuide: partial,
-      },
-    });
-  }
-
-  const interviewPrepGuide = await interviewPrepGuideStream.object;
 
   config.writer?.({
     event: 'NODE_END',
     data: {
       node: 'CREATE_INTERVIEW_PREP_GUIDE',
       message: 'Interview prep guide created successfully',
-      interviewPrepGuide,
+      interviewPrepGuide: object,
     },
   });
 
-  return {
-    interviewPrepGuide,
-  };
+  return { interviewPrepGuide: object };
+};
+
+const createResearchReport = async (
+  state: typeof stateAnnotation.State,
+  config: LangGraphRunnableConfig,
+) => {
+  const { searchResults, interviewPrepGuide, companyName } = state;
+
+  if (!searchResults || !interviewPrepGuide || !companyName) {
+    throw new Error('Missing required state at CREATE_RESEARCH_REPORT node');
+  }
+
+  config.writer?.({
+    event: 'NODE_START',
+    data: {
+      node: 'CREATE_RESEARCH_REPORT',
+      message: 'Creating research report...',
+    },
+  });
+
+  const { object } = await generateObject({
+    model,
+    schema: researchReportSchema,
+    ...researchReportPrompt({
+      companyName,
+      searchResults,
+      interviewPrepGuide,
+    }),
+  });
+
+  config.writer?.({
+    event: 'RESEARCH_REPORT_CREATED',
+    data: {
+      node: 'CREATE_RESEARCH_REPORT',
+      message: 'Research report created successfully',
+      researchReport: object,
+    },
+  });
+
+  return { researchReport: object };
 };
 
 export const deepResearchWorkflow = new StateGraph(stateAnnotation)
@@ -321,6 +352,7 @@ export const deepResearchWorkflow = new StateGraph(stateAnnotation)
   .addNode('SEARCH_FOR_INFORMATION', searchForInformation)
   .addNode('REVIEW_SEARCH_RESULTS', reviewSearchResults)
   .addNode('CREATE_INTERVIEW_PREP_GUIDE', createInterviewPrepGuide)
+  .addNode('CREATE_RESEARCH_REPORT', createResearchReport)
   .addEdge(START, 'INFER_COMPANY_NAME_AND_JOB_TITLE')
   .addConditionalEdges('INFER_COMPANY_NAME_AND_JOB_TITLE', shouldProceedWithDeepResearch, {
     YES: 'PLAN_DEEP_RESEARCH',
@@ -328,10 +360,10 @@ export const deepResearchWorkflow = new StateGraph(stateAnnotation)
   })
   .addEdge('PLAN_DEEP_RESEARCH', 'SEARCH_FOR_INFORMATION')
   .addEdge('SEARCH_FOR_INFORMATION', 'REVIEW_SEARCH_RESULTS')
-
   .addConditionalEdges('REVIEW_SEARCH_RESULTS', shouldReGenerateSearchQueries, {
     YES: 'PLAN_DEEP_RESEARCH',
     NO: 'CREATE_INTERVIEW_PREP_GUIDE',
   })
-  .addEdge('CREATE_INTERVIEW_PREP_GUIDE', END)
+  .addEdge('CREATE_INTERVIEW_PREP_GUIDE', 'CREATE_RESEARCH_REPORT')
+  .addEdge('CREATE_RESEARCH_REPORT', END)
   .compile();

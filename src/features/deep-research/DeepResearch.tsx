@@ -3,23 +3,20 @@
 import { createParser } from 'eventsource-parser';
 import { useEffect, useRef, useState } from 'react';
 
-import { InterviewPrepGuide } from '@/agents/schemas/interviewPrepGuide.schema';
+import { ResearchReport } from '@/agents/schemas/researchReport.schema';
+import { Badge } from '@/core/components/ui/badge';
 import { Button } from '@/core/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 import { useResumeStore } from '@/stores/resumeStore';
 
 type StreamEvent = {
   id: string;
-  event:
-    | 'NODE_START'
-    | 'NODE_END'
-    | 'INTERVIEW_PREP_GUIDE_CREATED'
-    | 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL';
+  event: 'NODE_START' | 'NODE_END' | 'RESEARCH_REPORT_CREATED' | 'RESEARCH_REPORT_STREAM_PARTIAL';
   data?: Partial<{
     node?: string;
     message?: string;
     data?: Record<string, unknown>;
-    interviewPrepGuide?: Partial<InterviewPrepGuide>;
+    researchReport?: Partial<ResearchReport>;
   }>;
 };
 
@@ -30,9 +27,7 @@ type DeepResearchProps = {
 export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
-  const [interviewPrepGuide, setInterviewPrepGuide] = useState<Partial<InterviewPrepGuide> | null>(
-    null,
-  );
+  const [researchReport, setResearchReport] = useState<Partial<ResearchReport> | null>(null);
   const {
     resumeText,
     skillAssessment,
@@ -57,7 +52,7 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
   const handleDeepResearch = async () => {
     setIsLoading(true);
     setStreamEvents([]);
-    setInterviewPrepGuide(null);
+    setResearchReport(null);
 
     try {
       const response = await fetch('/api/deep-research', {
@@ -90,16 +85,16 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
             event: event.event as
               | 'NODE_START'
               | 'NODE_END'
-              | 'INTERVIEW_PREP_GUIDE_CREATED'
-              | 'INTERVIEW_PREP_GUIDE_STREAM_PARTIAL',
+              | 'RESEARCH_REPORT_CREATED'
+              | 'RESEARCH_REPORT_STREAM_PARTIAL',
             data: parsedData,
           };
 
           setStreamEvents((prev) => [...prev, newStreamEvent]);
 
-          // Update interview prep guide from streaming or final event
-          if (parsedData.interviewPrepGuide) {
-            setInterviewPrepGuide(parsedData.interviewPrepGuide);
+          // Update research report from streaming or final event
+          if (parsedData.researchReport) {
+            setResearchReport(parsedData.researchReport);
           }
         },
       });
@@ -135,11 +130,11 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
           <div key={event.id}>{event.data?.message}</div>
         ))}
       </div>
-      {interviewPrepGuide && (
+      {researchReport && (
         <Card>
           <CardHeader>
             <CardTitle>
-              Interview Prep Guide
+              Research Report
               {isLoading && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   (Streaming...)
@@ -148,70 +143,155 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {interviewPrepGuide.interviewFormat?.format && (
+            {researchReport.companyHealth && (
               <div>
-                <h3 className="font-semibold mb-2">Interview Format</h3>
-                <p className="text-sm font-medium mb-1">
-                  {interviewPrepGuide.interviewFormat.format}
-                </p>
-                {interviewPrepGuide.interviewFormat.rationale && (
-                  <p className="text-sm text-muted-foreground">
-                    {interviewPrepGuide.interviewFormat.rationale}
-                  </p>
+                <h3 className="font-semibold mb-2">Company Health</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge
+                    variant={
+                      researchReport.companyHealth.status === 'Stable/Growing'
+                        ? 'default'
+                        : researchReport.companyHealth.status === 'Risky/Layoffs'
+                          ? 'destructive'
+                          : 'secondary'
+                    }
+                  >
+                    {researchReport.companyHealth.status}
+                  </Badge>
+                </div>
+                {researchReport.companyHealth.summary && (
+                  <p className="text-sm mb-3">{researchReport.companyHealth.summary}</p>
+                )}
+                {researchReport.companyHealth.redFlags &&
+                  researchReport.companyHealth.redFlags.length > 0 && (
+                    <div>
+                      <div className="text-xs font-medium text-muted-foreground mb-1">
+                        Red Flags
+                      </div>
+                      <ul className="space-y-1">
+                        {researchReport.companyHealth.redFlags.map((flag, index) => (
+                          <li key={index} className="text-sm text-destructive">
+                            • {flag}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {researchReport.cultureIntel && (
+              <div>
+                <h3 className="font-semibold mb-3">Culture Intelligence</h3>
+                {researchReport.cultureIntel.keywords &&
+                  researchReport.cultureIntel.keywords.length > 0 && (
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-muted-foreground mb-2">
+                        Cultural Values
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {researchReport.cultureIntel.keywords.map((keyword, index) => (
+                          <Badge key={index} variant="outline">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                {researchReport.cultureIntel.managerVibe && (
+                  <div className="mb-3">
+                    <div className="text-xs font-medium text-muted-foreground mb-1">
+                      Manager Vibe
+                    </div>
+                    <p className="text-sm">{researchReport.cultureIntel.managerVibe}</p>
+                  </div>
+                )}
+                {researchReport.cultureIntel.engineeringCulture && (
+                  <div>
+                    <div className="text-xs font-medium text-muted-foreground mb-1">
+                      Engineering Culture
+                    </div>
+                    <p className="text-sm">{researchReport.cultureIntel.engineeringCulture}</p>
+                  </div>
                 )}
               </div>
             )}
 
-            {interviewPrepGuide.skillGapCrashCourses &&
-              interviewPrepGuide.skillGapCrashCourses.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Skill Gap Crash Courses</h3>
-                  <div className="space-y-4">
-                    {interviewPrepGuide.skillGapCrashCourses.map((course, index) => (
-                      <Card key={index}>
-                        <CardHeader>
-                          <CardTitle className="text-base">
-                            {course.topic || 'Loading...'}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {course.companyContext && (
-                            <div>
-                              <div className="text-xs font-medium text-muted-foreground mb-1">
-                                Company Context
-                              </div>
-                              <p className="text-sm">{course.companyContext}</p>
-                            </div>
-                          )}
-                          {course.studyTip && (
-                            <div>
-                              <div className="text-xs font-medium text-muted-foreground mb-1">
-                                Study Tip
-                              </div>
-                              <p className="text-sm">{course.studyTip}</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+            {researchReport.interviewPrepGuide && (
+              <div>
+                <h3 className="font-semibold mb-3">Interview Prep Guide</h3>
+                {researchReport.interviewPrepGuide.interviewFormat?.format && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold mb-2">Interview Format</h4>
+                    <p className="text-sm font-medium mb-1">
+                      {researchReport.interviewPrepGuide.interviewFormat.format}
+                    </p>
+                    {researchReport.interviewPrepGuide.interviewFormat.rationale && (
+                      <p className="text-sm text-muted-foreground">
+                        {researchReport.interviewPrepGuide.interviewFormat.rationale}
+                      </p>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
 
-            {interviewPrepGuide.strategicQuestions &&
-              interviewPrepGuide.strategicQuestions.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Strategic Questions</h3>
-                  <ul className="space-y-3">
-                    {interviewPrepGuide.strategicQuestions.map((question, index) => (
-                      <li key={index} className="text-sm">
-                        <span className="font-medium text-muted-foreground">{index + 1}.</span>{' '}
-                        {question || 'Loading...'}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {researchReport.interviewPrepGuide.skillGapCrashCourses &&
+                  researchReport.interviewPrepGuide.skillGapCrashCourses.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold mb-3">Skill Gap Crash Courses</h4>
+                      <div className="space-y-4">
+                        {researchReport.interviewPrepGuide.skillGapCrashCourses.map(
+                          (course, index) => (
+                            <Card key={index}>
+                              <CardHeader>
+                                <CardTitle className="text-base">
+                                  {course.topic || 'Loading...'}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-2">
+                                {course.companyContext && (
+                                  <div>
+                                    <div className="text-xs font-medium text-muted-foreground mb-1">
+                                      Company Context
+                                    </div>
+                                    <p className="text-sm">{course.companyContext}</p>
+                                  </div>
+                                )}
+                                {course.studyTip && (
+                                  <div>
+                                    <div className="text-xs font-medium text-muted-foreground mb-1">
+                                      Study Tip
+                                    </div>
+                                    <p className="text-sm">{course.studyTip}</p>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {researchReport.interviewPrepGuide.strategicQuestions &&
+                  researchReport.interviewPrepGuide.strategicQuestions.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-3">Strategic Questions</h4>
+                      <ul className="space-y-3">
+                        {researchReport.interviewPrepGuide.strategicQuestions.map(
+                          (question, index) => (
+                            <li key={index} className="text-sm">
+                              <span className="font-medium text-muted-foreground">
+                                {index + 1}.
+                              </span>{' '}
+                              {question || 'Loading...'}
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
