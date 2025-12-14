@@ -1,5 +1,35 @@
-export const extractCompanyNameAndJobTitlePrompt = (jobDescription: string) => ({
-  system: `
+import type { LangGraphRunnableConfig } from '@langchain/langgraph';
+import { generateObject } from 'ai';
+import { z } from 'zod';
+
+import { model } from '@/ai/config';
+import { emitNodeEnd, emitNodeStart } from '@/ai/workflows/deep-research/events';
+import type { DeepResearchState } from '@/ai/workflows/deep-research/state';
+
+export const extractCompanyNameAndJobTitleSchema = z.object({
+  companyName: z.string(),
+  jobTitle: z.string(),
+  unableToExtract: z.boolean(),
+});
+
+export type ExtractCompanyNameAndJobTitle = z.infer<typeof extractCompanyNameAndJobTitleSchema>;
+
+export const inferCompanyNameAndJobTitle = async (
+  state: DeepResearchState,
+  config: LangGraphRunnableConfig,
+) => {
+  console.log('[NODE] inferring company name and job title');
+  emitNodeStart(config, {
+    node: 'INFER_COMPANY_NAME_AND_JOB_TITLE',
+    message: 'Inferring company name and job title...',
+  });
+
+  const { jobDescription } = state;
+  const { object } = await generateObject({
+    model,
+    schema: extractCompanyNameAndJobTitleSchema,
+    abortSignal: config.signal,
+    system: `
     You extract the hiring company name and the job title from a job description.
 
     Your outputs are used downstream for research, so accuracy and specificity matter more than always returning something.
@@ -28,10 +58,32 @@ export const extractCompanyNameAndJobTitlePrompt = (jobDescription: string) => (
     FAILURE CONDITIONS:
     - If you cannot confidently determine BOTH a companyName and jobTitle, set unableToExtract to true and return empty strings for companyName and jobTitle.
   `,
-  prompt: `
+    prompt: `
     Extract the hiring company name and job title from the job description below.
 
     JOB DESCRIPTION:
     ${jobDescription}
   `,
-});
+  });
+
+  if (object.unableToExtract) {
+    return {
+      companyName: null,
+      jobTitle: null,
+    };
+  }
+
+  emitNodeEnd(config, {
+    node: 'INFER_COMPANY_NAME_AND_JOB_TITLE',
+    message: `Company: ${object.companyName}, Job Title: ${object.jobTitle}`,
+    data: {
+      companyName: object.companyName,
+      jobTitle: object.jobTitle,
+    },
+  });
+
+  return {
+    companyName: object.companyName,
+    jobTitle: object.jobTitle,
+  };
+};

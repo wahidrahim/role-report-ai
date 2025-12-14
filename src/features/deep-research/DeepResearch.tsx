@@ -3,7 +3,7 @@
 import { createParser } from 'eventsource-parser';
 import { useEffect, useRef, useState } from 'react';
 
-import { ResearchReport } from '@/ai/schemas/researchReport.schema';
+import type { ResearchReport } from '@/ai/workflows/deep-research/nodes/createResearchReport';
 import { Badge } from '@/core/components/ui/badge';
 import { Button } from '@/core/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
