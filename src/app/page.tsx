@@ -5,6 +5,7 @@ import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/core/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +22,7 @@ import { useResumeStore } from '@/stores/resumeStore';
 export default function Home() {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('analysis');
 
   const { resumeText } = useResumeStore();
 
@@ -44,15 +46,24 @@ export default function Home() {
     canResearch,
   } = useDeepResearch(jobDescriptionText);
 
+  /* Include error in hasResearchData so we don't hide the tab if it fails */
+  const hasResearchData = streamEvents.length > 0 || !!researchReport || !!deepResearchError;
+
   const handleAnalyze = () => {
     if (!jobDescriptionText) {
       setValidationError('Please enter a job description.');
       return;
     }
     setValidationError(null);
+    setActiveTab('analysis');
     // Resume check is handled inside hook or component, but AnalyzeInputs props might need validation.
     // Actually AnalyzeFit.tsx had validation logic.
     analyze(resumeText || '', jobDescriptionText);
+  };
+
+  const handleStartDeepResearch = () => {
+    startDeepResearch();
+    setActiveTab('research');
   };
 
   return (
@@ -95,7 +106,7 @@ export default function Home() {
                 <span className="w-full" tabIndex={0}>
                   <Button
                     variant="outline"
-                    onClick={startDeepResearch}
+                    onClick={handleStartDeepResearch}
                     disabled={isResearching || !canResearch || !suitabilityAssessment}
                     className="w-full h-12 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-base disabled:opacity-50"
                   >
@@ -111,7 +122,7 @@ export default function Home() {
               {!suitabilityAssessment && (
                 <TooltipContent
                   side="top"
-                  className="bg-destructive text-destructive-foreground border-destructive/20"
+                  className="bg-destructive text-destructive-foreground border-destructive/20 [&_svg]:fill-destructive [&_svg]:text-destructive [&_svg]:bg-destructive"
                 >
                   <p>Running "Analyze Fit" is required to unlock this feature</p>
                 </TooltipContent>
@@ -128,33 +139,49 @@ export default function Home() {
         transition={{ delay: 0.2 }}
         className="lg:col-span-8 space-y-8 pb-20"
       >
-        {/* If nothing happened yet */}
-        {!suitabilityAssessment &&
-          !researchReport &&
-          !isAnalyzing &&
-          !isResearching &&
-          !deepResearchError && (
-            <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
-              <Sparkles className="size-12 mb-4 opacity-20" />
-              <p>Ready to analyze. Upload a resume and job description to begin.</p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
+          {/* Only show tabs if we have research data or are researching to allow switching back and forth */}
+          {(hasResearchData || isResearching) && (
+            <div className="flex items-center justify-between">
+              <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+                <TabsTrigger value="analysis">Fit Analysis</TabsTrigger>
+                <TabsTrigger value="research">Deep Research</TabsTrigger>
+              </TabsList>
             </div>
           )}
 
-        <AnalyzeResults
-          radarChart={radarChart}
-          skillAssessment={skillAssessment}
-          suitabilityAssessment={suitabilityAssessment}
-          resumeOptimizations={resumeOptimizations}
-          learningPriorities={learningPriorities}
-          isLoading={isAnalyzing}
-        />
+          {/* If nothing happened yet */}
+          {!suitabilityAssessment &&
+            !researchReport &&
+            !isAnalyzing &&
+            !isResearching &&
+            !deepResearchError && (
+              <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
+                <Sparkles className="size-12 mb-4 opacity-20" />
+                <p>Ready to analyze. Upload a resume and job description to begin.</p>
+              </div>
+            )}
 
-        <DeepResearchReport
-          isLoading={isResearching}
-          error={deepResearchError}
-          streamEvents={streamEvents}
-          researchReport={researchReport}
-        />
+          <TabsContent value="analysis" className="mt-0 focus-visible:outline-none">
+            <AnalyzeResults
+              radarChart={radarChart}
+              skillAssessment={skillAssessment}
+              suitabilityAssessment={suitabilityAssessment}
+              resumeOptimizations={resumeOptimizations}
+              learningPriorities={learningPriorities}
+              isLoading={isAnalyzing}
+            />
+          </TabsContent>
+
+          <TabsContent value="research" className="mt-0 focus-visible:outline-none">
+            <DeepResearchReport
+              isLoading={isResearching}
+              error={deepResearchError}
+              streamEvents={streamEvents}
+              researchReport={researchReport}
+            />
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </main>
   );
