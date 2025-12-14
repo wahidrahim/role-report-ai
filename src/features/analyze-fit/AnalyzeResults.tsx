@@ -86,15 +86,8 @@ export function AnalyzeResults({
 
       {/* Radar Chart */}
       {radarChart?.data && (
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills Radar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SkillsRadarChart data={radarChart.data} />
-            </CardContent>
-          </Card>
+        <div className="flex justify-center py-6">
+          <SkillsRadarChart data={radarChart.data} />
         </div>
       )}
 

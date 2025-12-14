@@ -4,8 +4,6 @@ import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from 'r
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/core/components/ui/chart';
@@ -27,11 +25,11 @@ export type SkillsRadarChartProps = {
 const chartConfig = {
   candidateLevel: {
     label: 'Candidate Level',
-    color: 'var(--chart-1)',
+    color: 'var(--color-primary)',
   },
   requiredLevel: {
     label: 'Required Level',
-    color: 'var(--chart-2)',
+    color: 'var(--color-chart-2)',
   },
 } satisfies ChartConfig;
 
@@ -76,43 +74,74 @@ export function SkillsRadarChart(props: SkillsRadarChartProps) {
   const finalData = [...right, ...left];
 
   return (
-    <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[400px] w-full">
-      <RadarChart data={finalData}>
-        <ChartTooltip
-          cursor={false}
-          content={(props: any) => {
-            const { active, payload } = props;
-            if (!active || !payload || !payload.length) {
-              return null;
-            }
-            const data = payload[0].payload;
+    <div>
+      <ChartContainer config={chartConfig} className="mx-auto min-h-[400px] w-full">
+        <RadarChart data={finalData}>
+          <ChartTooltip
+            cursor={false}
+            content={(props: any) => {
+              const { active, payload } = props;
+              if (!active || !payload || !payload.length) {
+                return null;
+              }
+              const data = payload[0].payload;
 
-            return (
-              <div className="grid max-w-[200px] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
-                <div className="font-semibold">{data.skill}</div>
-                <ChartTooltipContent
-                  active={active}
-                  payload={payload}
-                  indicator="line"
-                  hideLabel
-                  className="p-0 border-0 bg-transparent shadow-none min-w-0"
-                />
-                {data.reasoning && (
-                  <div className="mt-1 pt-1 border-t border-border/50">
-                    <p className="text-muted-foreground">{data.reasoning}</p>
-                  </div>
-                )}
-              </div>
-            );
-          }}
-        />
-        <PolarGrid gridType="circle" />
-        <PolarAngleAxis dataKey="skill" />
-        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-        <Radar dataKey="candidateLevel" fill="var(--color-candidateLevel)" fillOpacity={0.6} />
-        <Radar dataKey="requiredLevel" fill="var(--color-requiredLevel)" fillOpacity={0.6} />
-        <ChartLegend className="mt-8" content={<ChartLegendContent />} />
-      </RadarChart>
-    </ChartContainer>
+              return (
+                <div className="grid max-w-[200px] items-start gap-1.5 rounded-lg border border-border/50 bg-background/90 backdrop-blur-sm px-2.5 py-1.5 text-xs shadow-xl">
+                  <div className="font-semibold text-foreground">{data.skill}</div>
+                  <ChartTooltipContent
+                    active={active}
+                    payload={payload}
+                    indicator="line"
+                    hideLabel
+                    className="p-0 border-0 bg-transparent shadow-none min-w-0"
+                  />
+                  {data.reasoning && (
+                    <div className="mt-1 pt-1 border-t border-border/50">
+                      <p className="text-muted-foreground">{data.reasoning}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+          <PolarGrid
+            gridType="circle"
+            stroke="var(--color-border)"
+            strokeWidth={1}
+            className="opacity-100" // Increased visibility
+          />
+          <PolarAngleAxis
+            dataKey="skill"
+            tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12, fontWeight: 500 }}
+          />
+          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+          <Radar
+            dataKey="candidateLevel"
+            fill="var(--color-candidateLevel)"
+            fillOpacity={0.4}
+            stroke="var(--color-candidateLevel)"
+            strokeWidth={1}
+          />
+          <Radar
+            dataKey="requiredLevel"
+            fill="var(--color-requiredLevel)"
+            fillOpacity={0.2}
+            stroke="var(--color-requiredLevel)"
+            strokeWidth={1}
+          />
+        </RadarChart>
+      </ChartContainer>
+
+      {/* Custom Legend */}
+      <div className="flex items-center justify-center gap-6 mt-4">
+        <span className="text-xs font-bold" style={{ color: chartConfig.candidateLevel.color }}>
+          {chartConfig.candidateLevel.label}
+        </span>
+        <span className="text-xs font-bold" style={{ color: chartConfig.requiredLevel.color }}>
+          {chartConfig.requiredLevel.label}
+        </span>
+      </div>
+    </div>
   );
 }
