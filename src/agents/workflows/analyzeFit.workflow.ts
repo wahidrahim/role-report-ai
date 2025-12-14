@@ -18,21 +18,33 @@ const sendDataFn =
     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type, data })}\n\n`));
   };
 
-export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: string) =>
+export const analyzeFitWorkflow = (
+  resumeText: string,
+  jobDescriptionText: string,
+  abortSignal?: AbortSignal,
+) =>
   new ReadableStream({
     start: async (controller) => {
       try {
+        // Check if already aborted before starting
+        if (abortSignal?.aborted) {
+          controller.close();
+          return;
+        }
+
         const sendData = sendDataFn(controller);
 
         const radarChartStream = streamObject({
           model,
           schema: radarChartSchema,
+          abortSignal,
           ...radarChartPrompt(resumeText, jobDescriptionText),
         });
 
         const skillAssessmentStream = streamObject({
           model,
           schema: skillAssessmentSchema,
+          abortSignal,
           ...skillAssessmentPrompt(resumeText, jobDescriptionText),
         });
 
@@ -55,9 +67,16 @@ export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: strin
           skillAssessmentStream.object,
         ]);
 
+        // Check if aborted before starting suitability assessment
+        if (abortSignal?.aborted) {
+          controller.close();
+          return;
+        }
+
         const suitabilityAssessmentStream = streamObject({
           model,
           schema: suitabilityAssessmentSchema,
+          abortSignal,
           ...suitabilityAssessmentPrompt(
             resumeText,
             jobDescriptionText,
@@ -72,9 +91,16 @@ export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: strin
 
         const suitabilityAssessment = await suitabilityAssessmentStream.object;
 
+        // Check if aborted before starting final streams
+        if (abortSignal?.aborted) {
+          controller.close();
+          return;
+        }
+
         const resumeOptimizationsStream = streamObject({
           model,
           schema: actionPlanSchema,
+          abortSignal,
           ...resumeOptimizationsPrompt(
             resumeText,
             jobDescriptionText,
@@ -86,6 +112,7 @@ export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: strin
         const learningPrioritiesStream = streamObject({
           model,
           schema: actionPlanSchema,
+          abortSignal,
           ...learningPrioritiesPrompt(
             resumeText,
             jobDescriptionText,
@@ -112,6 +139,13 @@ export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: strin
         sendData('done', null);
         controller.close();
       } catch (error) {
+        // Handle abort errors gracefully - these are expected when user navigates away
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('Analysis aborted by client');
+          controller.close();
+          return;
+        }
+
         console.error('Error in analyzeFitWorkflow:', error);
         sendDataFn(controller)(
           'error',
@@ -119,5 +153,9 @@ export const analyzeFitWorkflow = (resumeText: string, jobDescriptionText: strin
         );
         controller.close();
       }
+    },
+    cancel() {
+      // This is called when the client disconnects
+      console.log('Analysis stream cancelled by client');
     },
   });

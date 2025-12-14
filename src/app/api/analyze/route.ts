@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const stream = analyzeFitWorkflow(resumeText, jobDescriptionText);
+  // Pass the request's abort signal to stop generation when client disconnects
+  const stream = analyzeFitWorkflow(resumeText, jobDescriptionText, request.signal);
 
   return new Response(stream, {
     headers: {

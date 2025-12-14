@@ -1,13 +1,6 @@
-import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
-import { UIMessage, generateObject } from 'ai';
+import { UIMessage } from 'ai';
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 
-import { model } from '@/agents/config';
-import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
-import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
-import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
-import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
 import { deepResearchWorkflow } from '@/agents/workflows/deepResearch.workflow';
 
 export type DeepResearchUIMessage = UIMessage<
@@ -41,10 +34,23 @@ export async function POST(request: Request) {
     messages: body.messages,
   });
 
+  // Get the abort signal from the request to stop generation when client disconnects
+  const abortSignal = request.signal;
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start: async (controller) => {
+      // Check if already aborted before starting
+      if (abortSignal.aborted) {
+        controller.close();
+        return;
+      }
+
       const emit = (event: string, data: unknown) => {
+        // Don't emit if aborted
+        if (abortSignal.aborted) {
+          return;
+        }
         controller.enqueue(
           encoder.encode(
             `id: ${crypto.randomUUID()}\nevent: ${event}\ndata: ${JSON.stringify(data)}\n\n`,
@@ -52,16 +58,36 @@ export async function POST(request: Request) {
         );
       };
 
-      const state = await deepResearchWorkflow.stream(
-        { jobDescription: jobDescriptionText, skillAssessment, suitabilityAssessment },
-        { streamMode: 'custom' },
-      );
+      try {
+        const state = await deepResearchWorkflow.stream(
+          { jobDescription: jobDescriptionText, skillAssessment, suitabilityAssessment },
+          { streamMode: 'custom', signal: abortSignal },
+        );
 
-      for await (const chunk of state) {
-        emit(chunk.event, chunk.data);
+        for await (const chunk of state) {
+          // Check if aborted during iteration
+          if (abortSignal.aborted) {
+            break;
+          }
+          emit(chunk.event, chunk.data);
+        }
+
+        controller.close();
+      } catch (error) {
+        // Handle abort errors gracefully
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('Deep research aborted by client');
+          controller.close();
+          return;
+        }
+
+        console.error('Error in deep research:', error);
+        controller.close();
       }
-
-      controller.close();
+    },
+    cancel() {
+      // This is called when the client disconnects
+      console.log('Deep research stream cancelled by client');
     },
   });
 

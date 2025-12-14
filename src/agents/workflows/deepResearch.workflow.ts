@@ -36,6 +36,7 @@ const inferCompanyNameAndJobTitle = async (
   const { object } = await generateObject({
     model,
     schema: extractCompanyNameAndJobTitleSchema,
+    abortSignal: config.signal,
     ...extractCompanyNameAndJobTitlePrompt(jobDescription),
   });
 
@@ -95,6 +96,7 @@ const planDeepResearch = async (
   const { object } = await generateObject({
     model,
     schema: DeepResearchPlanSchema,
+    abortSignal: config.signal,
     ...deepResearchPlanPrompt({ companyName, jobTitle, skillAssessment, suitabilityAssessment }),
   });
 
