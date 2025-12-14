@@ -46,6 +46,7 @@ export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
 
   const handleDeepResearch = async () => {
     setIsLoading(true);
+    setStreamEvents([]);
 
     try {
       const response = await fetch('/api/deep-research', {
