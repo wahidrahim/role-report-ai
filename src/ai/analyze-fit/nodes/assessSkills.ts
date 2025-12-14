@@ -51,6 +51,8 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - nice-to-have: Marked as "preferred", "plus", or "bonus"
 
       RULES:
+      - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
+      - Aim to identify at least 5-10 distinct skills if the job description mentions them.
       - Only include CONCRETE TECHNOLOGIES (React, Docker, AWS, PostgreSQL, Kubernetes)
       - Exclude vague concepts (async programming, version control, agile, soft skills)
       - Each skill must have exactly ONE status
@@ -58,6 +60,8 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     `,
     prompt: `
       Analyze the job description against the candidate's resume. For each specific technology mentioned in the job description, output a skill object with its status and importance, wrapped in a JSON object under the key \`skills\`.
+      
+      BE COMPREHENSIVE. List every single technology found in the job description and assess it.
 
       RESUME TEXT:
       ${resumeText}
@@ -72,6 +76,9 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
   }
 
   const skillAssessment = await skillAssessmentStream.object;
+
+  console.log(JSON.stringify(skillAssessment, null, 2));
+
   emitAnalysisCreated(config, {
     node: 'ASSESS_SKILLS',
     type: 'skillAssessment',

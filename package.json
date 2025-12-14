@@ -12,6 +12,8 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.80",
     "@ai-sdk/react": "^2.0.109",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/outfit": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
     "@langchain/core": "^1.1.4",
     "@langchain/langgraph": "^1.0.4",
@@ -49,6 +51,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "eventsource-parser": "^3.0.6",
+    "framer-motion": "^12.23.26",
     "input-otp": "^1.4.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.556.0",
