@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
-  title: 'AI Career Dossier',
-  description: 'AI Career Dossier',
+  title: 'Role Report AI',
+  description: 'Role Report AI',
 };
 
 export default function RootLayout({
