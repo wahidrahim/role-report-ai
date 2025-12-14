@@ -1,6 +1,7 @@
 import { Annotation, END, LangGraphRunnableConfig, START, StateGraph } from '@langchain/langgraph';
 import { tavily } from '@tavily/core';
 import { generateObject } from 'ai';
+import z from 'zod';
 
 import { model } from '@/agents/config';
 import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCompanyNameAndJobTitle.prompt';
@@ -20,8 +21,17 @@ const stateAnnotation = Annotation.Root({
   suitabilityAssessment: Annotation<SuitabilityAssessment>,
   companyName: Annotation<string | null>,
   jobTitle: Annotation<string | null>,
-  searchQueries: Annotation<string[] | null>,
-  searchResults: Annotation<string | null>,
+  searchQueries: Annotation<string[]>,
+  searchResults: Annotation<string[]>({
+    reducer: (prev, curr) => [...prev, ...curr],
+    default: () => [],
+  }),
+  searchResultsQuality: Annotation<string>,
+  searchResultsReviewCount: Annotation<number>({
+    reducer: (prev, curr) => curr,
+    default: () => 0,
+  }),
+  searchResultsReviewFeedback: Annotation<string>,
 });
 
 // NODE 1: Extract company name and job title
@@ -85,15 +95,26 @@ const planDeepResearch = async (
   config: LangGraphRunnableConfig,
 ) => {
   console.log('[NODE] planning deep research');
+  const { searchResultsReviewCount } = state;
+
   config.writer?.({
     event: 'NODE_START',
     data: {
       node: 'PLAN_DEEP_RESEARCH',
-      message: 'Planning deep research...',
+      message:
+        searchResultsReviewCount > 0
+          ? 'Re-planning search queries for better quality results...'
+          : 'Planning search queries...',
     },
   });
 
-  const { companyName, jobTitle, skillAssessment, suitabilityAssessment } = state;
+  const {
+    companyName,
+    jobTitle,
+    skillAssessment,
+    suitabilityAssessment,
+    searchResultsReviewFeedback,
+  } = state;
 
   if (!companyName || !jobTitle) {
     throw new Error('Missing company name or job title at DEEP_RESEARCH_PLAN node');
@@ -103,7 +124,13 @@ const planDeepResearch = async (
     model,
     schema: DeepResearchPlanSchema,
     abortSignal: config.signal,
-    ...deepResearchPlanPrompt({ companyName, jobTitle, skillAssessment, suitabilityAssessment }),
+    ...deepResearchPlanPrompt({
+      companyName,
+      jobTitle,
+      skillAssessment,
+      suitabilityAssessment,
+      searchResultsReviewFeedback,
+    }),
   });
 
   return {
@@ -155,15 +182,70 @@ const searchForInformation = async (
   };
 };
 
+const reviewSearchResults = async (state: typeof stateAnnotation.State) => {
+  const { searchResults, searchResultsReviewCount } = state;
+
+  if (!searchResults) {
+    throw new Error('Missing search results at REVIEW_SEARCH_RESULTS node');
+  }
+
+  console.log({ searchResultsReviewCount });
+
+  if (searchResultsReviewCount >= 3) {
+    console.log(`Max retries reached (${searchResultsReviewCount}). Forcing progress.`);
+    return { quality: 'pass', feedback: 'Max retries exceeded.' };
+  }
+
+  const { object } = await generateObject({
+    model,
+    schema: z.object({
+      status: z.enum(['PASS', 'FAIL']),
+      feedback: z.string(),
+    }),
+    system: `
+      You are a Research Quality Assurance Officer.
+      Evaluate the gathered data for the "Deep Research Dossier".
+
+      Assign "PASS" if ALL of the following are true:
+      1. Contains specific interview questions (not just generic advice).
+      2. Contains specific engineering values or tech stack details (e.g. "Apollo Federation", "Radical Candor").
+      3. Is NOT just generic "About Us" marketing text.
+
+      Assign "FAIL" if ANY of the above criteria are NOT met.
+      When assigning "FAIL", provide actionable feedback on what specific information is missing so the search can be improved.
+
+      DATA TO REVIEW:
+      ${searchResults.join('\n\n---\n\n')}
+    `,
+    prompt: `Evaluate the data quality and assign "PASS" or "FAIL" based on the criteria above.`,
+  });
+
+  return {
+    searchResultsQuality: object.status,
+    searchResultsReviewFeedback: object.feedback,
+    searchResultsReviewCount: searchResultsReviewCount + 1,
+  };
+};
+
+const shouldReGenerateSearchQueries = async (state: typeof stateAnnotation.State) => {
+  return state.searchResultsQuality === 'FAIL' ? 'YES' : 'NO';
+};
+
 export const deepResearchWorkflow = new StateGraph(stateAnnotation)
   .addNode('INFER_COMPANY_NAME_AND_JOB_TITLE', inferCompanyNameAndJobTitle)
   .addNode('PLAN_DEEP_RESEARCH', planDeepResearch)
   .addNode('SEARCH_FOR_INFORMATION', searchForInformation)
+  .addNode('REVIEW_SEARCH_RESULTS', reviewSearchResults)
   .addEdge(START, 'INFER_COMPANY_NAME_AND_JOB_TITLE')
   .addConditionalEdges('INFER_COMPANY_NAME_AND_JOB_TITLE', shouldProceedWithDeepResearch, {
     YES: 'PLAN_DEEP_RESEARCH',
     NO: END,
   })
   .addEdge('PLAN_DEEP_RESEARCH', 'SEARCH_FOR_INFORMATION')
-  .addEdge('SEARCH_FOR_INFORMATION', END)
+  .addEdge('SEARCH_FOR_INFORMATION', 'REVIEW_SEARCH_RESULTS')
+
+  .addConditionalEdges('REVIEW_SEARCH_RESULTS', shouldReGenerateSearchQueries, {
+    YES: 'PLAN_DEEP_RESEARCH',
+    NO: END,
+  })
   .compile();

@@ -6,13 +6,28 @@ type DeepResearchPlanPromptArgs = {
   jobTitle: string;
   skillAssessment: SkillAssessment;
   suitabilityAssessment: SuitabilityAssessment;
+  searchResultsReviewFeedback: string | null;
 };
 
 export const deepResearchPlanPrompt = (args: DeepResearchPlanPromptArgs) => {
-  const { companyName, jobTitle, skillAssessment, suitabilityAssessment } = args;
+  const {
+    companyName,
+    jobTitle,
+    skillAssessment,
+    suitabilityAssessment,
+    searchResultsReviewFeedback,
+  } = args;
   const gapsList = skillAssessment.skills.filter(
     (skill) => skill.status === 'missing' || skill.status === 'transferable',
   );
+
+  const prompt = searchResultsReviewFeedback
+    ? `
+      ***PREVIOUS RESEARCH PLAN FAILED***
+      FEEDBACK: ${searchResultsReviewFeedback}
+      TASK: Generate better search queries based on the feedback.
+    `
+    : 'Generate a 6-point personalized search plan.';
 
   return {
     system: `
@@ -37,6 +52,6 @@ export const deepResearchPlanPrompt = (args: DeepResearchPlanPromptArgs) => {
     - Better: "Stripe GraphQL interview questions" (if GraphQL is a gap)
     - Better: "Stripe engineering blog Kubernetes architecture" (if Kubernetes is a gap)
   `,
-    prompt: `Generate a 6-point personalized search plan.`,
+    prompt,
   };
 };
