@@ -6,6 +6,7 @@ import { ActionPlan } from '@/agents/schemas/actionPlan.schema';
 import { RadarChart } from '@/agents/schemas/radarChart.schema';
 import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
 import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
+import { useResumeStore } from '@/stores/resumeStore';
 
 type StreamDataType =
   | 'radarChart'
@@ -22,6 +23,10 @@ type StreamMessage = {
 };
 
 export function useAnalysis() {
+  const {
+    setSkillAssessment: setStoreSkillAssessment,
+    setSuitabilityAssessment: setStoreSuitabilityAssessment,
+  } = useResumeStore();
   const [radarChart, setRadarChart] = useState<RadarChart | null>(null);
   const [skillAssessment, setSkillAssessment] = useState<SkillAssessment | null>(null);
   const [suitabilityAssessment, setSuitabilityAssessment] = useState<SuitabilityAssessment | null>(
@@ -38,6 +43,8 @@ export function useAnalysis() {
     setRadarChart(null);
     setSkillAssessment(null);
     setSuitabilityAssessment(null);
+    setStoreSkillAssessment(null);
+    setStoreSuitabilityAssessment(null);
     setResumeOptimizations(null);
     setLearningPriorities(null);
 
@@ -88,10 +95,14 @@ export function useAnalysis() {
                 setRadarChart(data as RadarChart);
                 break;
               case 'skillAssessment':
-                setSkillAssessment(data as SkillAssessment);
+                const skillAssessmentData = data as SkillAssessment;
+                setSkillAssessment(skillAssessmentData);
+                setStoreSkillAssessment(skillAssessmentData);
                 break;
               case 'suitabilityAssessment':
-                setSuitabilityAssessment(data as SuitabilityAssessment);
+                const suitabilityAssessmentData = data as SuitabilityAssessment;
+                setSuitabilityAssessment(suitabilityAssessmentData);
+                setStoreSuitabilityAssessment(suitabilityAssessmentData);
                 break;
               case 'resumeOptimizations':
                 setResumeOptimizations(data as ActionPlan);

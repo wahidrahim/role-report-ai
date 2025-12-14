@@ -28,7 +28,7 @@ export type DeepResearchUIMessage = UIMessage<
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { resumeText, jobDescriptionText } = body;
+  const { resumeText, jobDescriptionText, skillAssessment, suitabilityAssessment } = body;
 
   if (!resumeText || !jobDescriptionText) {
     return NextResponse.json(
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       };
 
       const state = await deepResearchWorkflow.stream(
-        { jobDescription: jobDescriptionText },
+        { jobDescription: jobDescriptionText, skillAssessment, suitabilityAssessment },
         { streamMode: 'custom' },
       );
 

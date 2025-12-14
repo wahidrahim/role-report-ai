@@ -6,9 +6,13 @@ import { extractCompanyNameAndJobTitlePrompt } from '@/agents/prompts/extractCom
 import { deepResearchPlanPrompt } from '@/agents/prompts/planDeepResearch.prompt';
 import { extractCompanyNameAndJobTitleSchema } from '@/agents/schemas/extractCompanyNameAndJobTitle.schema';
 import { DeepResearchPlanSchema } from '@/agents/schemas/planDeepResearch.schema';
+import { SkillAssessment } from '@/agents/schemas/skillAssessment.schema';
+import { SuitabilityAssessment } from '@/agents/schemas/suitabilityAssessment.schema';
 
 const stateAnnotation = Annotation.Root({
   jobDescription: Annotation<string>,
+  skillAssessment: Annotation<SkillAssessment>,
+  suitabilityAssessment: Annotation<SuitabilityAssessment>,
   companyName: Annotation<string | null>,
   jobTitle: Annotation<string | null>,
   searchQueries: Annotation<string[] | null>,
@@ -82,7 +86,7 @@ const planDeepResearch = async (
     },
   });
 
-  const { companyName, jobTitle } = state;
+  const { companyName, jobTitle, skillAssessment, suitabilityAssessment } = state;
 
   if (!companyName || !jobTitle) {
     throw new Error('Missing company name or job title at DEEP_RESEARCH_PLAN node');
@@ -91,7 +95,7 @@ const planDeepResearch = async (
   const { object } = await generateObject({
     model,
     schema: DeepResearchPlanSchema,
-    ...deepResearchPlanPrompt(companyName, jobTitle),
+    ...deepResearchPlanPrompt({ companyName, jobTitle, skillAssessment, suitabilityAssessment }),
   });
 
   console.log('[NODE] planned deep research', { searchQueries: object.searchQueries });

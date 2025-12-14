@@ -16,6 +16,7 @@ import {
 import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
+import { DeepResearch } from '@/features/deep-research/DeepResearch';
 import { useResumeStore } from '@/stores/resumeStore';
 
 import MatchScore from './components/MatchScore';
@@ -201,6 +202,26 @@ export function AnalyzeFit() {
           </CardContent>
         </Card>
       )}
+
+      {!isLoading &&
+        (suitabilityAssessment ||
+          radarChart?.data ||
+          skillAssessment?.skills ||
+          resumeOptimizations?.plan ||
+          learningPriorities?.plan) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Deep Research</CardTitle>
+              <CardDescription>
+                Conduct in-depth research on the company and role to better prepare for your
+                application
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DeepResearch jobDescriptionText={jobDescriptionText} />
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }
