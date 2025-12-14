@@ -55,16 +55,6 @@ export function AnalyzeResults({
   learningPriorities,
   isLoading,
 }: AnalyzeResultsProps) {
-  // Show loading state only if completely empty and loading
-  if (isLoading && !suitabilityAssessment && !radarChart && !skillAssessment) {
-    return (
-      <div className="flex items-center justify-center p-12 h-64 border border-dashed border-primary/20 rounded-2xl bg-primary/5">
-        <Spinner className="size-8 text-primary" />
-        <span className="ml-3 text-muted-foreground animate-pulse">Initializing analysis...</span>
-      </div>
-    );
-  }
-
   const sortedResumeOptimizations = resumeOptimizations?.plan
     ? [...resumeOptimizations.plan].sort(
         (a: any, b: any) => getPriorityValue(b.priority) - getPriorityValue(a.priority),
@@ -79,24 +69,15 @@ export function AnalyzeResults({
 
   return (
     <div className="space-y-6">
-      {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-primary animate-pulse">
-          <Spinner className="size-4" />
-          Streaming analysis data...
-        </div>
-      )}
-
       {/* Fit Score */}
-      {suitabilityAssessment?.suitabilityScore !== undefined && (
+      {(isLoading || suitabilityAssessment?.suitabilityScore !== undefined) && (
         <div>
           <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="text-2xl">Fit Score</CardTitle>
-            </CardHeader>
             <CardContent>
               <MatchScore
-                matchScore={suitabilityAssessment.suitabilityScore}
-                verdict={suitabilityAssessment.suitabilityReasoning}
+                matchScore={suitabilityAssessment?.suitabilityScore}
+                verdict={suitabilityAssessment?.suitabilityReasoning}
+                isLoading={isLoading}
               />
             </CardContent>
           </Card>
