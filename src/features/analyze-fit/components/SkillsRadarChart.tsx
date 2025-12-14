@@ -80,7 +80,7 @@ export function SkillsRadarChart(props: SkillsRadarChartProps) {
       <RadarChart data={finalData}>
         <ChartTooltip
           cursor={false}
-          content={(props) => {
+          content={(props: any) => {
             const { active, payload } = props;
             if (!active || !payload || !payload.length) {
               return null;
@@ -88,11 +88,13 @@ export function SkillsRadarChart(props: SkillsRadarChartProps) {
             const data = payload[0].payload;
 
             return (
-              <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+              <div className="grid max-w-[200px] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+                <div className="font-semibold">{data.skill}</div>
                 <ChartTooltipContent
                   active={active}
                   payload={payload}
                   indicator="line"
+                  hideLabel
                   className="p-0 border-0 bg-transparent shadow-none min-w-0"
                 />
                 {data.reasoning && (
