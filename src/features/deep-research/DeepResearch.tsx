@@ -1,7 +1,7 @@
 'use client';
 
 import { createParser } from 'eventsource-parser';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/core/components/ui/button';
 import { useResumeStore } from '@/stores/resumeStore';
@@ -23,7 +23,26 @@ type DeepResearchProps = {
 export function DeepResearch({ jobDescriptionText }: DeepResearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
-  const { resumeText, skillAssessment, suitabilityAssessment } = useResumeStore();
+  const {
+    resumeText,
+    skillAssessment,
+    suitabilityAssessment,
+    setSkillAssessment,
+    setSuitabilityAssessment,
+  } = useResumeStore();
+  const prevJobDescriptionRef = useRef<string>(jobDescriptionText);
+
+  // Clear skill data when job description changes
+  useEffect(() => {
+    if (
+      prevJobDescriptionRef.current !== jobDescriptionText &&
+      prevJobDescriptionRef.current !== ''
+    ) {
+      setSkillAssessment(null);
+      setSuitabilityAssessment(null);
+    }
+    prevJobDescriptionRef.current = jobDescriptionText;
+  }, [jobDescriptionText, setSkillAssessment, setSuitabilityAssessment]);
 
   const handleDeepResearch = async () => {
     setIsLoading(true);
