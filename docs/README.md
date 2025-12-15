@@ -1,20 +1,29 @@
 # Role Report AI
 
-[role-report-ai.vercel.app](https://role-report-ai.vercel.app/)
+Live demo: [role-report-ai.vercel.app](https://role-report-ai.vercel.app/)
 
-A technical exploration of orchestrating multi-step LLM workflows with LangGraph, paired with a streaming UI (SSE + ReadableStreams). It compares a resume against a job description to generate a fit analysis and recommendations, and can optionally conduct deeper research to produce company/job context and interview prep guides.
+A technical exploration of orchestrating **multi-step LLM workflows** with **LangGraph**, paired with a **streaming UI** (SSE + ReadableStreams).
 
-## Analyze Fit
+At a high level, Role Report AI:
 
-![Analyze Fit Demo](analyze-fit.gif)
+- Compares a resume against a job description to generate a fit analysis + recommendations
+- Can optionally go deeper and produce company/role context and interview prep artifacts
 
-## Deep Research
+## Demos
+
+### Analyze
+
+![Analyze Demo](analyze.gif)
+
+### Deep Research
 
 ![Deep Research Demo](deep-research.gif)
 
-## Analyze Fit Workflow
+## Workflows
 
-This workflow orchestrates a preliminary resume-job fit analysis by visualizing skill alignments through a radar chart and conducting parallel skill assessments. These insights feed into a suitability evaluation that determines overall compatibility, then branches into actionable outputs: tailored resume optimization recommendations and structured learning priority plans.
+### Analyze Workflow
+
+This workflow orchestrates a resume ↔ job fit analysis by visualizing skill alignment (radar chart) and running parallel skill assessments. Those insights roll up into a suitability evaluation, then branch into actionable outputs: tailored resume optimization recommendations and structured learning priority plans.
 
 ```mermaid
 graph TD
@@ -28,9 +37,9 @@ graph TD
     learningPrioritiesPlan --> End
 ```
 
-## Deep Research Workflow 🚧
+### Deep Research Workflow 🚧
 
-This workflow conducts comprehensive company and role intelligence gathering, continuing from the preliminary analysis. It begins with automated extraction of key details, then strategically plans research queries, executes web searches, and reviews results with possible iterations. The process generates practical interview preparation guides and detailed research reports providing contextual understanding beyond the job description.
+This workflow continues from the preliminary analysis to do broader company/role intelligence gathering. It starts by extracting key details, then plans research queries, executes web searches, and reviews results (with iterative loops if needed). The workflow outputs practical interview prep guides and a detailed research report that adds context beyond the job description alone.
 
 ```mermaid
 graph TD
