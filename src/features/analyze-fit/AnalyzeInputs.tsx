@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/core/components/ui/card';
 import { Label } from '@/core/components/ui/label';
+import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
 
 const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
@@ -72,7 +73,7 @@ export function AnalyzeInputs({
             disabled={isLoading}
             className="w-full bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
           >
-            {isLoading ? 'Analyzing...' : 'Analyze Fit'}
+            {isLoading ? <Spinner /> : 'Analyze'}
           </Button>
         </CardContent>
       </Card>

@@ -124,7 +124,7 @@ export default function Home() {
                   side="top"
                   className="bg-destructive text-destructive-foreground border-destructive/20 [&_svg]:fill-destructive [&_svg]:text-destructive [&_svg]:bg-destructive"
                 >
-                  <p>Running "Analyze Fit" is required to unlock this feature</p>
+                  <p>Running &quot;Analyze Fit&quot; is required to unlock this feature</p>
                 </TooltipContent>
               )}
             </Tooltip>
@@ -156,7 +156,7 @@ export default function Home() {
             !isAnalyzing &&
             !isResearching &&
             !deepResearchError && (
-              <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
                 <Sparkles className="size-12 mb-4 opacity-20" />
                 <p>Ready to analyze. Upload a resume and job description to begin.</p>
               </div>
