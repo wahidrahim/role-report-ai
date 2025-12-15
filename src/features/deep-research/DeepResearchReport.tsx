@@ -365,18 +365,10 @@ export function DeepResearchReport({
         >
           {/* Header */}
           <motion.div variants={itemVariants} className="col-span-full mb-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-outfit font-bold flex items-center gap-3">
-                <Globe className="h-6 w-6 text-primary" />
-                Intelligence Dossier
-              </h2>
-              <Badge
-                variant="outline"
-                className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-3 py-1"
-              >
-                CONFIDENTIAL
-              </Badge>
-            </div>
+            <h2 className="text-2xl font-outfit font-bold flex items-center gap-3">
+              <Globe className="h-6 w-6 text-primary" />
+              Intelligence Dossier
+            </h2>
             <p className="text-muted-foreground mt-1">
               Generated deep-dive intelligence report based on public data sources.
             </p>
