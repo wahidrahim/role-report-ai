@@ -5,6 +5,7 @@ import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/core/components/ui/button';
+import { Spinner } from '@/core/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
 import {
   Tooltip,
@@ -23,6 +24,8 @@ export default function Home() {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('analysis');
+
+  const deepResearchEnabled = process.env.NEXT_PUBLIC_FEATURE_DEEP_RESEARCH === 'true';
 
   const { resumeText } = useResumeStore();
 
@@ -114,24 +117,33 @@ export default function Home() {
                   <Button
                     variant="outline"
                     onClick={handleStartDeepResearch}
-                    disabled={isResearching || !canResearch || !suitabilityAssessment}
+                    disabled={
+                      !deepResearchEnabled ||
+                      isResearching ||
+                      !canResearch ||
+                      !suitabilityAssessment
+                    }
                     className="w-full h-12 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-base disabled:opacity-50"
                   >
-                    {!suitabilityAssessment ? (
+                    {!deepResearchEnabled || !suitabilityAssessment ? (
                       <Lock className="mr-2 size-4 text-muted-foreground" />
                     ) : (
                       <Sparkles className="mr-2 size-4 text-primary" />
                     )}
-                    {isResearching ? 'Researching Entity...' : 'Start Deep Research'}
+                    {isResearching ? <Spinner /> : 'Start Deep Research'}
                   </Button>
                 </span>
               </TooltipTrigger>
-              {!suitabilityAssessment && (
+              {(!deepResearchEnabled || !suitabilityAssessment) && (
                 <TooltipContent
                   side="top"
                   className="bg-destructive text-destructive-foreground border-destructive/20 [&_svg]:fill-destructive [&_svg]:text-destructive [&_svg]:bg-destructive"
                 >
-                  <p>Running &quot;Analyze Fit&quot; is required to unlock this feature</p>
+                  <p>
+                    {!deepResearchEnabled
+                      ? 'Deep Research is disabled in this environment.'
+                      : 'Running "Analyze Fit" is required to unlock this feature'}
+                  </p>
                 </TooltipContent>
               )}
             </Tooltip>
