@@ -1,6 +1,6 @@
 # Role Report AI
 
-Live demo: [role-report-ai.vercel.app](https://role-report-ai.vercel.app/)
+[role-report-ai.vercel.app](https://role-report-ai.vercel.app/)
 
 A technical exploration of orchestrating **multi-step LLM workflows** with **LangGraph**, paired with a **streaming UI** (SSE + ReadableStreams).
 
