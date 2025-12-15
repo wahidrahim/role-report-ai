@@ -46,7 +46,14 @@ export default function Home() {
     canResearch,
   } = useDeepResearch(jobDescriptionText);
 
-  /* Include error in hasResearchData so we don't hide the tab if it fails */
+  const hasNoData =
+    !suitabilityAssessment &&
+    !researchReport &&
+    !isAnalyzing &&
+    !isResearching &&
+    !deepResearchError;
+
+  // Include error in hasResearchData so we don't hide the tab if it fails
   const hasResearchData = streamEvents.length > 0 || !!researchReport || !!deepResearchError;
 
   const handleAnalyze = () => {
@@ -137,7 +144,7 @@ export default function Home() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
-        className="lg:col-span-8 space-y-8 pb-20"
+        className="lg:col-span-8 space-y-8"
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
           {/* Only show tabs if we have research data or are researching to allow switching back and forth */}
@@ -151,36 +158,34 @@ export default function Home() {
           )}
 
           {/* If nothing happened yet */}
-          {!suitabilityAssessment &&
-            !researchReport &&
-            !isAnalyzing &&
-            !isResearching &&
-            !deepResearchError && (
-              <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
-                <Sparkles className="size-12 mb-4 opacity-20" />
-                <p>Ready to analyze. Upload a resume and job description to begin.</p>
-              </div>
-            )}
+          {hasNoData ? (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] border border-dashed border-white/10 rounded-3xl bg-white/5 text-muted-foreground">
+              <Sparkles className="size-12 mb-4 opacity-20" />
+              <p>Ready to analyze. Upload a resume and job description to begin.</p>
+            </div>
+          ) : (
+            <>
+              <TabsContent value="analysis" className="mt-0 focus-visible:outline-none">
+                <AnalyzeResults
+                  radarChart={radarChart}
+                  skillAssessment={skillAssessment}
+                  suitabilityAssessment={suitabilityAssessment}
+                  resumeOptimizations={resumeOptimizations}
+                  learningPriorities={learningPriorities}
+                  isLoading={isAnalyzing}
+                />
+              </TabsContent>
 
-          <TabsContent value="analysis" className="mt-0 focus-visible:outline-none">
-            <AnalyzeResults
-              radarChart={radarChart}
-              skillAssessment={skillAssessment}
-              suitabilityAssessment={suitabilityAssessment}
-              resumeOptimizations={resumeOptimizations}
-              learningPriorities={learningPriorities}
-              isLoading={isAnalyzing}
-            />
-          </TabsContent>
-
-          <TabsContent value="research" className="mt-0 focus-visible:outline-none">
-            <DeepResearchReport
-              isLoading={isResearching}
-              error={deepResearchError}
-              streamEvents={streamEvents}
-              researchReport={researchReport}
-            />
-          </TabsContent>
+              <TabsContent value="research" className="mt-0 focus-visible:outline-none">
+                <DeepResearchReport
+                  isLoading={isResearching}
+                  error={deepResearchError}
+                  streamEvents={streamEvents}
+                  researchReport={researchReport}
+                />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
       </motion.div>
     </main>
