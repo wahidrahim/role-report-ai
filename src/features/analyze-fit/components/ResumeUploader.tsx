@@ -64,7 +64,7 @@ export default function ResumeUploader() {
           <Input
             id="resume-upload"
             type="file"
-            accept=".pdf,.doc,.docx"
+            accept="application/pdf"
             onChange={handleFileChange}
             disabled={isParsing}
             className="cursor-pointer"
