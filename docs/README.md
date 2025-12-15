@@ -12,6 +12,8 @@ A technical exploration of orchestrating multi-step LLM workflows with LangGraph
 
 ## Analyze Fit Workflow
 
+This workflow orchestrates a preliminary resume-job fit analysis by visualizing skill alignments through a radar chart and conducting parallel skill assessments. These insights feed into a suitability evaluation that determines overall compatibility, then branches into actionable outputs: tailored resume optimization recommendations and structured learning priority plans.
+
 ```mermaid
 graph TD
     Start([Start]) --> plotRadarChart[Plot Radar Chart]
@@ -24,7 +26,9 @@ graph TD
     learningPrioritiesPlan --> End
 ```
 
-## Deep Research Workflow
+## Deep Research Workflow 🚧
+
+This workflow conducts comprehensive company and role intelligence gathering, continuing from the preliminary analysis. It begins with automated extraction of key details, then strategically plans research queries, executes web searches, and reviews results with possible iterations. The process generates practical interview preparation guides and detailed research reports providing contextual understanding beyond the job description.
 
 ```mermaid
 graph TD
