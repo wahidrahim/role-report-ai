@@ -2,6 +2,7 @@ import { UIMessage } from 'ai';
 import { NextResponse } from 'next/server';
 
 import { deepResearchWorkflow } from '@/ai/deep-research/workflow';
+import { isFeatureEnabled } from '@/core/featureFlags';
 
 export type DeepResearchUIMessage = UIMessage<
   never,
@@ -20,6 +21,13 @@ export type DeepResearchUIMessage = UIMessage<
 >;
 
 export async function POST(request: Request) {
+  if (!isFeatureEnabled('deepResearch')) {
+    return NextResponse.json(
+      { error: 'Deep Research is disabled in this environment.' },
+      { status: 403 },
+    );
+  }
+
   const body = await request.json();
   const { resumeText, jobDescriptionText, skillAssessment, suitabilityAssessment } = body;
 

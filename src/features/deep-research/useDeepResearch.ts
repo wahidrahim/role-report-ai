@@ -64,7 +64,20 @@ export function useDeepResearch(jobDescriptionText: string) {
       });
 
       if (!response.ok) {
-        throw new Error('Deep research failed');
+        // Prefer a server-provided error message when available (e.g. feature flag disabled).
+        let message = 'Deep research failed';
+
+        try {
+          const data = (await response.json()) as { error?: string };
+
+          if (typeof data?.error === 'string' && data.error.trim()) {
+            message = data.error;
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+
+        throw new Error(message);
       }
 
       if (!response.body) {
