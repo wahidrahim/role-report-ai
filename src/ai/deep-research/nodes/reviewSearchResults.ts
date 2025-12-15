@@ -62,6 +62,7 @@ export const reviewSearchResults = async (
   });
 
   return {
+    searchResults: object.status === 'PASS' ? searchResults : [], // Empty previous search results if review fails.
     searchResultsQuality: object.status,
     searchResultsReviewFeedback: object.feedback,
     searchResultsReviewCount: searchResultsReviewCount + 1,

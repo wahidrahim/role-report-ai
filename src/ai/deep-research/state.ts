@@ -13,7 +13,7 @@ export const stateAnnotation = Annotation.Root({
   jobTitle: Annotation<string | null>,
   searchQueries: Annotation<string[]>,
   searchResults: Annotation<string[]>({
-    reducer: (prev, curr) => [...prev, ...curr],
+    reducer: (prev, curr) => [...curr],
     default: () => [],
   }),
   searchResultsQuality: Annotation<string>,
