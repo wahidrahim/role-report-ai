@@ -7,7 +7,6 @@ import { ChangeEvent, useState } from 'react';
 import { Input } from '@/core/components/ui/input';
 import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
-import { useResumeStore } from '@/stores/resumeStore';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
@@ -30,10 +29,14 @@ async function parsePDF(file: File) {
   return parsedText;
 }
 
-export default function ResumeUploader() {
+type ResumeUploaderProps = {
+  resumeFileName: string;
+  onResumeChange: (text: string, fileName: string) => void;
+};
+
+export default function ResumeUploader({ resumeFileName, onResumeChange }: ResumeUploaderProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
-  const { resumeFileName, setResumeText, setResumeFileName } = useResumeStore();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -46,8 +49,7 @@ export default function ResumeUploader() {
       try {
         const extractedText = await parsePDF(file);
 
-        setResumeText(extractedText);
-        setResumeFileName(file.name);
+        onResumeChange(extractedText, file.name);
       } catch (error) {
         console.error('Failed to parse PDF:', error);
       } finally {

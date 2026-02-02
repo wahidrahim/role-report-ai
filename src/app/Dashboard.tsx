@@ -18,7 +18,6 @@ import { AnalyzeResults } from '@/features/analyze-fit/AnalyzeResults';
 import { useAnalysis } from '@/features/analyze-fit/hooks/useAnalysis';
 import { DeepResearchReport } from '@/features/deep-research/DeepResearchReport';
 import { useDeepResearch } from '@/features/deep-research/useDeepResearch';
-import { useResumeStore } from '@/stores/resumeStore';
 
 type DashboardProps = {
   isDeepResearchEnabled: boolean;
@@ -29,8 +28,8 @@ export default function Dashboard(props: DashboardProps) {
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('analysis');
-
-  const { resumeText } = useResumeStore();
+  const [resumeText, setResumeText] = useState('');
+  const [resumeFileName, setResumeFileName] = useState('');
 
   const {
     radarChart,
@@ -50,7 +49,7 @@ export default function Dashboard(props: DashboardProps) {
     researchReport,
     startDeepResearch,
     canResearch,
-  } = useDeepResearch(jobDescriptionText);
+  } = useDeepResearch(jobDescriptionText, resumeText, skillAssessment, suitabilityAssessment);
 
   const hasNoData =
     !suitabilityAssessment &&
@@ -62,6 +61,11 @@ export default function Dashboard(props: DashboardProps) {
   // Include error in hasResearchData so we don't hide the tab if it fails
   const hasResearchData = streamEvents.length > 0 || !!researchReport || !!deepResearchError;
 
+  const handleResumeChange = (text: string, fileName: string) => {
+    setResumeText(text);
+    setResumeFileName(fileName);
+  };
+
   const handleAnalyze = () => {
     if (!jobDescriptionText) {
       setValidationError('Please enter a job description.');
@@ -69,9 +73,7 @@ export default function Dashboard(props: DashboardProps) {
     }
     setValidationError(null);
     setActiveTab('analysis');
-    // Resume check is handled inside hook or component, but AnalyzeInputs props might need validation.
-    // Actually AnalyzeFit.tsx had validation logic.
-    analyze(resumeText || '', jobDescriptionText);
+    analyze(resumeText, jobDescriptionText);
   };
 
   const handleStartDeepResearch = () => {
@@ -106,6 +108,8 @@ export default function Dashboard(props: DashboardProps) {
           isLoading={isAnalyzing}
           validationError={validationError}
           error={analysisError}
+          resumeFileName={resumeFileName}
+          onResumeChange={handleResumeChange}
         />
 
         {/* Deep Research Trigger */}

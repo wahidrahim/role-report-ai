@@ -7,7 +7,6 @@ import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
-import { useResumeStore } from '@/stores/resumeStore';
 
 type StreamEventName =
   | 'RADAR_CHART_STREAM_PARTIAL'
@@ -23,10 +22,6 @@ type StreamEventName =
   | 'ERROR';
 
 export function useAnalysis() {
-  const {
-    setSkillAssessment: setStoreSkillAssessment,
-    setSuitabilityAssessment: setStoreSuitabilityAssessment,
-  } = useResumeStore();
   const [radarChart, setRadarChart] = useState<RadarChart | null>(null);
   const [skillAssessment, setSkillAssessment] = useState<SkillAssessment | null>(null);
   const [suitabilityAssessment, setSuitabilityAssessment] = useState<SuitabilityAssessment | null>(
@@ -44,8 +39,6 @@ export function useAnalysis() {
       setRadarChart(null);
       setSkillAssessment(null);
       setSuitabilityAssessment(null);
-      setStoreSkillAssessment(null);
-      setStoreSuitabilityAssessment(null);
       setResumeOptimizations(null);
       setLearningPriorities(null);
 
@@ -83,20 +76,13 @@ export function useAnalysis() {
                   setRadarChart(payload?.radarChart as RadarChart);
                   break;
                 case 'SKILL_ASSESSMENT_STREAM_PARTIAL':
-                case 'SKILL_ASSESSMENT_CREATED': {
-                  const skillAssessmentData = payload?.skillAssessment as SkillAssessment;
-                  setSkillAssessment(skillAssessmentData);
-                  setStoreSkillAssessment(skillAssessmentData);
+                case 'SKILL_ASSESSMENT_CREATED':
+                  setSkillAssessment(payload?.skillAssessment as SkillAssessment);
                   break;
-                }
                 case 'SUITABILITY_ASSESSMENT_STREAM_PARTIAL':
-                case 'SUITABILITY_ASSESSMENT_CREATED': {
-                  const suitabilityAssessmentData =
-                    payload?.suitabilityAssessment as SuitabilityAssessment;
-                  setSuitabilityAssessment(suitabilityAssessmentData);
-                  setStoreSuitabilityAssessment(suitabilityAssessmentData);
+                case 'SUITABILITY_ASSESSMENT_CREATED':
+                  setSuitabilityAssessment(payload?.suitabilityAssessment as SuitabilityAssessment);
                   break;
-                }
                 case 'RESUME_OPTIMIZATIONS_STREAM_PARTIAL':
                 case 'RESUME_OPTIMIZATIONS_CREATED':
                   setResumeOptimizations(payload?.resumeOptimizations as ActionPlan);
@@ -126,7 +112,7 @@ export function useAnalysis() {
         setIsLoading(false);
       }
     },
-    [setStoreSkillAssessment, setStoreSuitabilityAssessment],
+    [],
   );
 
   return {

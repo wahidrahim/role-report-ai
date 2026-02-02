@@ -1,8 +1,9 @@
 import { createParser } from 'eventsource-parser';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
+import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
+import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import type { ResearchReport } from '@/ai/deep-research/nodes/createResearchReport';
-import { useResumeStore } from '@/stores/resumeStore';
 
 export type StreamEvent = {
   id: string;
@@ -15,33 +16,16 @@ export type StreamEvent = {
   }>;
 };
 
-export function useDeepResearch(jobDescriptionText: string) {
+export function useDeepResearch(
+  jobDescriptionText: string,
+  resumeText: string,
+  skillAssessment: SkillAssessment | null,
+  suitabilityAssessment: SuitabilityAssessment | null,
+) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
   const [researchReport, setResearchReport] = useState<Partial<ResearchReport> | null>(null);
-
-  const {
-    resumeText,
-    skillAssessment,
-    suitabilityAssessment,
-    setSkillAssessment,
-    setSuitabilityAssessment,
-  } = useResumeStore();
-
-  const prevJobDescriptionRef = useRef<string>(jobDescriptionText);
-
-  // Clear skill data when job description changes
-  useEffect(() => {
-    if (
-      prevJobDescriptionRef.current !== jobDescriptionText &&
-      prevJobDescriptionRef.current !== ''
-    ) {
-      setSkillAssessment(null);
-      setSuitabilityAssessment(null);
-    }
-    prevJobDescriptionRef.current = jobDescriptionText;
-  }, [jobDescriptionText, setSkillAssessment, setSuitabilityAssessment]);
 
   const startDeepResearch = async () => {
     if (!resumeText || !jobDescriptionText) return;
