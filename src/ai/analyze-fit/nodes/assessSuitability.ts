@@ -8,7 +8,7 @@ import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { models } from '@/ai/config';
 
 export const suitabilityAssessmentSchema = z.object({
-  suitabilityScore: z.number().min(0).max(10),
+  suitabilityScore: z.number(),
   suitabilityReasoning: z.string(),
 });
 

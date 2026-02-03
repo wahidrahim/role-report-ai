@@ -95,8 +95,13 @@ export function useAnalysis() {
                   setError(new Error((payload?.message as string) ?? 'Analysis failed'));
                   break;
               }
-            } catch {
-              // Skip malformed JSON chunks
+            } catch (e) {
+              if (e instanceof SyntaxError) {
+                // Skip malformed JSON chunks
+                return;
+              }
+              console.error('Error processing analysis event:', e);
+              setError(e instanceof Error ? e : new Error('Failed to process analysis event'));
             }
           },
         });

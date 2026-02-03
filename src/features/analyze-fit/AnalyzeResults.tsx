@@ -1,12 +1,8 @@
+import { AlertCircle } from 'lucide-react';
+
+import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/core/components/ui/card';
-import { Spinner } from '@/core/components/ui/spinner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 
 import MatchScore from './components/MatchScore';
 import { SkillAssessment } from './components/SkillAssessment';
@@ -19,6 +15,7 @@ type AnalyzeResultsProps = {
   resumeOptimizations: any;
   learningPriorities: any;
   isLoading: boolean;
+  error: Error | null;
 };
 
 const getPriorityValue = (priority: string) => {
@@ -54,6 +51,7 @@ export function AnalyzeResults({
   resumeOptimizations,
   learningPriorities,
   isLoading,
+  error,
 }: AnalyzeResultsProps) {
   const sortedResumeOptimizations = resumeOptimizations?.plan
     ? [...resumeOptimizations.plan].sort(
@@ -69,6 +67,18 @@ export function AnalyzeResults({
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert
+          variant="destructive"
+          className="bg-destructive/10 text-destructive border-destructive/20"
+        >
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Analysis Failed</AlertTitle>
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Fit Score */}
       {(isLoading || suitabilityAssessment?.suitabilityScore !== undefined) && (
         <div>
