@@ -1,11 +1,14 @@
 'use client';
 
+import { useRef } from 'react';
+
 import {
   AlertCircle,
   AlertTriangle,
   ArrowUpDown,
   BookOpen,
   Clock,
+  Download,
   Lightbulb,
   Minus,
   Plus,
@@ -16,11 +19,14 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
+import { Button } from '@/core/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
+import { Spinner } from '@/core/components/ui/spinner';
 
 import MatchScore from './components/MatchScore';
 import { SkillAssessment } from './components/SkillAssessment';
 import { SkillsRadarChart } from './components/SkillsRadarChart';
+import { usePDFExport } from './hooks/usePDFExport';
 
 type AnalyzeResultsProps = {
   radarChart: any;
@@ -207,6 +213,15 @@ export function AnalyzeResults({
   isLoading,
   error,
 }: AnalyzeResultsProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const { generatePDF, isGenerating } = usePDFExport({
+    suitabilityAssessment,
+    skillAssessment,
+    resumeOptimizations,
+    learningPriorities,
+  });
+
   const sortedResumeOptimizations = resumeOptimizations?.plan
     ? [...resumeOptimizations.plan].sort(
         (a: any, b: any) => getPriorityValue(b.priority) - getPriorityValue(a.priority),
@@ -219,8 +234,25 @@ export function AnalyzeResults({
       )
     : null;
 
+  const hasResults = suitabilityAssessment?.suitabilityScore !== undefined;
+
   return (
     <div className="space-y-6">
+      {/* Download Button */}
+      {hasResults && !isLoading && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => generatePDF(chartRef)}
+            disabled={isGenerating}
+            className="border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+          >
+            {isGenerating ? <Spinner /> : <Download className="size-4" />}
+            {isGenerating ? 'Generating...' : 'Download Report'}
+          </Button>
+        </div>
+      )}
+
       {/* Error Alert */}
       {error && (
         <Alert
@@ -247,7 +279,7 @@ export function AnalyzeResults({
       {/* Radar Chart */}
       {radarChart?.data && (
         <div className="flex justify-center py-6">
-          <SkillsRadarChart data={radarChart.data} />
+          <SkillsRadarChart ref={chartRef} data={radarChart.data} />
         </div>
       )}
 
