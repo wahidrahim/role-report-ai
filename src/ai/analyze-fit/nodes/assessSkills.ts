@@ -146,11 +146,13 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - PostgreSQL: transferable/nice-to-have - "MongoDB experience, different paradigm"
       - Leadership: verified/critical - "Led team of 5 engineers"
 
-      RESUME TEXT:
+      <resume>
       ${resumeText}
+      </resume>
 
-      JOB DESCRIPTION TEXT:
+      <job-description>
       ${jobDescriptionText}
+      </job-description>
     `,
   });
 
