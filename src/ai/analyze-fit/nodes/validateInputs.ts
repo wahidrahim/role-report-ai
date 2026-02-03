@@ -1,4 +1,4 @@
-import type { LangGraphRunnableConfig } from '@langchain/langgraph';
+import { END, type LangGraphRunnableConfig } from '@langchain/langgraph';
 
 type ValidateInputsState = {
   resumeText: string;
@@ -143,7 +143,10 @@ function isLikelyJobDescription(text: string): ValidationResult {
   };
 }
 
-export const validateInputs = async (state: ValidateInputsState, config: LangGraphRunnableConfig) => {
+export const validateInputs = async (
+  state: ValidateInputsState,
+  config: LangGraphRunnableConfig,
+) => {
   const { resumeText, jobDescriptionText } = state;
 
   const resumeValidation = isLikelyResume(resumeText);
@@ -170,8 +173,5 @@ export const validateInputs = async (state: ValidateInputsState, config: LangGra
 };
 
 export const routeAfterValidation = (state: { validationError: string | null }) => {
-  if (state.validationError) {
-    return 'invalid';
-  }
-  return ['plotRadarChart', 'assessSkills'];
+  return state.validationError ? END : ['plotRadarChart', 'assessSkills'];
 };

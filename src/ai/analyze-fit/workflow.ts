@@ -16,11 +16,7 @@ export const analyzeFitGraph = new StateGraph(stateAnnotation)
   .addNode('resumeOptimizationPlans', resumeOptimizationPlans)
   .addNode('learningPrioritiesPlan', learningPrioritiesPlan)
   .addEdge(START, 'validateInputs')
-  .addConditionalEdges('validateInputs', routeAfterValidation, {
-    plotRadarChart: 'plotRadarChart',
-    assessSkills: 'assessSkills',
-    invalid: END,
-  })
+  .addConditionalEdges('validateInputs', routeAfterValidation)
   .addEdge('plotRadarChart', 'assessSuitability')
   .addEdge('assessSkills', 'assessSuitability')
   .addEdge('assessSuitability', 'resumeOptimizationPlans')
