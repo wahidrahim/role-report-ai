@@ -1,3 +1,5 @@
+import type { LangGraphRunnableConfig } from '@langchain/langgraph';
+
 type ValidateInputsState = {
   resumeText: string;
   jobDescriptionText: string;
@@ -141,25 +143,28 @@ function isLikelyJobDescription(text: string): ValidationResult {
   };
 }
 
-export const validateInputs = async (state: ValidateInputsState) => {
+export const validateInputs = async (state: ValidateInputsState, config: LangGraphRunnableConfig) => {
   const { resumeText, jobDescriptionText } = state;
 
   const resumeValidation = isLikelyResume(resumeText);
   const jdValidation = isLikelyJobDescription(jobDescriptionText);
 
+  let validationError: string | null = null;
+
   if (!resumeValidation.valid && !jdValidation.valid) {
-    throw new Error(
-      `Invalid inputs: Resume - ${resumeValidation.reason} Job Description - ${jdValidation.reason}`,
-    );
+    validationError = `Invalid inputs: Resume - ${resumeValidation.reason} Job Description - ${jdValidation.reason}`;
+  } else if (!resumeValidation.valid) {
+    validationError = `Invalid resume: ${resumeValidation.reason}`;
+  } else if (!jdValidation.valid) {
+    validationError = `Invalid job description: ${jdValidation.reason}`;
   }
 
-  if (!resumeValidation.valid) {
-    throw new Error(`Invalid resume: ${resumeValidation.reason}`);
+  if (validationError) {
+    config.writer?.({
+      event: 'VALIDATION_FAILED',
+      data: { message: validationError },
+    });
   }
 
-  if (!jdValidation.valid) {
-    throw new Error(`Invalid job description: ${jdValidation.reason}`);
-  }
-
-  return {};
+  return { validationError };
 };
