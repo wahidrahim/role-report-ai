@@ -33,7 +33,7 @@ export const learningPrioritiesPlan = async (
     schema: actionPlanSchema,
     abortSignal: config.signal,
     system: `
-      You are an seasoned career coach helping a candidate prepare for a screening call and potential interview.
+      You are a seasoned career coach helping a candidate prepare for a screening call and potential interview.
 
       Your task is to generate a list of learning priorities for the candidate.
 
