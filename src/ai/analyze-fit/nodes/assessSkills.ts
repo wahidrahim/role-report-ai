@@ -102,6 +102,19 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - critical: Marked as "required" or "must have" in job description
       - nice-to-have: Marked as "preferred", "plus", or "bonus"
 
+      SOFT SKILLS (include only if job description explicitly mentions them):
+      If JD mentions soft skills, include up to 3:
+      - Leadership / Team Management
+      - Communication / Presentation
+      - Collaboration / Cross-functional work
+      - Mentoring / Coaching
+      - Project Management
+
+      For soft skills:
+      - "verified": concrete resume evidence (led team of X, presented to stakeholders)
+      - "missing": required but no evidence
+      - Importance follows same rules as technical skills
+
       RULES:
       - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
       - Aim to identify at least 5-10 distinct skills if the job description mentions them.
