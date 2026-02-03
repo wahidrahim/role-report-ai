@@ -127,7 +127,19 @@ export const learningPrioritiesPlan = async (
       </skill_assessment>
 
       <suitability_assessment>
-        ${suitabilityAssessment.suitabilityReasoning}
+        Score: ${suitabilityAssessment.suitabilityScore}/10
+
+        Critical Gaps (prioritize learning for these):
+        ${suitabilityAssessment.criticalGaps?.map((g) => `- ${g}`).join('\n        ') ?? 'N/A'}
+
+        Criteria Breakdown:
+        ${
+          suitabilityAssessment.criteriaBreakdown
+            ? Object.entries(suitabilityAssessment.criteriaBreakdown)
+                .map(([key, value]) => `- ${key}: ${value.score}/10 - ${value.reasoning}`)
+                .join('\n        ')
+            : 'N/A'
+        }
       </suitability_assessment>
     `,
   });
