@@ -89,7 +89,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
       - Aim to identify at least 5-10 distinct skills if the job description mentions them.
       - Only include CONCRETE TECHNOLOGIES (React, Docker, AWS, PostgreSQL, Kubernetes)
-      - Exclude vague concepts (async programming, version control, agile, soft skills)
+      - Exclude vague concepts (async programming, version control, agile)
       - Each skill must have exactly ONE status
       - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
