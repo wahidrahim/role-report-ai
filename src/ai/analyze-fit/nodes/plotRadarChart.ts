@@ -6,16 +6,14 @@ import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/event
 import { models } from '@/ai/config';
 
 export const radarChartSchema = z.object({
-  data: z
-    .array(
-      z.object({
-        skillName: z.string(),
-        requiredLevel: z.number().min(0).max(100),
-        candidateLevel: z.number().min(0).max(100),
-        reasoning: z.string(),
-      }),
-    )
-    .max(8),
+  data: z.array(
+    z.object({
+      skillName: z.string(),
+      requiredLevel: z.number().min(0).max(100),
+      candidateLevel: z.number().min(0).max(100),
+      reasoning: z.string(),
+    }),
+  ),
 });
 
 export type RadarChart = z.infer<typeof radarChartSchema>;
