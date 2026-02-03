@@ -62,7 +62,7 @@ export const planDeepResearch = async (
       TARGET: ${companyName}
       ROLE: ${jobTitle}
       SKILL GAPS: ${skillGaps}
-      SUITABILITY ASSESSMENT: ${suitabilityAssessment.suitabilityReasoning}
+      SUITABILITY ASSESSMENT: ${suitabilityAssessment.bottomLine}
 
       OUTPUT (STRICT):
       - Return VALID JSON that matches the provided schema exactly.
