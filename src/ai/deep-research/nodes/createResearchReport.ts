@@ -59,6 +59,11 @@ export const createResearchReport = async (
   const researchReportStream = streamObject({
     model: models.balanced,
     schema: researchReportSchema,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a Senior Career Strategist for a specialized talent agency.
       Your goal is to write a confidential "Intelligence Brief" (Dossier) for a candidate.

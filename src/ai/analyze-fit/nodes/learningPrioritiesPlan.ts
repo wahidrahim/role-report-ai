@@ -81,6 +81,11 @@ export const learningPrioritiesPlan = async (
     model: models.powerful,
     schema: learningPlanSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a technical interview coach specializing in rapid skill development for job seekers. Your goal is to create a focused learning plan that maximizes interview readiness in limited time.
 

@@ -29,6 +29,11 @@ export const extractCompanyNameAndJobTitle = async (
     model: models.balanced,
     schema: extractCompanyNameAndJobTitleSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
     You extract the hiring company name and the job title from a job description.
 

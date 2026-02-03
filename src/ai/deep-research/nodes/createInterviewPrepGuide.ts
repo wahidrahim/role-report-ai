@@ -74,6 +74,11 @@ export const createInterviewPrepGuide = async (
   const { object } = await generateObject({
     model: models.balanced,
     schema: interviewPrepGuideSchema,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a **Forensic Technical Interview Strategist**.
       Your goal is to build a "Gap-Bridging" study plan that helps a specific candidate pass an interview at ${companyName}.

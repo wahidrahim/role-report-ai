@@ -3,9 +3,12 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowUpDown,
   BookOpen,
-  ChevronRight,
   Clock,
+  Lightbulb,
+  Minus,
+  Plus,
   Target,
   Wrench,
   Zap,
@@ -14,11 +17,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/core/components/ui/collapsible';
 
 import MatchScore from './components/MatchScore';
 import { SkillAssessment } from './components/SkillAssessment';
@@ -110,21 +108,94 @@ const getLearningCategoryStyle = (category: string) => {
   }
 };
 
-const TimeEstimateBadge = ({
-  time,
-  variant,
-}: {
-  time: string;
-  variant: 'effort' | 'learning';
-}) => {
-  const icon =
-    variant === 'effort' ? <Wrench className="size-3" /> : <Clock className="size-3" />;
+const TimeEstimateBadge = ({ time, variant }: { time: string; variant: 'effort' | 'learning' }) => {
+  const icon = variant === 'effort' ? <Wrench className="size-3" /> : <Clock className="size-3" />;
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded">
       {icon}
       {time}
     </span>
   );
+};
+
+const ExampleRenderer = ({ example }: { example: any }) => {
+  if (!example?.type) return null;
+
+  switch (example.type) {
+    case 'replacement':
+      return (
+        <div className="space-y-2">
+          <div className="flex items-start gap-2 p-2 bg-red-500/5 rounded border border-red-500/10">
+            <span className="text-[10px] uppercase tracking-wider text-red-400/70 shrink-0">
+              Before
+            </span>
+            <span className="text-xs text-red-300/80">{example.before}</span>
+          </div>
+          <div className="flex items-start gap-2 p-2 bg-emerald-500/5 rounded border border-emerald-500/10">
+            <span className="text-[10px] uppercase tracking-wider text-emerald-400/70 shrink-0">
+              After
+            </span>
+            <span className="text-xs text-emerald-300">{example.after}</span>
+          </div>
+        </div>
+      );
+
+    case 'addition':
+      return (
+        <div className="space-y-1">
+          <div className="flex items-start gap-2 p-2 bg-emerald-500/5 rounded border border-emerald-500/10">
+            <Plus className="size-3 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-emerald-400/70">Add</span>
+              <p className="text-xs text-emerald-300">{example.content}</p>
+            </div>
+          </div>
+          {example.location && (
+            <p className="text-xs text-muted-foreground/70">Location: {example.location}</p>
+          )}
+        </div>
+      );
+
+    case 'removal':
+      return (
+        <div className="flex items-start gap-2 p-2 bg-red-500/5 rounded border border-red-500/10">
+          <Minus className="size-3 text-red-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-wider text-red-400/70">Remove</span>
+            <p className="text-xs text-red-300/80 line-through decoration-red-400/50">
+              {example.content}
+            </p>
+          </div>
+        </div>
+      );
+
+    case 'structural':
+      return (
+        <div className="flex items-start gap-2 p-2 bg-blue-500/5 rounded border border-blue-500/10">
+          <ArrowUpDown className="size-3 text-blue-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-wider text-blue-400/70">
+              Restructure
+            </span>
+            <p className="text-xs text-blue-300">{example.suggestion}</p>
+          </div>
+        </div>
+      );
+
+    case 'general':
+      return (
+        <div className="flex items-start gap-2 p-2 bg-amber-500/5 rounded border border-amber-500/10">
+          <Lightbulb className="size-3 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-wider text-amber-400/70">Tip</span>
+            <p className="text-xs text-amber-300">{example.suggestion}</p>
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
 };
 
 export function AnalyzeResults({
@@ -167,10 +238,7 @@ export function AnalyzeResults({
         <div>
           <Card className="border-primary/20 bg-primary/5">
             <CardContent>
-              <MatchScore
-                suitabilityAssessment={suitabilityAssessment}
-                isLoading={isLoading}
-              />
+              <MatchScore suitabilityAssessment={suitabilityAssessment} isLoading={isLoading} />
             </CardContent>
           </Card>
         </div>
@@ -235,20 +303,8 @@ export function AnalyzeResults({
                           {item.description}
                         </p>
 
-                        {/* Example Section (Expandable) */}
-                        {item.example && (
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors group">
-                              <ChevronRight className="size-3 transition-transform group-data-[state=open]:rotate-90" />
-                              View Example
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="mt-2 p-3 bg-black/30 rounded border border-white/5 text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-                                {item.example}
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        )}
+                        {/* Example */}
+                        {item.example && <ExampleRenderer example={item.example} />}
                       </li>
                     );
                   })}
