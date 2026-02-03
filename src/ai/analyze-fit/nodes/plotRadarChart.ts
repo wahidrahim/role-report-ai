@@ -8,10 +8,10 @@ import { models } from '@/ai/config';
 export const radarChartSchema = z.object({
   data: z.array(
     z.object({
-      skillName: z.string(),
-      requiredLevel: z.number(),
-      candidateLevel: z.number(),
-      reasoning: z.string(),
+      skillName: z.string().describe('Normalized skill name from job description'),
+      requiredLevel: z.number().describe('Proficiency level the job demands (0-100)'),
+      candidateLevel: z.number().describe("Candidate's proficiency level based on resume evidence (0-100)"),
+      reasoning: z.string().describe('Evidence-based justification for both levels'),
     }),
   ),
 });
