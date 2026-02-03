@@ -86,7 +86,7 @@ export const createInterviewPrepGuide = async (
 
       *** THE CANDIDATE PROFILE (PHASE 1) ***
       - Target Role: ${jobTitle}
-      - Baseline Fit: ${suitabilityAssessment.suitabilityReasoning}
+      - Baseline Fit: ${suitabilityAssessment.bottomLine}
       - SKILL GAPS: ${skillGaps || 'None detected (Focus on Advanced Topics)'}
 
       *** THE COMPANY INTELLIGENCE (PHASE 2) ***

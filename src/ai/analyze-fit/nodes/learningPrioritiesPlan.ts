@@ -69,6 +69,14 @@ export const learningPrioritiesPlan = async (
     throw new Error('Missing required state at learningPrioritiesPlan node');
   }
 
+  // Warn if suitability fields are missing - these improve output quality
+  if (!suitabilityAssessment.criticalGaps?.length) {
+    console.warn('[learningPrioritiesPlan] Missing criticalGaps in suitabilityAssessment');
+  }
+  if (!suitabilityAssessment.criteriaBreakdown) {
+    console.warn('[learningPrioritiesPlan] Missing criteriaBreakdown in suitabilityAssessment');
+  }
+
   const learningPrioritiesStream = streamObject({
     model: models.powerful,
     schema: learningPlanSchema,
@@ -127,7 +135,19 @@ export const learningPrioritiesPlan = async (
       </skill_assessment>
 
       <suitability_assessment>
-        ${suitabilityAssessment.suitabilityReasoning}
+        Score: ${suitabilityAssessment.suitabilityScore}/10
+
+        Critical Gaps (prioritize learning for these):
+        ${suitabilityAssessment.criticalGaps?.map((g) => `- ${g}`).join('\n        ') ?? 'N/A'}
+
+        Criteria Breakdown:
+        ${
+          suitabilityAssessment.criteriaBreakdown
+            ? Object.entries(suitabilityAssessment.criteriaBreakdown)
+                .map(([key, value]) => `- ${key}: ${value.score}/10 - ${value.reasoning}`)
+                .join('\n        ')
+            : 'N/A'
+        }
       </suitability_assessment>
     `,
   });

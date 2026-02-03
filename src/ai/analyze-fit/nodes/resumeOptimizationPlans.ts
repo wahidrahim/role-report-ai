@@ -66,6 +66,17 @@ export const resumeOptimizationPlans = async (
     throw new Error('Missing required state at resumeOptimizationPlans node');
   }
 
+  // Warn if suitability fields are missing - these improve output quality
+  if (!suitabilityAssessment.keyStrengths?.length) {
+    console.warn('[resumeOptimizationPlans] Missing keyStrengths in suitabilityAssessment');
+  }
+  if (!suitabilityAssessment.criticalGaps?.length) {
+    console.warn('[resumeOptimizationPlans] Missing criticalGaps in suitabilityAssessment');
+  }
+  if (!suitabilityAssessment.bottomLine) {
+    console.warn('[resumeOptimizationPlans] Missing bottomLine in suitabilityAssessment');
+  }
+
   const resumeOptimizationsStream = streamObject({
     model: models.powerful,
     schema: actionPlanSchema,
@@ -130,7 +141,15 @@ export const resumeOptimizationPlans = async (
       </skill_assessment>
 
       <suitability_assessment>
-        ${suitabilityAssessment.suitabilityReasoning}
+        Score: ${suitabilityAssessment.suitabilityScore}/10
+
+        Key Strengths (leverage these in resume):
+        ${suitabilityAssessment.keyStrengths?.map((s) => `- ${s}`).join('\n        ') ?? 'N/A'}
+
+        Critical Gaps (address with targeted content):
+        ${suitabilityAssessment.criticalGaps?.map((g) => `- ${g}`).join('\n        ') ?? 'N/A'}
+
+        Bottom Line: ${suitabilityAssessment.bottomLine ?? 'N/A'}
       </suitability_assessment>
     `,
   });
