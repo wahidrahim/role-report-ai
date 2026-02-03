@@ -8,6 +8,13 @@ import { resumeOptimizationPlans } from '@/ai/analyze-fit/nodes/resumeOptimizati
 import { validateInputs } from '@/ai/analyze-fit/nodes/validateInputs';
 import { stateAnnotation } from '@/ai/analyze-fit/state';
 
+const routeAfterValidation = (state: { validationError: string | null }) => {
+  if (state.validationError) {
+    return END;
+  }
+  return ['plotRadarChart', 'assessSkills'];
+};
+
 export const analyzeFitGraph = new StateGraph(stateAnnotation)
   .addNode('validateInputs', validateInputs)
   .addNode('plotRadarChart', plotRadarChart)
@@ -16,8 +23,11 @@ export const analyzeFitGraph = new StateGraph(stateAnnotation)
   .addNode('resumeOptimizationPlans', resumeOptimizationPlans)
   .addNode('learningPrioritiesPlan', learningPrioritiesPlan)
   .addEdge(START, 'validateInputs')
-  .addEdge('validateInputs', 'plotRadarChart')
-  .addEdge('validateInputs', 'assessSkills')
+  .addConditionalEdges('validateInputs', routeAfterValidation, [
+    'plotRadarChart',
+    'assessSkills',
+    END,
+  ])
   .addEdge('plotRadarChart', 'assessSuitability')
   .addEdge('assessSkills', 'assessSuitability')
   .addEdge('assessSuitability', 'resumeOptimizationPlans')
