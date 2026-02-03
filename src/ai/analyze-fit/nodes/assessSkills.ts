@@ -81,6 +81,23 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - transferable: Candidate has a comparable alternative technology (e.g., Vue.js for React requirement)
       - missing: Technology required but not evidenced in resume
 
+      TRANSFERABILITY GUIDELINES:
+      A skill is "transferable" ONLY when the candidate has a directly comparable alternative:
+
+      Valid transfers (same category):
+      - Vue.js → React (frontend frameworks)
+      - PostgreSQL → MySQL (relational databases)
+      - AWS → GCP (cloud platforms)
+      - Python → Ruby (backend scripting languages)
+
+      NOT transferable:
+      - "General programming" for specific framework
+      - Backend experience for frontend requirement
+      - SQL for NoSQL (different paradigms)
+      - Mobile for web development
+
+      When marking "transferable", state the equivalent skill in reasoning.
+
       IMPORTANCE:
       - critical: Marked as "required" or "must have" in job description
       - nice-to-have: Marked as "preferred", "plus", or "bonus"
