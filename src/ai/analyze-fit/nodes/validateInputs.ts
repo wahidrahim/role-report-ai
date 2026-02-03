@@ -1,67 +1,164 @@
-import type { LangGraphRunnableConfig } from '@langchain/langgraph';
-import { generateObject } from 'ai';
-import { z } from 'zod';
-
-import { models } from '@/ai/config';
-
-export const inputValidationSchema = z.object({
-  resumeIsValid: z.boolean().describe('True if the text appears to be an actual resume'),
-  resumeReason: z.string().describe('Brief explanation of why the resume is valid or invalid'),
-  jobDescriptionIsValid: z
-    .boolean()
-    .describe('True if the text appears to be an actual job posting'),
-  jobDescriptionReason: z
-    .string()
-    .describe('Brief explanation of why the job description is valid or invalid'),
-});
-
-export type InputValidation = z.infer<typeof inputValidationSchema>;
-
 type ValidateInputsState = {
   resumeText: string;
   jobDescriptionText: string;
 };
 
-export const validateInputs = async (
-  state: ValidateInputsState,
-  config: LangGraphRunnableConfig,
-) => {
+type ValidationResult = {
+  valid: boolean;
+  reason: string;
+};
+
+const RESUME_SECTION_HEADERS = [
+  'experience',
+  'education',
+  'skills',
+  'work history',
+  'employment',
+  'objective',
+  'summary',
+  'qualifications',
+  'projects',
+  'certifications',
+  'professional',
+];
+
+const RESUME_ACTION_VERBS = [
+  'managed',
+  'developed',
+  'led',
+  'implemented',
+  'achieved',
+  'created',
+  'designed',
+  'built',
+  'delivered',
+  'improved',
+  'increased',
+  'reduced',
+  'coordinated',
+  'analyzed',
+];
+
+const JOB_SECTION_HEADERS = [
+  'responsibilities',
+  'requirements',
+  'qualifications',
+  'about the role',
+  'about the position',
+  "what you'll do",
+  "what we're looking for",
+  'we are looking for',
+  'duties',
+  'benefits',
+  'about us',
+  'the role',
+];
+
+const JOB_KEYWORDS = [
+  'position',
+  'role',
+  'opportunity',
+  'hiring',
+  'apply',
+  'candidate',
+  'team',
+  'company',
+  'salary',
+  'remote',
+  'hybrid',
+  'full-time',
+  'part-time',
+  'contract',
+];
+
+const REQUIREMENT_PATTERNS = [
+  'years of experience',
+  'years experience',
+  'required',
+  'preferred',
+  'must have',
+  'nice to have',
+  'bonus',
+  "bachelor's",
+  "master's",
+  'degree in',
+];
+
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+const PHONE_REGEX = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/;
+
+const MIN_TEXT_LENGTH = 100;
+const MIN_RESUME_MATCHES = 3;
+const MIN_JD_MATCHES = 3;
+
+function countMatches(text: string, patterns: string[]): number {
+  const lowerText = text.toLowerCase();
+  return patterns.filter((pattern) => lowerText.includes(pattern.toLowerCase())).length;
+}
+
+function isLikelyResume(text: string): ValidationResult {
+  if (text.length < MIN_TEXT_LENGTH) {
+    return { valid: false, reason: 'Text is too short to be a resume.' };
+  }
+
+  const sectionMatches = countMatches(text, RESUME_SECTION_HEADERS);
+  const actionVerbMatches = countMatches(text, RESUME_ACTION_VERBS);
+  const hasEmail = EMAIL_REGEX.test(text);
+  const hasPhone = PHONE_REGEX.test(text);
+
+  const totalScore = sectionMatches + actionVerbMatches + (hasEmail ? 1 : 0) + (hasPhone ? 1 : 0);
+
+  if (totalScore >= MIN_RESUME_MATCHES) {
+    return { valid: true, reason: 'Text contains resume indicators.' };
+  }
+
+  return {
+    valid: false,
+    reason:
+      'Text does not appear to be a resume. Missing typical resume sections, professional experience, or contact information.',
+  };
+}
+
+function isLikelyJobDescription(text: string): ValidationResult {
+  if (text.length < MIN_TEXT_LENGTH) {
+    return { valid: false, reason: 'Text is too short to be a job description.' };
+  }
+
+  const sectionMatches = countMatches(text, JOB_SECTION_HEADERS);
+  const keywordMatches = countMatches(text, JOB_KEYWORDS);
+  const requirementMatches = countMatches(text, REQUIREMENT_PATTERNS);
+
+  const totalScore = sectionMatches + keywordMatches + requirementMatches;
+
+  if (totalScore >= MIN_JD_MATCHES) {
+    return { valid: true, reason: 'Text contains job description indicators.' };
+  }
+
+  return {
+    valid: false,
+    reason:
+      'Text does not appear to be a job description. Missing typical job posting sections like responsibilities, requirements, or qualifications.',
+  };
+}
+
+export const validateInputs = async (state: ValidateInputsState) => {
   const { resumeText, jobDescriptionText } = state;
 
-  const { object } = await generateObject({
-    model: models.fast,
-    schema: inputValidationSchema,
-    abortSignal: config.signal,
-    system: `You are an input validator. Determine if the provided texts are actually a resume and a job description.
+  const resumeValidation = isLikelyResume(resumeText);
+  const jdValidation = isLikelyJobDescription(jobDescriptionText);
 
-RESUME VALIDATION:
-- Valid: Contains professional info (work experience, education, skills, contact info)
-- Invalid: Random text, articles, code, or unrelated content
-
-JOB DESCRIPTION VALIDATION:
-- Valid: Describes a job opening (title, responsibilities, requirements, qualifications)
-- Invalid: Random text, a resume, articles, code, or unrelated content
-
-Provide brief reasons (1-2 sentences) for each validation result.`,
-    prompt: `RESUME TEXT:
-${resumeText}
-
-JOB DESCRIPTION TEXT:
-${jobDescriptionText}`,
-  });
-
-  if (!object.resumeIsValid && !object.jobDescriptionIsValid) {
+  if (!resumeValidation.valid && !jdValidation.valid) {
     throw new Error(
-      `Invalid inputs: Resume - ${object.resumeReason}. Job Description - ${object.jobDescriptionReason}`,
+      `Invalid inputs: Resume - ${resumeValidation.reason} Job Description - ${jdValidation.reason}`,
     );
   }
 
-  if (!object.resumeIsValid) {
-    throw new Error(`Invalid resume: ${object.resumeReason}`);
+  if (!resumeValidation.valid) {
+    throw new Error(`Invalid resume: ${resumeValidation.reason}`);
   }
 
-  if (!object.jobDescriptionIsValid) {
-    throw new Error(`Invalid job description: ${object.jobDescriptionReason}`);
+  if (!jdValidation.valid) {
+    throw new Error(`Invalid job description: ${jdValidation.reason}`);
   }
 
   return {};
