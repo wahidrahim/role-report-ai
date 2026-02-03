@@ -7,7 +7,7 @@ import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitabi
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { actionPlanSchema } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
 import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 type LearningPrioritiesPlanState = {
   resumeText: string;
@@ -29,7 +29,7 @@ export const learningPrioritiesPlan = async (
   }
 
   const learningPrioritiesStream = streamObject({
-    model,
+    model: models.powerful,
     schema: actionPlanSchema,
     abortSignal: config.signal,
     system: `

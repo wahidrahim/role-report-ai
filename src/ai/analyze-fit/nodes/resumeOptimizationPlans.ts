@@ -6,7 +6,7 @@ import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/event
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 export const actionPlanSchema = z.object({
   plan: z.array(
@@ -40,7 +40,7 @@ export const resumeOptimizationPlans = async (
   }
 
   const resumeOptimizationsStream = streamObject({
-    model,
+    model: models.powerful,
     schema: actionPlanSchema,
     abortSignal: config.signal,
     system: `
