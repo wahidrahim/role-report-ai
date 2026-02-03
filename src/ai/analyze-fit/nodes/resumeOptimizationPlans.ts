@@ -130,7 +130,15 @@ export const resumeOptimizationPlans = async (
       </skill_assessment>
 
       <suitability_assessment>
-        ${suitabilityAssessment.suitabilityReasoning}
+        Score: ${suitabilityAssessment.suitabilityScore}/10
+
+        Key Strengths (leverage these in resume):
+        ${suitabilityAssessment.keyStrengths?.map((s) => `- ${s}`).join('\n        ') ?? 'N/A'}
+
+        Critical Gaps (address with targeted content):
+        ${suitabilityAssessment.criticalGaps?.map((g) => `- ${g}`).join('\n        ') ?? 'N/A'}
+
+        Bottom Line: ${suitabilityAssessment.bottomLine ?? 'N/A'}
       </suitability_assessment>
     `,
   });
