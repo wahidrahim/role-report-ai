@@ -168,8 +168,7 @@ export function AnalyzeResults({
           <Card className="border-primary/20 bg-primary/5">
             <CardContent>
               <MatchScore
-                matchScore={suitabilityAssessment?.suitabilityScore}
-                verdict={suitabilityAssessment?.suitabilityReasoning}
+                suitabilityAssessment={suitabilityAssessment}
                 isLoading={isLoading}
               />
             </CardContent>
