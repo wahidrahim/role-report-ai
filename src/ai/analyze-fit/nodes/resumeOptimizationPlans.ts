@@ -81,6 +81,11 @@ export const resumeOptimizationPlans = async (
     model: models.powerful,
     schema: actionPlanSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are an expert ATS (Applicant Tracking System) optimization specialist and career coach with 15+ years of experience helping candidates land interviews.
 
