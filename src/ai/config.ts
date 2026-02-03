@@ -1,4 +1,7 @@
-import { ollama } from 'ollama-ai-provider-v2';
+export const models = {
+  fast: 'anthropic/claude-3-5-haiku-20241022',
+  balanced: 'anthropic/claude-sonnet-4-20250514',
+  powerful: 'anthropic/claude-opus-4-20250514',
+} as const;
 
-export const model =
-  process.env.NODE_ENV === 'development' ? ollama('qwen3:30b') : 'openai/gpt-4o-mini';
+export type ModelTier = keyof typeof models;
