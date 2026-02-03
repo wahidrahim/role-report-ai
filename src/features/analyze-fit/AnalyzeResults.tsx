@@ -4,7 +4,6 @@ import {
   AlertCircle,
   AlertTriangle,
   BookOpen,
-  ChevronRight,
   Clock,
   Target,
   Wrench,
@@ -14,11 +13,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/core/components/ui/collapsible';
 
 import MatchScore from './components/MatchScore';
 import { SkillAssessment } from './components/SkillAssessment';
@@ -235,19 +229,26 @@ export function AnalyzeResults({
                           {item.description}
                         </p>
 
-                        {/* Example Section (Expandable) */}
+                        {/* Before/After Example */}
                         {item.example && (
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors group">
-                              <ChevronRight className="size-3 transition-transform group-data-[state=open]:rotate-90" />
-                              View Example
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="mt-2 p-3 bg-black/30 rounded border border-white/5 text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-                                {item.example}
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2 p-2 bg-red-500/5 rounded border border-red-500/10">
+                              <span className="text-[10px] uppercase tracking-wider text-red-400/70 shrink-0">
+                                Before
+                              </span>
+                              <span className="text-xs text-red-300/80 line-through">
+                                {item.example.before}
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-2 p-2 bg-emerald-500/5 rounded border border-emerald-500/10">
+                              <span className="text-[10px] uppercase tracking-wider text-emerald-400/70 shrink-0">
+                                After
+                              </span>
+                              <span className="text-xs text-emerald-300">
+                                {item.example.after}
+                              </span>
+                            </div>
+                          </div>
                         )}
                       </li>
                     );
