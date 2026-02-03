@@ -56,7 +56,8 @@ export default function Dashboard(props: DashboardProps) {
     !researchReport &&
     !isAnalyzing &&
     !isResearching &&
-    !deepResearchError;
+    !deepResearchError &&
+    !analysisError;
 
   // Include error in hasResearchData so we don't hide the tab if it fails
   const hasResearchData = streamEvents.length > 0 || !!researchReport || !!deepResearchError;
@@ -192,6 +193,7 @@ export default function Dashboard(props: DashboardProps) {
                   resumeOptimizations={resumeOptimizations}
                   learningPriorities={learningPriorities}
                   isLoading={isAnalyzing}
+                  error={analysisError}
                 />
               </TabsContent>
 
