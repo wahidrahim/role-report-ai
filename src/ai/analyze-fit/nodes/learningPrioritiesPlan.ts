@@ -114,21 +114,21 @@ export const learningPrioritiesPlan = async (
         ${resumeText}
       </resume>
 
-      <job-description>
+      <job_description>
         ${jobDescriptionText}
-      </job-description>
+      </job_description>
 
-      <radar-chart>
+      <radar_chart>
         ${JSON.stringify(radarChart, null, 2)}
-      </radar-chart>
+      </radar_chart>
 
-      <skill-assessment>
+      <skill_assessment>
         ${JSON.stringify(skillAssessment, null, 2)}
-      </skill-assessment>
+      </skill_assessment>
 
-      <suitability-assessment>
+      <suitability_assessment>
         ${suitabilityAssessment.suitabilityReasoning}
-      </suitability-assessment>
+      </suitability_assessment>
     `,
   });
 
