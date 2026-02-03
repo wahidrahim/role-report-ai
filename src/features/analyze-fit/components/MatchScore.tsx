@@ -12,13 +12,15 @@ type MatchScoreProps = {
   isLoading?: boolean;
 };
 
-const CRITERIA_CONFIG = [
+type CriteriaKey = keyof NonNullable<SuitabilityAssessment['criteriaBreakdown']>;
+
+const CRITERIA_CONFIG: readonly { key: CriteriaKey; label: string; weight: string }[] = [
   { key: 'coreSkillsMatch', label: 'Core Skills Match', weight: '35%' },
   { key: 'experienceRelevance', label: 'Experience Relevance', weight: '25%' },
   { key: 'skillGapsSeverity', label: 'Skill Gaps Severity', weight: '20%' },
   { key: 'transferableSkills', label: 'Transferable Skills', weight: '10%' },
   { key: 'overallPotential', label: 'Overall Potential', weight: '10%' },
-] as const;
+];
 
 const getScoreColor = (score: number) => {
   // Custom curve points: [score, hue]
@@ -179,7 +181,7 @@ export default function MatchScore({ suitabilityAssessment, isLoading }: MatchSc
             Assessment Breakdown
           </h4>
           {CRITERIA_CONFIG.map(({ key, label, weight }, index) => {
-            const criteria = criteriaBreakdown[key as keyof typeof criteriaBreakdown];
+            const criteria = criteriaBreakdown[key];
             if (!criteria || criteria.score === undefined) return null;
 
             const score = criteria.score;
