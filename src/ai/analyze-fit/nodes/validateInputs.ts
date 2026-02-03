@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 export const inputValidationSchema = z.object({
   resumeIsValid: z.boolean().describe('True if the text appears to be an actual resume'),
@@ -29,7 +29,7 @@ export const validateInputs = async (
   const { resumeText, jobDescriptionText } = state;
 
   const { object } = await generateObject({
-    model,
+    model: models.fast,
     schema: inputValidationSchema,
     abortSignal: config.signal,
     system: `You are an input validator. Determine if the provided texts are actually a resume and a job description.
