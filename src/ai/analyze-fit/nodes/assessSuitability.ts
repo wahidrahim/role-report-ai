@@ -8,12 +8,12 @@ import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { models } from '@/ai/config';
 
 const criteriaScoreSchema = z.object({
-  score: z.number().min(0).max(10),
+  score: z.number().describe('Score from 0-10'),
   reasoning: z.string(),
 });
 
 export const suitabilityAssessmentSchema = z.object({
-  suitabilityScore: z.number().min(0).max(10),
+  suitabilityScore: z.number().describe('Overall score from 0-10'),
   criteriaBreakdown: z.object({
     coreSkillsMatch: criteriaScoreSchema.describe(
       'Alignment with must-have requirements (35% weight)',
@@ -27,8 +27,10 @@ export const suitabilityAssessmentSchema = z.object({
     transferableSkills: criteriaScoreSchema.describe('Existing skills that bridge gaps (10% weight)'),
     overallPotential: criteriaScoreSchema.describe('Growth trajectory and adaptability (10% weight)'),
   }),
-  keyStrengths: z.array(z.string()).max(3).describe('Top 3 strengths for this role'),
-  criticalGaps: z.array(z.string()).max(3).describe('Top 3 gaps to address'),
+  keyStrengths: z.array(z.string()).describe('Top 3 strengths for this role'),
+  criticalGaps: z
+    .array(z.string())
+    .describe('Top 3 gaps to address (can be fewer if minimal gaps)'),
   bottomLine: z.string().describe('2-3 sentence summary recommendation'),
 });
 
