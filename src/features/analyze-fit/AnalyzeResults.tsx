@@ -1,7 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
-
 import {
   AlertCircle,
   AlertTriangle,
@@ -16,6 +14,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react';
+import { useRef } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
@@ -238,21 +237,6 @@ export function AnalyzeResults({
 
   return (
     <div className="space-y-6">
-      {/* Download Button */}
-      {hasResults && !isLoading && (
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            onClick={() => generatePDF(chartRef)}
-            disabled={isGenerating}
-            className="border-primary/30 hover:bg-primary/10 hover:border-primary/50"
-          >
-            {isGenerating ? <Spinner /> : <Download className="size-4" />}
-            {isGenerating ? 'Generating...' : 'Download Report'}
-          </Button>
-        </div>
-      )}
-
       {/* Error Alert */}
       {error && (
         <Alert
@@ -418,6 +402,20 @@ export function AnalyzeResults({
               </CardContent>
             </Card>
           )}
+        </div>
+      )}
+      {/* Download Button */}
+      {hasResults && !isLoading && (
+        <div className="flex">
+          <Button
+            variant="outline"
+            onClick={() => generatePDF(chartRef)}
+            disabled={isGenerating}
+            className="border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+          >
+            {isGenerating ? <Spinner /> : <Download className="size-4" />}
+            {isGenerating ? 'Generating...' : 'Download Analysis'}
+          </Button>
         </div>
       )}
     </div>
