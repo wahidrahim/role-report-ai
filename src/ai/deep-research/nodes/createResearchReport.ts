@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 import {
   emitNodeStart,
   emitResearchReportCreated,
@@ -57,7 +57,7 @@ export const createResearchReport = async (
   });
 
   const researchReportStream = streamObject({
-    model,
+    model: models.balanced,
     schema: researchReportSchema,
     system: `
       You are a Senior Career Strategist for a specialized talent agency.
