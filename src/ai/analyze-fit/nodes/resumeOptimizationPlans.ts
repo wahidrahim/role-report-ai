@@ -30,10 +30,28 @@ export const actionPlanSchema = z.object({
         ),
       example: z
         .object({
-          before: z.string().describe('The original resume text that needs improvement'),
-          after: z.string().describe('The improved version of the text'),
+          type: z
+            .enum(['replacement', 'addition', 'removal', 'structural', 'general'])
+            .describe('The type of change being recommended'),
+          before: z
+            .string()
+            .optional()
+            .describe('Original text that needs improvement (for replacement type)'),
+          after: z.string().optional().describe('Improved version (for replacement type)'),
+          content: z
+            .string()
+            .optional()
+            .describe('Content to add or remove (for addition/removal types)'),
+          location: z
+            .string()
+            .optional()
+            .describe('Where to add content (for addition type)'),
+          suggestion: z
+            .string()
+            .optional()
+            .describe('Structural change or general advice (for structural/general types)'),
         })
-        .describe('Specific before/after text showing exactly what to change'),
+        .describe('Specific example showing the recommended change'),
       estimatedEffort: z
         .enum(['15min', '1hr', '2-4hrs', '1day', 'multi-day'])
         .describe('Realistic time estimate to implement this change'),
@@ -123,7 +141,12 @@ export const resumeOptimizationPlans = async (
       - Flag any potential red flags and mitigation strategies
 
       ## Output Requirements
-      - Every recommendation MUST include a specific example or before/after text in the 'example' field
+      - Every recommendation MUST include an example using the appropriate type:
+        - "replacement": For improving existing text (provide before/after)
+        - "addition": For new content to add (provide content and optional location)
+        - "removal": For content to delete (provide the content to remove)
+        - "structural": For reordering sections or layout changes (provide suggestion)
+        - "general": For broad advice that doesn't map to specific text (provide suggestion)
       - Prioritize high-impact changes that address critical skill gaps from the assessment
       - Be direct and actionable — no generic advice like "tailor your resume"
       - Limit to 6-8 recommendations maximum, ordered by impact
