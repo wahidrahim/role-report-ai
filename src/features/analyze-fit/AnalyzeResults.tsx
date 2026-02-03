@@ -1,8 +1,24 @@
-import { AlertCircle } from 'lucide-react';
+'use client';
+
+import {
+  AlertCircle,
+  AlertTriangle,
+  BookOpen,
+  ChevronRight,
+  Clock,
+  Target,
+  Wrench,
+  Zap,
+} from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Badge } from '@/core/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/core/components/ui/collapsible';
 
 import MatchScore from './components/MatchScore';
 import { SkillAssessment } from './components/SkillAssessment';
@@ -20,6 +36,8 @@ type AnalyzeResultsProps = {
 
 const getPriorityValue = (priority: string) => {
   switch (priority?.toLowerCase()) {
+    case 'critical':
+      return 4;
     case 'high':
       return 3;
     case 'medium':
@@ -33,6 +51,8 @@ const getPriorityValue = (priority: string) => {
 
 const getPriorityBadgeStyle = (priority: string) => {
   switch (priority?.toLowerCase()) {
+    case 'critical':
+      return 'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/30';
     case 'high':
       return 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20';
     case 'medium':
@@ -42,6 +62,69 @@ const getPriorityBadgeStyle = (priority: string) => {
     default:
       return 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20';
   }
+};
+
+const getResumeCategoryStyle = (category: string) => {
+  switch (category) {
+    case 'keyword-optimization':
+      return { style: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'Keywords' };
+    case 'quantification':
+      return { style: 'bg-violet-500/10 text-violet-400 border-violet-500/20', label: 'Metrics' };
+    case 'experience-alignment':
+      return { style: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20', label: 'Experience' };
+    case 'skills-section':
+      return { style: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'Skills' };
+    case 'format-structure':
+      return { style: 'bg-slate-500/10 text-slate-400 border-slate-500/20', label: 'Format' };
+    default:
+      return { style: 'bg-gray-500/10 text-gray-400 border-gray-500/20', label: category };
+  }
+};
+
+const getLearningCategoryStyle = (category: string) => {
+  switch (category) {
+    case 'critical-gap':
+      return {
+        style: 'bg-red-500/10 text-red-400 border-red-500/20',
+        label: 'Critical Gap',
+        icon: AlertTriangle,
+      };
+    case 'quick-win':
+      return {
+        style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        label: 'Quick Win',
+        icon: Zap,
+      };
+    case 'interview-prep':
+      return {
+        style: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+        label: 'Interview Prep',
+        icon: Target,
+      };
+    default:
+      return {
+        style: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+        label: category,
+        icon: null,
+      };
+  }
+};
+
+const TimeEstimateBadge = ({
+  time,
+  variant,
+}: {
+  time: string;
+  variant: 'effort' | 'learning';
+}) => {
+  const icon =
+    variant === 'effort' ? <Wrench className="size-3" /> : <Clock className="size-3" />;
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded">
+      {icon}
+      {time}
+    </span>
+  );
 };
 
 export function AnalyzeResults({
@@ -118,27 +201,58 @@ export function AnalyzeResults({
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-3">
-                  {sortedResumeOptimizations.map((item: any, i: number) => (
-                    <li
-                      key={`opt-${i}`}
-                      className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="font-semibold text-primary-foreground text-sm">
-                          {item.title}
+                  {sortedResumeOptimizations.map((item: any, i: number) => {
+                    const categoryInfo = getResumeCategoryStyle(item.category);
+                    return (
+                      <li
+                        key={`opt-${i}`}
+                        className="p-4 bg-white/5 rounded-lg border border-white/10 space-y-3 hover:bg-white/[0.07] transition-colors"
+                      >
+                        {/* Header Row: Priority + Category + Time */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge
+                            variant="outline"
+                            className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
+                          >
+                            {item.priority}
+                          </Badge>
+                          {item.category && (
+                            <Badge variant="outline" className={categoryInfo.style}>
+                              {categoryInfo.label}
+                            </Badge>
+                          )}
+                          {item.estimatedEffort && (
+                            <TimeEstimateBadge time={item.estimatedEffort} variant="effort" />
+                          )}
                         </div>
-                        <Badge
-                          variant="outline"
-                          className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
-                        >
-                          {item.priority}
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </div>
-                    </li>
-                  ))}
+
+                        {/* Title */}
+                        <h4 className="font-semibold text-primary-foreground text-sm leading-tight">
+                          {item.title}
+                        </h4>
+
+                        {/* Description */}
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        {/* Example Section (Expandable) */}
+                        {item.example && (
+                          <Collapsible>
+                            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors group">
+                              <ChevronRight className="size-3 transition-transform group-data-[state=open]:rotate-90" />
+                              View Example
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="mt-2 p-3 bg-black/30 rounded border border-white/5 text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+                                {item.example}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </CardContent>
             </Card>
@@ -151,27 +265,68 @@ export function AnalyzeResults({
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-3">
-                  {sortedLearningPriorities.map((item: any, i: number) => (
-                    <li
-                      key={`learning-${i}`}
-                      className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="font-semibold text-primary-foreground text-sm">
-                          {item.title}
+                  {sortedLearningPriorities.map((item: any, i: number) => {
+                    const categoryInfo = getLearningCategoryStyle(item.category);
+                    const CategoryIcon = categoryInfo.icon;
+                    return (
+                      <li
+                        key={`learning-${i}`}
+                        className="p-4 bg-white/5 rounded-lg border border-white/10 space-y-3 hover:bg-white/[0.07] transition-colors"
+                      >
+                        {/* Header Row: Priority + Category + Time */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge
+                            variant="outline"
+                            className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
+                          >
+                            {item.priority}
+                          </Badge>
+                          {item.category && (
+                            <Badge
+                              variant="outline"
+                              className={`${categoryInfo.style} inline-flex items-center gap-1`}
+                            >
+                              {CategoryIcon && <CategoryIcon className="size-3" />}
+                              {categoryInfo.label}
+                            </Badge>
+                          )}
+                          {item.estimatedTime && (
+                            <TimeEstimateBadge time={item.estimatedTime} variant="learning" />
+                          )}
                         </div>
-                        <Badge
-                          variant="outline"
-                          className={`shrink-0 capitalize ${getPriorityBadgeStyle(item.priority)}`}
-                        >
-                          {item.priority}
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </div>
-                    </li>
-                  ))}
+
+                        {/* Title */}
+                        <h4 className="font-semibold text-primary-foreground text-sm leading-tight">
+                          {item.title}
+                        </h4>
+
+                        {/* Description */}
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        {/* Resource */}
+                        {item.resource && (
+                          <div className="flex items-start gap-2 p-2 bg-blue-500/5 rounded border border-blue-500/10">
+                            <BookOpen className="size-4 text-blue-400 shrink-0 mt-0.5" />
+                            <span className="text-xs text-blue-300">{item.resource}</span>
+                          </div>
+                        )}
+
+                        {/* Outcome */}
+                        {item.outcome && (
+                          <div className="pt-2 border-t border-white/5">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                              After completing:
+                            </span>
+                            <p className="text-xs text-emerald-400/90 mt-1 italic">
+                              &ldquo;{item.outcome}&rdquo;
+                            </p>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </CardContent>
             </Card>
