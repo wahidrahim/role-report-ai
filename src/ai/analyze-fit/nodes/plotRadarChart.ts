@@ -33,6 +33,11 @@ export const plotRadarChart = async (
     model: models.balanced,
     schema: radarChartSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a STRICT HIRING MANAGER for the company described in the job description. Your evaluations must be evidence-based, and derived solely from the provided resume and job description. Do not assume external knowledge or add unmentioned details.
 
