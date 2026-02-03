@@ -81,29 +81,78 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - transferable: Candidate has a comparable alternative technology (e.g., Vue.js for React requirement)
       - missing: Technology required but not evidenced in resume
 
+      TRANSFERABILITY GUIDELINES:
+      A skill is "transferable" ONLY when the candidate has a directly comparable alternative:
+
+      Valid transfers (same category):
+      - Vue.js → React (frontend frameworks)
+      - PostgreSQL → MySQL (relational databases)
+      - AWS → GCP (cloud platforms)
+      - Python → Ruby (backend scripting languages)
+
+      NOT transferable:
+      - "General programming" for specific framework
+      - Backend experience for frontend requirement
+      - SQL for NoSQL (different paradigms)
+      - Mobile for web development
+
+      When marking "transferable", state the equivalent skill in reasoning.
+
       IMPORTANCE:
       - critical: Marked as "required" or "must have" in job description
       - nice-to-have: Marked as "preferred", "plus", or "bonus"
+
+      SOFT SKILLS (include only if job description explicitly mentions them):
+      If JD mentions soft skills, include up to 3:
+      - Leadership / Team Management
+      - Communication / Presentation
+      - Collaboration / Cross-functional work
+      - Mentoring / Coaching
+      - Project Management
+
+      For soft skills:
+      - "verified": concrete resume evidence (led team of X, presented to stakeholders)
+      - "missing": required but no evidence
+      - Importance follows same rules as technical skills
+
+      EXPERIENCE LEVEL CONTEXT:
+      Adjust "verified" threshold based on job seniority:
+      - Senior roles: Expect deeper expertise, leadership evidence
+      - Mid-level roles: Solid hands-on experience sufficient
+      - Junior roles: Exposure and learning potential matter more
 
       RULES:
       - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
       - Aim to identify at least 5-10 distinct skills if the job description mentions them.
       - Only include CONCRETE TECHNOLOGIES (React, Docker, AWS, PostgreSQL, Kubernetes)
-      - Exclude vague concepts (async programming, version control, agile, soft skills)
+      - Exclude vague concepts (async programming, version control, agile)
       - Each skill must have exactly ONE status
       - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
     `,
     prompt: `
       Analyze the job description against the candidate's resume. For each specific technology mentioned in the job description, output a skill object with its status and importance, wrapped in a JSON object under the key \`skills\`.
-      
+
       BE COMPREHENSIVE. List every single technology found in the job description and assess it.
 
-      RESUME TEXT:
-      ${resumeText}
+      EXAMPLE:
+      Job requires: React, TypeScript, Node.js, PostgreSQL, Leadership
+      Candidate has: Vue.js, JavaScript, Express, MongoDB, "Led team of 5"
 
-      JOB DESCRIPTION TEXT:
+      Output:
+      - React: transferable/critical - "Vue.js is comparable frontend framework"
+      - TypeScript: missing/critical - "Only JavaScript shown"
+      - Node.js: verified/critical - "Express.js runs on Node.js"
+      - PostgreSQL: transferable/nice-to-have - "MongoDB experience, different paradigm"
+      - Leadership: verified/critical - "Led team of 5 engineers"
+
+      <resume>
+      ${resumeText}
+      </resume>
+
+      <job-description>
       ${jobDescriptionText}
+      </job-description>
     `,
   });
 
