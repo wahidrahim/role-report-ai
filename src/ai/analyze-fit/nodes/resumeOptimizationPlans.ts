@@ -11,9 +11,36 @@ import { models } from '@/ai/config';
 export const actionPlanSchema = z.object({
   plan: z.array(
     z.object({
-      title: z.string(),
-      description: z.string(),
-      priority: z.enum(['high', 'medium', 'low']),
+      title: z
+        .string()
+        .describe('Concise, actionable title (e.g., "Add missing TypeScript keyword")'),
+      category: z
+        .enum([
+          'keyword-optimization',
+          'quantification',
+          'experience-alignment',
+          'skills-section',
+          'format-structure',
+        ])
+        .describe('The type of resume improvement'),
+      description: z
+        .string()
+        .describe(
+          'Detailed explanation of what to change and why it matters for ATS/recruiter screening',
+        ),
+      example: z
+        .string()
+        .describe(
+          'Specific before/after text showing exactly what to change (e.g., "Before: Managed team → After: Led cross-functional team of 8 engineers")',
+        ),
+      estimatedEffort: z
+        .enum(['15min', '1hr', '2-4hrs', '1day', 'multi-day'])
+        .describe('Realistic time estimate to implement this change'),
+      priority: z
+        .enum(['critical', 'high', 'medium', 'low'])
+        .describe(
+          'Impact level: critical = major skill gap, high = missing keyword, medium = enhancement, low = nice-to-have',
+        ),
     }),
   ),
 });
