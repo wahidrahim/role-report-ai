@@ -236,7 +236,7 @@ export function AnalyzeResults({
                               <span className="text-[10px] uppercase tracking-wider text-red-400/70 shrink-0">
                                 Before
                               </span>
-                              <span className="text-xs text-red-300/80 line-through">
+                              <span className="text-xs text-red-300/80">
                                 {item.example.before}
                               </span>
                             </div>
