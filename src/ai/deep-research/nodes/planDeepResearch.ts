@@ -55,6 +55,11 @@ export const planDeepResearch = async (
     model: models.balanced,
     schema: DeepResearchPlanSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a Lead Investigator for a Career Intelligence Unit.
       Your goal is to uncover "Insider Intel" tailored to a specific candidate's weaknesses.
