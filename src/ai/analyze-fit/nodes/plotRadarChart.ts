@@ -79,11 +79,13 @@ export const plotRadarChart = async (
       No additional text, explanations, or wrappers.
     `,
     prompt: `
-      RESUME:
+      <resume>
       ${resumeText}
+      </resume>
 
-      JOB DESCRIPTION:
+      <job_description>
       ${jobDescriptionText}
+      </job_description>
     `,
   });
 
