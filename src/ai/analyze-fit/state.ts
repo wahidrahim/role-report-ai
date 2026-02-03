@@ -8,6 +8,7 @@ import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans'
 export const stateAnnotation = Annotation.Root({
   resumeText: Annotation<string>,
   jobDescriptionText: Annotation<string>,
+  validationError: Annotation<string | null>,
 
   radarChart: Annotation<RadarChart>,
   skillAssessment: Annotation<SkillAssessment>,
