@@ -5,15 +5,8 @@ import { assessSuitability } from '@/ai/analyze-fit/nodes/assessSuitability';
 import { learningPrioritiesPlan } from '@/ai/analyze-fit/nodes/learningPrioritiesPlan';
 import { plotRadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { resumeOptimizationPlans } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
-import { validateInputs } from '@/ai/analyze-fit/nodes/validateInputs';
+import { routeAfterValidation, validateInputs } from '@/ai/analyze-fit/nodes/validateInputs';
 import { stateAnnotation } from '@/ai/analyze-fit/state';
-
-const routeAfterValidation = (state: { validationError: string | null }) => {
-  if (state.validationError) {
-    return END;
-  }
-  return ['plotRadarChart', 'assessSkills'];
-};
 
 export const analyzeFitGraph = new StateGraph(stateAnnotation)
   .addNode('validateInputs', validateInputs)
