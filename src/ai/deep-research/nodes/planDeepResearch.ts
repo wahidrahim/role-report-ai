@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 import { emitNodeStart } from '@/ai/deep-research/events';
 import type { DeepResearchState } from '@/ai/deep-research/state';
 
@@ -52,7 +52,7 @@ export const planDeepResearch = async (
     .map((skill) => `${skill.skillName} ${skill.importance}`)
     .join(', ');
   const { object } = await generateObject({
-    model,
+    model: models.balanced,
     schema: DeepResearchPlanSchema,
     abortSignal: config.signal,
     system: `

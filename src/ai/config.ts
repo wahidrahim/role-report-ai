@@ -1,4 +1,14 @@
-import { ollama } from 'ollama-ai-provider-v2';
+/**
+ * Model tiers ordered by capability (and cost):
+ * - fast: Optimized for speed and cost efficiency
+ * - balanced: Good balance of capability and cost
+ * - powerful: Maximum capability for complex tasks
+ */
+export const models = {
+  fast: 'anthropic/claude-3.5-haiku',
+  balanced: 'anthropic/claude-sonnet-4.5',
+  powerful: 'anthropic/claude-opus-4.5',
+} as const;
 
-export const model =
-  process.env.NODE_ENV === 'development' ? ollama('qwen3:30b') : 'openai/gpt-4o-mini';
+export type ModelTier = keyof typeof models;
+export type ModelIdentifier = (typeof models)[ModelTier];

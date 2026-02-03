@@ -3,7 +3,7 @@ import { streamObject } from 'ai';
 import { z } from 'zod';
 
 import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 export const radarChartSchema = z.object({
   data: z
@@ -32,7 +32,7 @@ export const plotRadarChart = async (
   const { resumeText, jobDescriptionText } = state;
 
   const radarChartStream = streamObject({
-    model,
+    model: models.balanced,
     schema: radarChartSchema,
     abortSignal: config.signal,
     system: `

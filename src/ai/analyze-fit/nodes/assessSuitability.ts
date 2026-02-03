@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 export const suitabilityAssessmentSchema = z.object({
   suitabilityScore: z.number().min(0).max(10),
@@ -32,7 +32,7 @@ export const assessSuitability = async (
   }
 
   const suitabilityAssessmentStream = streamObject({
-    model,
+    model: models.balanced,
     schema: suitabilityAssessmentSchema,
     abortSignal: config.signal,
     system: `

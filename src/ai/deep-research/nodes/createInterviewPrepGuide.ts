@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 import { emitNodeEnd, emitNodeStart } from '@/ai/deep-research/events';
 import type { DeepResearchState } from '@/ai/deep-research/state';
 
@@ -72,7 +72,7 @@ export const createInterviewPrepGuide = async (
     .join(', ');
 
   const { object } = await generateObject({
-    model,
+    model: models.balanced,
     schema: interviewPrepGuideSchema,
     system: `
       You are a **Forensic Technical Interview Strategist**.
