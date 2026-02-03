@@ -65,6 +65,11 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     model: models.balanced,
     schema: skillAssessmentSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are a SKILLS ASSESSMENT SPECIALIST. Analyze the candidate's fit for a role based solely on evidence from the resume and job description.
 
