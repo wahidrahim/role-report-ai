@@ -19,6 +19,7 @@ type StreamEventName =
   | 'RESUME_OPTIMIZATIONS_CREATED'
   | 'LEARNING_PRIORITIES_STREAM_PARTIAL'
   | 'LEARNING_PRIORITIES_CREATED'
+  | 'VALIDATION_FAILED'
   | 'ERROR';
 
 export function useAnalysis() {
@@ -90,6 +91,9 @@ export function useAnalysis() {
                 case 'LEARNING_PRIORITIES_STREAM_PARTIAL':
                 case 'LEARNING_PRIORITIES_CREATED':
                   setLearningPriorities(payload?.learningPriorities as ActionPlan);
+                  break;
+                case 'VALIDATION_FAILED':
+                  setError(new Error((payload?.message as string) ?? 'Validation failed'));
                   break;
                 case 'ERROR':
                   setError(new Error((payload?.message as string) ?? 'Analysis failed'));
