@@ -29,10 +29,11 @@ export const actionPlanSchema = z.object({
           'Detailed explanation of what to change and why it matters for ATS/recruiter screening',
         ),
       example: z
-        .string()
-        .describe(
-          'Specific before/after text showing exactly what to change (e.g., "Before: Managed team → After: Led cross-functional team of 8 engineers")',
-        ),
+        .object({
+          before: z.string().describe('The original resume text that needs improvement'),
+          after: z.string().describe('The improved version of the text'),
+        })
+        .describe('Specific before/after text showing exactly what to change'),
       estimatedEffort: z
         .enum(['15min', '1hr', '2-4hrs', '1day', 'multi-day'])
         .describe('Realistic time estimate to implement this change'),
