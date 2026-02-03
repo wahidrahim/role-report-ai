@@ -27,7 +27,7 @@ This workflow orchestrates a resume ↔ job fit analysis. It first validates tha
 
 ```mermaid
 graph TD
-    Start([Start]) --> validateInputs[Validate Inputs]
+    Start([Start]) --> validateInputs{Validate Inputs}
     validateInputs -->|valid| plotRadarChart[Plot Radar Chart]
     validateInputs -->|valid| assessSkills[Assess Skills]
     validateInputs -->|invalid| End([End])
