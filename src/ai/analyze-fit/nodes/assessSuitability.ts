@@ -100,21 +100,21 @@ export const assessSuitability = async (
     prompt: `
       Assess this candidate's suitability for the role.
 
-      ---
-      ## CANDIDATE RESUME
-      ${resumeText}
+      <resume>
+        ${resumeText}
+      </resume>
 
-      ---
-      ## JOB DESCRIPTION
-      ${jobDescriptionText}
+      <job_description>
+        ${jobDescriptionText}
+      </job_description>
 
-      ---
-      ## SKILLS RADAR CHART DATA
-      ${JSON.stringify(radarChart, null, 2)}
+      <radar_chart>
+        ${JSON.stringify(radarChart, null, 2)}
+      </radar_chart>
 
-      ---
-      ## SKILL ASSESSMENT
-      ${JSON.stringify(skillAssessment, null, 2)}
+      <skill_assessment>
+        ${JSON.stringify(skillAssessment, null, 2)}
+      </skill_assessment>
     `,
   });
 
