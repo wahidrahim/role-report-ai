@@ -115,6 +115,12 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - "missing": required but no evidence
       - Importance follows same rules as technical skills
 
+      EXPERIENCE LEVEL CONTEXT:
+      Adjust "verified" threshold based on job seniority:
+      - Senior roles: Expect deeper expertise, leadership evidence
+      - Mid-level roles: Solid hands-on experience sufficient
+      - Junior roles: Exposure and learning potential matter more
+
       RULES:
       - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
       - Aim to identify at least 5-10 distinct skills if the job description mentions them.
