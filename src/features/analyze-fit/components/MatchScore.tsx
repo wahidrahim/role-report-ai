@@ -1,11 +1,6 @@
-import { AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/core/components/ui/collapsible';
 import {
   HoverCard,
   HoverCardContent,
@@ -177,72 +172,67 @@ export default function MatchScore({ suitabilityAssessment, isLoading }: MatchSc
         </div>
       )}
 
-      {/* Criteria Breakdown - Collapsible */}
+      {/* Criteria Breakdown */}
       {criteriaBreakdown && (
-        <Collapsible>
-          <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground/80 hover:text-muted-foreground transition-colors group w-full">
-            <ChevronRight className="size-4 transition-transform group-data-[state=open]:rotate-90" />
-            <span className="font-medium">View Assessment Breakdown</span>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="mt-4 space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
-              {CRITERIA_CONFIG.map(({ key, label, weight }, index) => {
-                const criteria = criteriaBreakdown[key as keyof typeof criteriaBreakdown];
-                if (!criteria) return null;
+        <div className="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
+          <h4 className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
+            Assessment Breakdown
+          </h4>
+          {CRITERIA_CONFIG.map(({ key, label, weight }, index) => {
+            const criteria = criteriaBreakdown[key as keyof typeof criteriaBreakdown];
+            if (!criteria || criteria.score === undefined) return null;
 
-                const score = criteria.score;
-                const reasoning = criteria.reasoning;
-                const barWidth = `${(score / 10) * 100}%`;
+            const score = criteria.score;
+            const reasoning = criteria.reasoning;
+            const barWidth = `${(score / 10) * 100}%`;
 
-                return (
-                  <HoverCard key={key} openDelay={200}>
-                    <HoverCardTrigger asChild>
+            return (
+              <HoverCard key={key} openDelay={200}>
+                <HoverCardTrigger asChild>
+                  <div
+                    className="grid grid-cols-[1fr_auto_2fr_auto] items-center gap-3 cursor-help group"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Label */}
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
+                      {label}
+                    </span>
+
+                    {/* Weight Badge */}
+                    <span className="text-[10px] font-mono text-muted-foreground/60 bg-white/5 px-1.5 py-0.5 rounded">
+                      {weight}
+                    </span>
+
+                    {/* Score Bar */}
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
-                        className="grid grid-cols-[1fr_auto_2fr_auto] items-center gap-3 cursor-help group"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        {/* Label */}
-                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
-                          {label}
-                        </span>
+                        className="h-full rounded-full transition-all duration-500 ease-out"
+                        style={{
+                          width: barWidth,
+                          backgroundColor: getScoreColor(score),
+                        }}
+                      />
+                    </div>
 
-                        {/* Weight Badge */}
-                        <span className="text-[10px] font-mono text-muted-foreground/60 bg-white/5 px-1.5 py-0.5 rounded">
-                          {weight}
-                        </span>
-
-                        {/* Score Bar */}
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-500 ease-out"
-                            style={{
-                              width: barWidth,
-                              backgroundColor: getScoreColor(score),
-                            }}
-                          />
-                        </div>
-
-                        {/* Score Number */}
-                        <span
-                          className="text-sm font-semibold tabular-nums min-w-[2.5rem] text-right"
-                          style={{ color: getScoreColor(score) }}
-                        >
-                          {score.toFixed(1)}
-                        </span>
-                      </div>
-                    </HoverCardTrigger>
-                    <HoverCardContent
-                      side="top"
-                      className="w-80 text-sm leading-relaxed bg-card/95 backdrop-blur-xl"
+                    {/* Score Number */}
+                    <span
+                      className="text-sm font-semibold tabular-nums min-w-[2.5rem] text-right"
+                      style={{ color: getScoreColor(score) }}
                     >
-                      <p className="text-muted-foreground">{reasoning}</p>
-                    </HoverCardContent>
-                  </HoverCard>
-                );
-              })}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+                      {score.toFixed(1)}
+                    </span>
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent
+                  side="top"
+                  className="w-80 text-sm leading-relaxed bg-card/95 backdrop-blur-xl"
+                >
+                  <p className="text-muted-foreground">{reasoning}</p>
+                </HoverCardContent>
+              </HoverCard>
+            );
+          })}
+        </div>
       )}
     </div>
   );
