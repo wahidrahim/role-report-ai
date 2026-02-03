@@ -78,7 +78,7 @@ export const learningPrioritiesPlan = async (
   }
 
   const learningPrioritiesStream = streamObject({
-    model: models.powerful,
+    model: models.fast,
     schema: learningPlanSchema,
     abortSignal: config.signal,
     providerOptions: {
