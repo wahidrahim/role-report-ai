@@ -73,7 +73,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     system: `
       You are a SKILLS ASSESSMENT SPECIALIST. Analyze the candidate's fit for a role based solely on evidence from the resume and job description.
 
-      OUTPUT FORMAT: Return a JSON object with a single field \`skills\`, which is a flat array of skill objects. Each skill appears exactly once with its assessed status.
+      OUTPUT FORMAT: Return a JSON object with a single field \`skills\`. Each skill object corresponds to a skill FROM THE JOB DESCRIPTION. The skillName must be the JD's terminology. Do NOT include candidate skills that aren't required by the job.
 
       SKILL OBJECT FIELDS:
       - status: "verified" | "transferable" | "missing"
@@ -81,10 +81,10 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - importance: "critical" | "nice-to-have" (MUST be exactly one of these two strings)
       - reasoning: Brief evidence-based justification
 
-      STATUS DEFINITIONS:
-      - verified: Technology explicitly required AND directly evidenced with hands-on experience
-      - transferable: Candidate has a comparable alternative technology (e.g., Vue.js for React requirement)
-      - missing: Technology required but not evidenced in resume
+      STATUS DEFINITIONS (all JD-anchored — skillName is always the JD skill):
+      - verified: JD skill that the candidate directly possesses with hands-on experience
+      - transferable: JD skill the candidate lacks, BUT has a comparable alternative (state the alternative in reasoning)
+      - missing: JD skill the candidate lacks with no comparable alternative
 
       TRANSFERABILITY GUIDELINES:
       A skill is "transferable" ONLY when the candidate has a directly comparable alternative:
@@ -127,8 +127,8 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - Junior roles: Exposure and learning potential matter more
 
       RULES:
-      - EXTRACT ALL RELEVANT HARD SKILLS AND TECHNOLOGIES. Do not limit yourself to just a few. 
-      - Aim to identify at least 5-10 distinct skills if the job description mentions them.
+      - CRITICAL: ONLY output skills from the JOB DESCRIPTION. The skillName must match JD terminology. Never include candidate skills that the JD doesn't require.
+      - Extract all relevant hard skills and technologies FROM THE JOB DESCRIPTION. Aim to identify at least 5-10 distinct skills if the job description mentions them.
       - Only include CONCRETE TECHNOLOGIES (React, Docker, AWS, PostgreSQL, Kubernetes)
       - Exclude vague concepts (async programming, version control, agile)
       - Each skill must have exactly ONE status
@@ -140,16 +140,20 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
 
       BE COMPREHENSIVE. List every single technology found in the job description and assess it.
 
-      EXAMPLE:
+      EXAMPLE (JD-anchored output):
       Job requires: React, TypeScript, Node.js, PostgreSQL, Leadership
       Candidate has: Vue.js, JavaScript, Express, MongoDB, "Led team of 5"
 
-      Output:
-      - React: transferable/critical - "Vue.js is comparable frontend framework"
-      - TypeScript: missing/critical - "Only JavaScript shown"
-      - Node.js: verified/critical - "Express.js runs on Node.js"
-      - PostgreSQL: transferable/nice-to-have - "MongoDB experience, different paradigm"
-      - Leadership: verified/critical - "Led team of 5 engineers"
+      Output (skillName = JD skill, NOT candidate skill):
+      - skillName: "React", status: transferable, reasoning: "Candidate has Vue.js, a comparable frontend framework"
+      - skillName: "TypeScript", status: missing, reasoning: "Only JavaScript shown, no TypeScript evidence"
+      - skillName: "Node.js", status: verified, reasoning: "Express.js experience demonstrates Node.js proficiency"
+      - skillName: "PostgreSQL", status: missing, reasoning: "MongoDB experience shown, but different paradigm (NoSQL vs SQL)"
+      - skillName: "Leadership", status: verified, reasoning: "Led team of 5 engineers"
+
+      WRONG (never do this):
+      - skillName: "Vue.js", status: verified <- WRONG! Vue.js isn't in the JD
+      - skillName: "MongoDB", status: verified <- WRONG! MongoDB isn't in the JD
 
       <resume>
       ${resumeText}
