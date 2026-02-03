@@ -132,8 +132,19 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     `,
     prompt: `
       Analyze the job description against the candidate's resume. For each specific technology mentioned in the job description, output a skill object with its status and importance, wrapped in a JSON object under the key \`skills\`.
-      
+
       BE COMPREHENSIVE. List every single technology found in the job description and assess it.
+
+      EXAMPLE:
+      Job requires: React, TypeScript, Node.js, PostgreSQL, Leadership
+      Candidate has: Vue.js, JavaScript, Express, MongoDB, "Led team of 5"
+
+      Output:
+      - React: transferable/critical - "Vue.js is comparable frontend framework"
+      - TypeScript: missing/critical - "Only JavaScript shown"
+      - Node.js: verified/critical - "Express.js runs on Node.js"
+      - PostgreSQL: transferable/nice-to-have - "MongoDB experience, different paradigm"
+      - Leadership: verified/critical - "Led team of 5 engineers"
 
       RESUME TEXT:
       ${resumeText}
