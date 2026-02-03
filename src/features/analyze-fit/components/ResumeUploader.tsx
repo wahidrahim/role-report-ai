@@ -1,9 +1,10 @@
 'use client';
-import { FileText } from 'lucide-react';
+import { FileText, X } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 
+import { Button } from '@/core/components/ui/button';
 import { Input } from '@/core/components/ui/input';
 import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
@@ -32,11 +33,21 @@ async function parsePDF(file: File) {
 type ResumeUploaderProps = {
   resumeFileName: string;
   onResumeChange: (text: string, fileName: string) => void;
+  onClear: () => void;
 };
 
-export default function ResumeUploader({ resumeFileName, onResumeChange }: ResumeUploaderProps) {
+export default function ResumeUploader({ resumeFileName, onResumeChange, onClear }: ResumeUploaderProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleClear = () => {
+    setResumeFile(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+    onClear();
+  };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -64,6 +75,7 @@ export default function ResumeUploader({ resumeFileName, onResumeChange }: Resum
         <Label htmlFor="resume-upload">Upload Resume</Label>
         <div className="flex items-center gap-2">
           <Input
+            ref={inputRef}
             id="resume-upload"
             type="file"
             accept="application/pdf"
@@ -81,16 +93,36 @@ export default function ResumeUploader({ resumeFileName, onResumeChange }: Resum
       </div>
 
       {resumeFile && !isParsing && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-200">
           <FileText className="size-4" />
-          <span>File selected: {resumeFile.name}</span>
+          <span className="flex-1">File selected: {resumeFile.name}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleClear}
+            className="size-6 opacity-60 hover:opacity-100 hover:text-destructive"
+            aria-label="Clear uploaded resume"
+          >
+            <X className="size-3.5" />
+          </Button>
         </div>
       )}
 
       {!resumeFile && !isParsing && resumeFileName && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-200">
           <FileText className="size-4" />
-          <span>File already loaded: {resumeFileName}</span>
+          <span className="flex-1">File already loaded: {resumeFileName}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleClear}
+            className="size-6 opacity-60 hover:opacity-100 hover:text-destructive"
+            aria-label="Clear uploaded resume"
+          >
+            <X className="size-3.5" />
+          </Button>
         </div>
       )}
     </div>

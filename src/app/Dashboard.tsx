@@ -67,6 +67,11 @@ export default function Dashboard(props: DashboardProps) {
     setResumeFileName(fileName);
   };
 
+  const handleResumeClear = () => {
+    setResumeText('');
+    setResumeFileName('');
+  };
+
   const handleAnalyze = () => {
     if (!jobDescriptionText) {
       setValidationError('Please enter a job description.');
@@ -111,6 +116,7 @@ export default function Dashboard(props: DashboardProps) {
           error={analysisError}
           resumeFileName={resumeFileName}
           onResumeChange={handleResumeChange}
+          onResumeClear={handleResumeClear}
         />
 
         {/* Deep Research Trigger */}

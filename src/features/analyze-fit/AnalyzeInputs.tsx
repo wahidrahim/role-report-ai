@@ -26,6 +26,7 @@ type AnalyzeInputsProps = {
   error: Error | null;
   resumeFileName: string;
   onResumeChange: (text: string, fileName: string) => void;
+  onResumeClear: () => void;
 };
 
 export function AnalyzeInputs({
@@ -37,6 +38,7 @@ export function AnalyzeInputs({
   error,
   resumeFileName,
   onResumeChange,
+  onResumeClear,
 }: AnalyzeInputsProps) {
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     onJobDescriptionChange(e.target.value);
@@ -50,7 +52,7 @@ export function AnalyzeInputs({
           <CardDescription>Upload your PDF or DOCX resume</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResumeUploader resumeFileName={resumeFileName} onResumeChange={onResumeChange} />
+          <ResumeUploader resumeFileName={resumeFileName} onResumeChange={onResumeChange} onClear={onResumeClear} />
         </CardContent>
       </Card>
 
