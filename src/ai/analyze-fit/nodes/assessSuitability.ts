@@ -7,9 +7,29 @@ import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { models } from '@/ai/config';
 
+const criteriaScoreSchema = z.object({
+  score: z.number().min(0).max(10),
+  reasoning: z.string(),
+});
+
 export const suitabilityAssessmentSchema = z.object({
-  suitabilityScore: z.number(),
-  suitabilityReasoning: z.string(),
+  suitabilityScore: z.number().min(0).max(10),
+  criteriaBreakdown: z.object({
+    coreSkillsMatch: criteriaScoreSchema.describe(
+      'Alignment with must-have requirements (35% weight)',
+    ),
+    experienceRelevance: criteriaScoreSchema.describe(
+      'How well past roles prepare them (25% weight)',
+    ),
+    skillGapsSeverity: criteriaScoreSchema.describe(
+      'Impact of missing skills and learnability (20% weight)',
+    ),
+    transferableSkills: criteriaScoreSchema.describe('Existing skills that bridge gaps (10% weight)'),
+    overallPotential: criteriaScoreSchema.describe('Growth trajectory and adaptability (10% weight)'),
+  }),
+  keyStrengths: z.array(z.string()).max(3).describe('Top 3 strengths for this role'),
+  criticalGaps: z.array(z.string()).max(3).describe('Top 3 gaps to address'),
+  bottomLine: z.string().describe('2-3 sentence summary recommendation'),
 });
 
 export type SuitabilityAssessment = z.infer<typeof suitabilityAssessmentSchema>;
