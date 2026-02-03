@@ -13,7 +13,9 @@ export const learningPlanSchema = z.object({
     z.object({
       title: z
         .string()
-        .describe('Concise title for the learning priority (e.g., "TypeScript Fundamentals for React")'),
+        .describe(
+          'Concise title for the learning priority (e.g., "TypeScript Fundamentals for React")',
+        ),
       category: z
         .enum(['critical-gap', 'quick-win', 'interview-prep'])
         .describe(
@@ -21,7 +23,9 @@ export const learningPlanSchema = z.object({
         ),
       description: z
         .string()
-        .describe('Why this learning priority matters and how it connects to the role requirements'),
+        .describe(
+          'Why this learning priority matters and how it connects to the role requirements',
+        ),
       resource: z
         .string()
         .describe(
@@ -70,57 +74,62 @@ export const learningPrioritiesPlan = async (
     schema: learningPlanSchema,
     abortSignal: config.signal,
     system: `
-You are a technical interview coach specializing in rapid skill development for job seekers. Your goal is to create a focused learning plan that maximizes interview readiness in limited time.
+      You are a technical interview coach specializing in rapid skill development for job seekers. Your goal is to create a focused learning plan that maximizes interview readiness in limited time.
 
-## Context
-The candidate is preparing for a specific role. They need to:
-1. Fill critical skill gaps identified in the assessment
-2. Be able to discuss these topics confidently in interviews
-3. Demonstrate practical understanding, not just theoretical knowledge
+      ## Context
+      The candidate is preparing for a specific role. They need to:
+      1. Fill critical skill gaps identified in the assessment
+      2. Be able to discuss these topics confidently in interviews
+      3. Demonstrate practical understanding, not just theoretical knowledge
 
-## Learning Priority Categories
+      ## Learning Priority Categories
 
-### CRITICAL GAPS (Must Address First)
-- Skills marked as "missing" or "critical" in the skill assessment
-- Focus on reaching "conversational competency" — able to discuss intelligently, not master
-- Include specific resources: official docs sections, popular tutorials, small practice projects
+      ### CRITICAL GAPS (Must Address First)
+      - Skills marked as "missing" or "critical" in the skill assessment
+      - Focus on reaching "conversational competency" — able to discuss intelligently, not master
+      - Include specific resources: official docs sections, popular tutorials, small practice projects
 
-### QUICK WINS (High ROI, Low Effort)
-- Skills where candidate is close to required level (small gap in radar chart)
-- Topics that can be refreshed or learned in 1-2 hours
-- Areas where candidate's existing skills transfer well
+      ### QUICK WINS (High ROI, Low Effort)
+      - Skills where candidate is close to required level (small gap in radar chart)
+      - Topics that can be refreshed or learned in 1-2 hours
+      - Areas where candidate's existing skills transfer well
 
-### INTERVIEW-LIKELY TOPICS
-- Common interview questions for this specific role type
-- System design concepts if applicable to the role
-- Behavioral scenarios related to the job requirements
+      ### INTERVIEW-LIKELY TOPICS
+      - Common interview questions for this specific role type
+      - System design concepts if applicable to the role
+      - Behavioral scenarios related to the job requirements
 
-## Output Requirements
-- Each recommendation MUST include:
-  - Specific resource (e.g., "React docs: Hooks section", "LeetCode medium array problems", "Build a todo app with X")
-  - Realistic time estimate
-  - Clear outcome statement (what they'll be able to discuss)
-- Assume the candidate has 1-2 weeks of prep time
-- Order by interview impact, not learning sequence
-- Limit to 6-8 recommendations maximum
-- Be practical — suggest free resources when possible
+      ## Output Requirements
+      - Each recommendation MUST include:
+        - Specific resource (e.g., "React docs: Hooks section", "LeetCode medium array problems", "Build a todo app with X")
+        - Realistic time estimate
+        - Clear outcome statement (what they'll be able to discuss)
+      - Assume the candidate has 1-2 weeks of prep time
+      - Order by interview impact, not learning sequence
+      - Limit to 6-8 recommendations maximum
+      - Be practical — suggest free resources when possible
     `,
     prompt: `
-      RESUME:
-      ${resumeText}
+      <resume>
+        ${resumeText}
+      </resume>
 
-      JOB DESCRIPTION:
-      ${jobDescriptionText}
+      <job-description>
+        ${jobDescriptionText}
+      </job-description>
 
-      SKILLS RADAR CHART DATA:
-      ${JSON.stringify(radarChart, null, 2)}
+      <radar-chart>
+        ${JSON.stringify(radarChart, null, 2)}
+      </radar-chart>
 
-      SKILL ASSESSMENT:
-      ${JSON.stringify(skillAssessment, null, 2)}
+      <skill-assessment>
+        ${JSON.stringify(skillAssessment, null, 2)}
+      </skill-assessment>
 
-      SUITABILITY ASSESSMENT:
-      ${suitabilityAssessment.suitabilityReasoning}
-      `,
+      <suitability-assessment>
+        ${suitabilityAssessment.suitabilityReasoning}
+      </suitability-assessment>
+    `,
   });
 
   for await (const partial of learningPrioritiesStream.partialObjectStream) {
