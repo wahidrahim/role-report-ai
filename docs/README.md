@@ -23,17 +23,19 @@ At a high level, Role Report AI:
 
 ### Analyze Workflow
 
-This workflow orchestrates a resume ↔ job fit analysis by visualizing skill alignment (radar chart) and running parallel skill assessments. Those insights roll up into a suitability evaluation, then branch into actionable outputs: tailored resume optimization recommendations and structured learning priority plans.
+This workflow orchestrates a resume ↔ job fit analysis. It first validates that the inputs are legitimate resume and job description documents. If valid, it proceeds with parallel skill assessments: visualizing skill alignment (radar chart) and evaluating skills. Those insights roll up into a suitability evaluation, then branch into actionable outputs: tailored resume optimization recommendations and structured learning priority plans.
 
 ```mermaid
 graph TD
-    Start([Start]) --> plotRadarChart[Plot Radar Chart]
-    Start --> assessSkills[Assess Skills]
+    Start([Start]) --> validateInputs[Validate Inputs]
+    validateInputs -->|valid| plotRadarChart[Plot Radar Chart]
+    validateInputs -->|valid| assessSkills[Assess Skills]
+    validateInputs -->|invalid| End([End])
     plotRadarChart --> assessSuitability[Assess Suitability]
     assessSkills --> assessSuitability
     assessSuitability --> resumeOptimizationPlans[Resume Optimization Plans]
     assessSuitability --> learningPrioritiesPlan[Learning Priorities Plan]
-    resumeOptimizationPlans --> End([End])
+    resumeOptimizationPlans --> End
     learningPrioritiesPlan --> End
 ```
 
