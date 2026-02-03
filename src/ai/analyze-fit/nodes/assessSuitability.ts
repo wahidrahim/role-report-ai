@@ -57,6 +57,11 @@ export const assessSuitability = async (
     model: models.balanced,
     schema: suitabilityAssessmentSchema,
     abortSignal: config.signal,
+    providerOptions: {
+      anthropic: {
+        cacheControl: { type: 'ephemeral' },
+      },
+    },
     system: `
       You are an expert technical recruiter conducting a candidate suitability assessment. Your evaluations are fair, evidence-based, and concise.
 
