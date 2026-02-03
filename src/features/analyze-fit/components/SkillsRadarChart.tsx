@@ -1,4 +1,6 @@
 'use client';
+import { forwardRef } from 'react';
+
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 
 import {
@@ -33,8 +35,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function SkillsRadarChart(props: SkillsRadarChartProps) {
-  const { data } = props;
+export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps>(
+  function SkillsRadarChart(props, ref) {
+    const { data } = props;
 
   if (!data || data.length === 0) {
     return (
@@ -74,7 +77,7 @@ export function SkillsRadarChart(props: SkillsRadarChartProps) {
   const finalData = [...right, ...left];
 
   return (
-    <div>
+    <div ref={ref}>
       <ChartContainer config={chartConfig} className="mx-auto min-h-[400px] w-full">
         <RadarChart data={finalData}>
           <ChartTooltip
@@ -144,4 +147,5 @@ export function SkillsRadarChart(props: SkillsRadarChartProps) {
       </div>
     </div>
   );
-}
+  }
+);
