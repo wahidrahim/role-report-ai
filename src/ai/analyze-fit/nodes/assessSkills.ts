@@ -3,7 +3,7 @@ import { streamObject } from 'ai';
 import { z } from 'zod';
 
 import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
-import { model } from '@/ai/config';
+import { models } from '@/ai/config';
 
 const skillImportanceSchema = z.preprocess(
   (value) => {
@@ -62,7 +62,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
   const { resumeText, jobDescriptionText } = state;
 
   const skillAssessmentStream = streamObject({
-    model,
+    model: models.balanced,
     schema: skillAssessmentSchema,
     abortSignal: config.signal,
     system: `
