@@ -24,8 +24,12 @@ export const suitabilityAssessmentSchema = z.object({
     skillGapsSeverity: criteriaScoreSchema.describe(
       'Impact of missing skills and learnability (20% weight)',
     ),
-    transferableSkills: criteriaScoreSchema.describe('Existing skills that bridge gaps (10% weight)'),
-    overallPotential: criteriaScoreSchema.describe('Growth trajectory and adaptability (10% weight)'),
+    transferableSkills: criteriaScoreSchema.describe(
+      'Existing skills that bridge gaps (10% weight)',
+    ),
+    overallPotential: criteriaScoreSchema.describe(
+      'Growth trajectory and adaptability (10% weight)',
+    ),
   }),
   keyStrengths: z.array(z.string()).describe('Top 3 strengths for this role'),
   criticalGaps: z
@@ -54,7 +58,7 @@ export const assessSuitability = async (
   }
 
   const suitabilityAssessmentStream = streamObject({
-    model: models.balanced,
+    model: models.powerful,
     schema: suitabilityAssessmentSchema,
     abortSignal: config.signal,
     providerOptions: {
