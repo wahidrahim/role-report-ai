@@ -56,13 +56,13 @@ const getPriorityValue = (priority: string) => {
 
 export function PDFOptimizations({ optimizations }: PDFOptimizationsProps) {
   const items = (optimizations ?? []).filter(
-    (item): item is OptimizationItem => item !== undefined
+    (item): item is OptimizationItem => item !== undefined,
   );
 
   if (items.length === 0) return null;
 
   const sortedItems = [...items].sort(
-    (a, b) => getPriorityValue(b.priority || '') - getPriorityValue(a.priority || '')
+    (a, b) => getPriorityValue(b.priority || '') - getPriorityValue(a.priority || ''),
   );
 
   return (
@@ -82,29 +82,20 @@ export function PDFOptimizations({ optimizations }: PDFOptimizationsProps) {
 
             {/* Category Badge */}
             {item.category && (
-              <View
-                style={[
-                  styles.badge,
-                  { backgroundColor: '#EDE9FE', color: colors.primary },
-                ]}
-              >
+              <View style={[styles.badge, { backgroundColor: '#EDE9FE', color: colors.primary }]}>
                 <Text>{getCategoryLabel(item.category)}</Text>
               </View>
             )}
 
             {/* Effort */}
             {item.estimatedEffort && (
-              <Text style={{ fontSize: 8, color: colors.lightGray }}>
-                {item.estimatedEffort}
-              </Text>
+              <Text style={{ fontSize: 8, color: colors.lightGray }}>{item.estimatedEffort}</Text>
             )}
           </View>
 
           {/* Title */}
           {item.title && (
-            <Text style={[styles.textBold, { fontSize: 10, marginBottom: 4 }]}>
-              {item.title}
-            </Text>
+            <Text style={[styles.textBold, { fontSize: 10, marginBottom: 4 }]}>{item.title}</Text>
           )}
 
           {/* Description */}
@@ -162,7 +153,9 @@ function ExampleRenderer({ example }: { example: OptimizationExample }) {
     case 'structural':
       return (
         <View style={[styles.exampleBox, { backgroundColor: '#DBEAFE', color: '#1E40AF' }]}>
-          <Text style={{ fontSize: 7, textTransform: 'uppercase', marginBottom: 2 }}>Restructure</Text>
+          <Text style={{ fontSize: 7, textTransform: 'uppercase', marginBottom: 2 }}>
+            Restructure
+          </Text>
           <Text>{example.suggestion}</Text>
         </View>
       );

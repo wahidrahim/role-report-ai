@@ -65,17 +65,27 @@ export function PDFMatchScore({
           <View style={[styles.row, { gap: 16, marginBottom: 16 }]}>
             {/* Key Strengths */}
             {keyStrengths && keyStrengths.length > 0 && (
-              <View style={[styles.col, { padding: 12, backgroundColor: '#D1FAE5', borderRadius: 6 }]}>
+              <View
+                style={[styles.col, { padding: 12, backgroundColor: '#D1FAE5', borderRadius: 6 }]}
+              >
                 <Text
                   style={[
                     styles.textBold,
-                    { fontSize: 9, color: colors.success, marginBottom: 8, textTransform: 'uppercase' },
+                    {
+                      fontSize: 9,
+                      color: colors.success,
+                      marginBottom: 8,
+                      textTransform: 'uppercase',
+                    },
                   ]}
                 >
                   Key Strengths
                 </Text>
                 {keyStrengths.map((strength, i) => (
-                  <View key={i} style={[styles.listItem, { borderBottomWidth: 0, marginBottom: 4 }]}>
+                  <View
+                    key={i}
+                    style={[styles.listItem, { borderBottomWidth: 0, marginBottom: 4 }]}
+                  >
                     <View style={[styles.bullet, styles.bulletSuccess]} />
                     <Text style={{ flex: 1, fontSize: 9, color: '#065F46' }}>{strength}</Text>
                   </View>
@@ -85,17 +95,27 @@ export function PDFMatchScore({
 
             {/* Critical Gaps */}
             {criticalGaps && criticalGaps.length > 0 && (
-              <View style={[styles.col, { padding: 12, backgroundColor: '#FEE2E2', borderRadius: 6 }]}>
+              <View
+                style={[styles.col, { padding: 12, backgroundColor: '#FEE2E2', borderRadius: 6 }]}
+              >
                 <Text
                   style={[
                     styles.textBold,
-                    { fontSize: 9, color: colors.error, marginBottom: 8, textTransform: 'uppercase' },
+                    {
+                      fontSize: 9,
+                      color: colors.error,
+                      marginBottom: 8,
+                      textTransform: 'uppercase',
+                    },
                   ]}
                 >
                   Critical Gaps
                 </Text>
                 {criticalGaps.map((gap, i) => (
-                  <View key={i} style={[styles.listItem, { borderBottomWidth: 0, marginBottom: 4 }]}>
+                  <View
+                    key={i}
+                    style={[styles.listItem, { borderBottomWidth: 0, marginBottom: 4 }]}
+                  >
                     <View style={[styles.bullet, styles.bulletError]} />
                     <Text style={{ flex: 1, fontSize: 9, color: '#991B1B' }}>{gap}</Text>
                   </View>
@@ -111,7 +131,12 @@ export function PDFMatchScore({
             <Text
               style={[
                 styles.textBold,
-                { fontSize: 9, color: colors.mediumGray, marginBottom: 10, textTransform: 'uppercase' },
+                {
+                  fontSize: 9,
+                  color: colors.mediumGray,
+                  marginBottom: 10,
+                  textTransform: 'uppercase',
+                },
               ]}
             >
               Assessment Breakdown
@@ -154,7 +179,15 @@ export function PDFMatchScore({
                   </View>
 
                   {/* Score */}
-                  <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: getScoreColor(score), width: 24, textAlign: 'right' }}>
+                  <Text
+                    style={{
+                      fontSize: 9,
+                      fontFamily: 'Helvetica-Bold',
+                      color: getScoreColor(score),
+                      width: 24,
+                      textAlign: 'right',
+                    }}
+                  >
                     {score.toFixed(1)}
                   </Text>
                 </View>

@@ -105,11 +105,20 @@ export function AnalysisReportDocument({ data }: AnalysisReportDocumentProps) {
               <Image src={data.chartImage} style={styles.chartImage} />
               <View style={[styles.row, { justifyContent: 'center', gap: 24, marginTop: 8 }]}>
                 <View style={[styles.row, { alignItems: 'center', gap: 4 }]}>
-                  <View style={{ width: 12, height: 12, backgroundColor: colors.primary, borderRadius: 2 }} />
+                  <View
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: colors.primary,
+                      borderRadius: 2,
+                    }}
+                  />
                   <Text style={{ fontSize: 8, color: colors.mediumGray }}>Candidate Level</Text>
                 </View>
                 <View style={[styles.row, { alignItems: 'center', gap: 4 }]}>
-                  <View style={{ width: 12, height: 12, backgroundColor: '#3B82F6', borderRadius: 2 }} />
+                  <View
+                    style={{ width: 12, height: 12, backgroundColor: '#3B82F6', borderRadius: 2 }}
+                  />
                   <Text style={{ fontSize: 8, color: colors.mediumGray }}>Required Level</Text>
                 </View>
               </View>

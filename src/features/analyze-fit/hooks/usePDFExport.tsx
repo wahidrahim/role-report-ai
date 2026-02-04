@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-
 import { toPng } from 'html-to-image';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { AnalysisReportData } from '../pdf/AnalysisReportDocument';
@@ -77,7 +76,7 @@ export function usePDFExport({
         setIsGenerating(false);
       }
     },
-    [suitabilityAssessment, skillAssessment, resumeOptimizations, learningPriorities]
+    [suitabilityAssessment, skillAssessment, resumeOptimizations, learningPriorities],
   );
 
   return {

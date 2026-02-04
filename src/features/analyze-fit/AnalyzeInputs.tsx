@@ -52,7 +52,11 @@ export function AnalyzeInputs({
           <CardDescription>Upload your PDF or DOCX resume</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResumeUploader resumeFileName={resumeFileName} onResumeChange={onResumeChange} onClear={onResumeClear} />
+          <ResumeUploader
+            resumeFileName={resumeFileName}
+            onResumeChange={onResumeChange}
+            onClear={onResumeClear}
+          />
         </CardContent>
       </Card>
 

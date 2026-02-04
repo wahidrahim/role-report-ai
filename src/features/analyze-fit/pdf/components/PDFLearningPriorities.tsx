@@ -45,14 +45,12 @@ const getPriorityValue = (priority: string) => {
 };
 
 export function PDFLearningPriorities({ priorities }: PDFLearningPrioritiesProps) {
-  const items = (priorities ?? []).filter(
-    (item): item is LearningItem => item !== undefined
-  );
+  const items = (priorities ?? []).filter((item): item is LearningItem => item !== undefined);
 
   if (items.length === 0) return null;
 
   const sortedItems = [...items].sort(
-    (a, b) => getPriorityValue(b.priority || '') - getPriorityValue(a.priority || '')
+    (a, b) => getPriorityValue(b.priority || '') - getPriorityValue(a.priority || ''),
   );
 
   return (
@@ -87,17 +85,13 @@ export function PDFLearningPriorities({ priorities }: PDFLearningPrioritiesProps
 
               {/* Time Estimate */}
               {item.estimatedTime && (
-                <Text style={{ fontSize: 8, color: colors.lightGray }}>
-                  {item.estimatedTime}
-                </Text>
+                <Text style={{ fontSize: 8, color: colors.lightGray }}>{item.estimatedTime}</Text>
               )}
             </View>
 
             {/* Title */}
             {item.title && (
-              <Text style={[styles.textBold, { fontSize: 10, marginBottom: 4 }]}>
-                {item.title}
-              </Text>
+              <Text style={[styles.textBold, { fontSize: 10, marginBottom: 4 }]}>{item.title}</Text>
             )}
 
             {/* Description */}
@@ -125,7 +119,14 @@ export function PDFLearningPriorities({ priorities }: PDFLearningPrioritiesProps
             {/* Outcome */}
             {item.outcome && (
               <View style={{ paddingTop: 6, borderTopWidth: 1, borderTopColor: '#E5E7EB' }}>
-                <Text style={{ fontSize: 7, color: colors.lightGray, textTransform: 'uppercase', marginBottom: 2 }}>
+                <Text
+                  style={{
+                    fontSize: 7,
+                    color: colors.lightGray,
+                    textTransform: 'uppercase',
+                    marginBottom: 2,
+                  }}
+                >
                   After completing
                 </Text>
                 <Text style={{ fontSize: 9, color: colors.success, fontStyle: 'italic' }}>

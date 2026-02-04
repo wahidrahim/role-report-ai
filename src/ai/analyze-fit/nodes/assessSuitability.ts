@@ -12,30 +12,31 @@ const criteriaScoreSchema = z.object({
   reasoning: z.string(),
 });
 
-export const suitabilityAssessmentSchema = z.object({
-  suitabilityScore: z.number().describe('Overall score from 0-10'),
+const CRITERIA_WEIGHTS = {
+  coreSkillsMatch: 0.35,
+  experienceRelevance: 0.25,
+  skillGapsSeverity: 0.2,
+  transferableSkills: 0.1,
+  overallPotential: 0.1,
+} as const;
+
+const llmOutputSchema = z.object({
   criteriaBreakdown: z.object({
-    coreSkillsMatch: criteriaScoreSchema.describe(
-      'Alignment with must-have requirements (35% weight)',
-    ),
-    experienceRelevance: criteriaScoreSchema.describe(
-      'How well past roles prepare them (25% weight)',
-    ),
-    skillGapsSeverity: criteriaScoreSchema.describe(
-      'Impact of missing skills and learnability (20% weight)',
-    ),
-    transferableSkills: criteriaScoreSchema.describe(
-      'Existing skills that bridge gaps (10% weight)',
-    ),
-    overallPotential: criteriaScoreSchema.describe(
-      'Growth trajectory and adaptability (10% weight)',
-    ),
+    coreSkillsMatch: criteriaScoreSchema.describe('Alignment with must-have requirements'),
+    experienceRelevance: criteriaScoreSchema.describe('How well past roles prepare them'),
+    skillGapsSeverity: criteriaScoreSchema.describe('Impact of missing skills and learnability'),
+    transferableSkills: criteriaScoreSchema.describe('Existing skills that bridge gaps'),
+    overallPotential: criteriaScoreSchema.describe('Growth trajectory and adaptability'),
   }),
   keyStrengths: z.array(z.string()).describe('Top 3 strengths for this role'),
   criticalGaps: z
     .array(z.string())
     .describe('Top 3 gaps to address (can be fewer if minimal gaps)'),
   bottomLine: z.string().describe('2-3 sentence summary recommendation'),
+});
+
+export const suitabilityAssessmentSchema = llmOutputSchema.extend({
+  suitabilityScore: z.number().describe('Overall score from 0-10'),
 });
 
 export type SuitabilityAssessment = z.infer<typeof suitabilityAssessmentSchema>;
@@ -59,7 +60,7 @@ export const assessSuitability = async (
 
   const suitabilityAssessmentStream = streamObject({
     model: models.powerful,
-    schema: suitabilityAssessmentSchema,
+    schema: llmOutputSchema,
     abortSignal: config.signal,
     providerOptions: {
       anthropic: {
@@ -89,20 +90,18 @@ export const assessSuitability = async (
 
       Provide a comprehensive assessment with:
 
-      1. **Overall Score (0-10)**: Weighted combination of criteria below
+      1. **Criteria Breakdown**: Score (0-10) and 1-2 sentence reasoning for each:
+         - Core Skills Match: Alignment with must-have requirements
+         - Experience Relevance: How well past roles prepare them
+         - Skill Gaps Severity: Impact of missing skills, learnability
+         - Transferable Skills: Existing skills that bridge gaps
+         - Overall Potential: Growth trajectory and adaptability
 
-      2. **Criteria Breakdown**: Score (0-10) and 1-2 sentence reasoning for each:
-         - Core Skills Match (35% weight): Alignment with must-have requirements
-         - Experience Relevance (25% weight): How well past roles prepare them
-         - Skill Gaps Severity (20% weight): Impact of missing skills, learnability
-         - Transferable Skills (10% weight): Existing skills that bridge gaps
-         - Overall Potential (10% weight): Growth trajectory and adaptability
+      2. **Key Strengths**: Exactly 3 strongest points for this candidacy
 
-      3. **Key Strengths**: Exactly 3 strongest points for this candidacy
+      3. **Critical Gaps**: Up to 3 most important gaps to address (can be fewer if minimal gaps)
 
-      4. **Critical Gaps**: Up to 3 most important gaps to address (can be fewer if minimal gaps)
-
-      5. **Bottom Line**: 2-3 sentence hiring recommendation
+      4. **Bottom Line**: 2-3 sentence hiring recommendation
 
       Keep it direct and professional. No fluff or filler phrases.
     `,
@@ -135,12 +134,30 @@ export const assessSuitability = async (
     });
   }
 
-  const suitabilityAssessment = await suitabilityAssessmentStream.object;
+  const llmOutput = await suitabilityAssessmentStream.object;
+
+  const { criteriaBreakdown } = llmOutput;
+  const suitabilityScore =
+    Math.round(
+      (criteriaBreakdown.coreSkillsMatch.score * CRITERIA_WEIGHTS.coreSkillsMatch +
+        criteriaBreakdown.experienceRelevance.score * CRITERIA_WEIGHTS.experienceRelevance +
+        criteriaBreakdown.skillGapsSeverity.score * CRITERIA_WEIGHTS.skillGapsSeverity +
+        criteriaBreakdown.transferableSkills.score * CRITERIA_WEIGHTS.transferableSkills +
+        criteriaBreakdown.overallPotential.score * CRITERIA_WEIGHTS.overallPotential) *
+        10,
+    ) / 10;
+
+  const suitabilityAssessment: SuitabilityAssessment = {
+    ...llmOutput,
+    suitabilityScore,
+  };
+
   emitAnalysisCreated(config, {
     node: 'ASSESS_SUITABILITY',
     type: 'suitabilityAssessment',
     message: 'Suitability assessment created successfully',
     data: suitabilityAssessment,
   });
+
   return { suitabilityAssessment };
 };

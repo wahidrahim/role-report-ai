@@ -42,10 +42,7 @@ export const actionPlanSchema = z.object({
             .string()
             .optional()
             .describe('Content to add or remove (for addition/removal types)'),
-          location: z
-            .string()
-            .optional()
-            .describe('Where to add content (for addition type)'),
+          location: z.string().optional().describe('Where to add content (for addition type)'),
           suggestion: z
             .string()
             .optional()

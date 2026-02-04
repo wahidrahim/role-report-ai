@@ -10,7 +10,9 @@ export const radarChartSchema = z.object({
     z.object({
       skillName: z.string().describe('Normalized skill name from job description'),
       requiredLevel: z.number().describe('Proficiency level the job demands (0-100)'),
-      candidateLevel: z.number().describe("Candidate's proficiency level based on resume evidence (0-100)"),
+      candidateLevel: z
+        .number()
+        .describe("Candidate's proficiency level based on resume evidence (0-100)"),
       reasoning: z.string().describe('Evidence-based justification for both levels'),
     }),
   ),

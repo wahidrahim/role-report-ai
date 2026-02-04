@@ -1,11 +1,7 @@
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/core/components/ui/hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/core/components/ui/hover-card';
 
 type MatchScoreProps = {
   suitabilityAssessment?: Partial<SuitabilityAssessment>;

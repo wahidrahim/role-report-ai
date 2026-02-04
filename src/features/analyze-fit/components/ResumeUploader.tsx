@@ -36,7 +36,11 @@ type ResumeUploaderProps = {
   onClear: () => void;
 };
 
-export default function ResumeUploader({ resumeFileName, onResumeChange, onClear }: ResumeUploaderProps) {
+export default function ResumeUploader({
+  resumeFileName,
+  onResumeChange,
+  onClear,
+}: ResumeUploaderProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

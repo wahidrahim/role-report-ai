@@ -26,7 +26,12 @@ export function PDFSkillAssessment({ skills }: PDFSkillAssessmentProps) {
 
   const columnConfig = [
     { key: 'verified' as const, label: 'Verified', color: colors.success, bgColor: '#D1FAE5' },
-    { key: 'transferable' as const, label: 'Transferable', color: colors.warning, bgColor: '#FEF3C7' },
+    {
+      key: 'transferable' as const,
+      label: 'Transferable',
+      color: colors.warning,
+      bgColor: '#FEF3C7',
+    },
     { key: 'missing' as const, label: 'Missing', color: colors.error, bgColor: '#FEE2E2' },
   ];
 
@@ -36,7 +41,10 @@ export function PDFSkillAssessment({ skills }: PDFSkillAssessmentProps) {
 
       <View style={[styles.row, { gap: 12 }]}>
         {columnConfig.map(({ key, label, color, bgColor }) => (
-          <View key={key} style={[styles.colThird, { backgroundColor: bgColor, borderRadius: 6, padding: 10 }]}>
+          <View
+            key={key}
+            style={[styles.colThird, { backgroundColor: bgColor, borderRadius: 6, padding: 10 }]}
+          >
             <Text
               style={[
                 styles.textBold,

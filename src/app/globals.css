@@ -58,17 +58,17 @@
   --card: oklch(0.22 0.05 270 / 0.4);
   --card-foreground: oklch(0.98 0.01 270);
 
-  --popover: oklch(0.20 0.05 270 / 0.9);
+  --popover: oklch(0.2 0.05 270 / 0.9);
   --popover-foreground: oklch(0.98 0.01 270);
 
   /* Vibrant Neon Violet/Indigo */
   --primary: oklch(0.65 0.22 280);
   --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.30 0.08 270);
+  --secondary: oklch(0.3 0.08 270);
   --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.30 0.04 270);
+  --muted: oklch(0.3 0.04 270);
   --muted-foreground: oklch(0.7 0.02 270);
 
   --accent: oklch(0.65 0.22 280 / 0.15);
@@ -94,7 +94,7 @@
   --sidebar-foreground: oklch(0.98 0.01 270);
   --sidebar-primary: oklch(0.65 0.22 280);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.30 0.08 270);
+  --sidebar-accent: oklch(0.3 0.08 270);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(0.98 0 0 / 0.1);
   --sidebar-ring: oklch(0.65 0.22 280);
