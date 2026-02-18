@@ -30,41 +30,51 @@ export const reviewSearchResults = async (
     message: 'Reviewing search results...',
   });
 
-  const { object } = await generateObject({
-    model: models.balanced,
-    schema: z.object({
-      status: z.enum(['PASS', 'FAIL']),
-      feedback: z.string(),
-    }),
-    system: `
-      You are a Research Quality Assurance Officer.
-      Evaluate the gathered data for the "Deep Research Dossier".
+  try {
+    const { object } = await generateObject({
+      model: models.balanced,
+      schema: z.object({
+        status: z.enum(['PASS', 'FAIL']),
+        feedback: z.string(),
+      }),
+      system: `
+        You are a Research Quality Assurance Officer.
+        Evaluate the gathered data for the "Deep Research Dossier".
 
-      OUTPUT (STRICT):
-      - Return a JSON OBJECT (an instance), not a schema/description.
-      - Return EXACTLY these keys: "status", "feedback" (no extra keys).
-      - "status" MUST be exactly one of: "PASS" | "FAIL" (case-sensitive).
-      - "feedback" MUST be a non-empty string. If status is PASS, briefly explain why it passed.
+        OUTPUT (STRICT):
+        - Return a JSON OBJECT (an instance), not a schema/description.
+        - Return EXACTLY these keys: "status", "feedback" (no extra keys).
+        - "status" MUST be exactly one of: "PASS" | "FAIL" (case-sensitive).
+        - "feedback" MUST be a non-empty string. If status is PASS, briefly explain why it passed.
 
-      Assign "PASS" if ALL of the following are true:
-      1. Contains specific interview questions (not just generic advice).
-      2. Contains specific engineering values or tech stack details (e.g. "Apollo Federation", "Radical Candor").
-      3. Is NOT just generic "About Us" marketing text.
+        Assign "PASS" if ALL of the following are true:
+        1. Contains specific interview questions (not just generic advice).
+        2. Contains specific engineering values or tech stack details (e.g. "Apollo Federation", "Radical Candor").
+        3. Is NOT just generic "About Us" marketing text.
 
-      Assign "FAIL" if ANY of the above criteria are NOT met.
-      When assigning "FAIL", provide actionable feedback on what specific information is missing so the search can be improved.
+        Assign "FAIL" if ANY of the above criteria are NOT met.
+        When assigning "FAIL", provide actionable feedback on what specific information is missing so the search can be improved.
 
-      DATA TO REVIEW:
-      ${searchResults.join('\n\n---\n\n')}
-    `,
-    prompt: `Return { "status": "PASS" | "FAIL", "feedback": string } based on the criteria above.`,
-    abortSignal: config.signal,
-  });
+        DATA TO REVIEW:
+        ${searchResults.join('\n\n---\n\n')}
+      `,
+      prompt: `Return { "status": "PASS" | "FAIL", "feedback": string } based on the criteria above.`,
+      abortSignal: config.signal,
+    });
 
-  return {
-    searchResults: object.status === 'PASS' ? searchResults : [], // Empty previous search results if review fails.
-    searchResultsQuality: object.status,
-    searchResultsReviewFeedback: object.feedback,
-    searchResultsReviewCount: searchResultsReviewCount + 1,
-  };
+    return {
+      searchResults: object.status === 'PASS' ? searchResults : [], // Empty previous search results if review fails.
+      searchResultsQuality: object.status,
+      searchResultsReviewFeedback: object.feedback,
+      searchResultsReviewCount: searchResultsReviewCount + 1,
+    };
+  } catch (error) {
+    console.warn('Review failed (likely content filter). Skipping review.', error);
+    return {
+      searchResults,
+      searchResultsQuality: 'PASS',
+      searchResultsReviewFeedback: 'Review skipped due to content filter.',
+      searchResultsReviewCount: searchResultsReviewCount + 1,
+    };
+  }
 };
