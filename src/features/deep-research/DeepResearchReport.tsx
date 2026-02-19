@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Code2,
+  Download,
   Fingerprint,
   Globe,
   Grip,
@@ -22,11 +23,14 @@ import { useState } from 'react';
 
 import type { ResearchReport } from '@/ai/deep-research/nodes/createResearchReport';
 import { Badge } from '@/core/components/ui/badge';
+import { Button } from '@/core/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 import { ScrollArea } from '@/core/components/ui/scroll-area';
+import { Spinner } from '@/core/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
 import { cn } from '@/core/lib/utils';
 
+import { useDeepResearchPDFExport } from './hooks/useDeepResearchPDFExport';
 import { StreamEvent } from './useDeepResearch';
 
 type DeepResearchReportProps = {
@@ -329,6 +333,10 @@ export function DeepResearchReport({
   streamEvents,
   researchReport,
 }: DeepResearchReportProps) {
+  const { generatePDF, isGenerating } = useDeepResearchPDFExport({
+    researchReport: researchReport ?? null,
+  });
+
   if (!isLoading && !researchReport && streamEvents.length === 0 && !error) {
     return null;
   }
@@ -393,6 +401,21 @@ export function DeepResearchReport({
             </motion.div>
           )}
         </motion.div>
+      )}
+
+      {/* Download Button */}
+      {researchReport && !isLoading && (
+        <div className="flex">
+          <Button
+            variant="outline"
+            onClick={generatePDF}
+            disabled={isGenerating}
+            className="border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+          >
+            {isGenerating ? <Spinner /> : <Download className="size-4" />}
+            {isGenerating ? 'Generating...' : 'Download Report'}
+          </Button>
+        </div>
       )}
     </section>
   );
