@@ -13,9 +13,9 @@ export type SkillAssessmentProps = {
   skills?: (SkillItem | undefined)[] | null;
 };
 
-// ... imports remain the same ...
+export function SkillAssessment(props: SkillAssessmentProps) {
+  const { skills } = props;
 
-export function SkillAssessment({ skills }: SkillAssessmentProps) {
   const items = (skills ?? []).filter((skill): skill is SkillItem => skill !== undefined);
 
   const groups = {
@@ -118,13 +118,12 @@ export function SkillAssessment({ skills }: SkillAssessmentProps) {
   );
 }
 
-function SkillBadge({
-  skill,
-  variant,
-}: {
+function SkillBadge(props: {
   skill: SkillItem;
   variant: 'verified' | 'transferable' | 'missing' | 'other';
 }) {
+  const { skill, variant } = props;
+
   const styles = {
     verified: 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20',
     transferable: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 hover:bg-yellow-500/20',

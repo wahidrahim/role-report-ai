@@ -4,7 +4,7 @@ import { toPng } from 'html-to-image';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { AnalysisReportData } from '../pdf/AnalysisReportDocument';
+import type { AnalysisReportData } from '@/features/analyze-fit/pdf/analysis-report-document.component';
 
 type UsePDFExportProps = {
   suitabilityAssessment?: AnalysisReportData['suitabilityAssessment'];
@@ -13,12 +13,9 @@ type UsePDFExportProps = {
   learningPriorities?: AnalysisReportData['learningPriorities'];
 };
 
-export function usePDFExport({
-  suitabilityAssessment,
-  skillAssessment,
-  resumeOptimizations,
-  learningPriorities,
-}: UsePDFExportProps) {
+export function usePDFExport(props: UsePDFExportProps) {
+  const { suitabilityAssessment, skillAssessment, resumeOptimizations, learningPriorities } = props;
+
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePDF = useCallback(
@@ -28,7 +25,9 @@ export function usePDFExport({
       try {
         // Dynamically import @react-pdf/renderer to reduce initial bundle size
         const { pdf } = await import('@react-pdf/renderer');
-        const { AnalysisReportDocument } = await import('../pdf/AnalysisReportDocument');
+        const { AnalysisReportDocument } = await import(
+          '@/features/analyze-fit/pdf/analysis-report-document.component'
+        );
 
         // Capture the radar chart as an image if available
         let chartImage: string | undefined;
@@ -41,7 +40,7 @@ export function usePDFExport({
             });
           } catch (chartError) {
             console.warn('Failed to capture chart image:', chartError);
-            // Continue without the chart image
+            // Continue without the chart image.
           }
         }
 

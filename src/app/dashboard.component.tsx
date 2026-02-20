@@ -13,17 +13,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/core/components/ui/tooltip';
-import { AnalyzeInputs } from '@/features/analyze-fit/AnalyzeInputs';
-import { AnalyzeResults } from '@/features/analyze-fit/AnalyzeResults';
-import { useAnalysis } from '@/features/analyze-fit/hooks/useAnalysis';
-import { DeepResearchReport } from '@/features/deep-research/DeepResearchReport';
-import { useDeepResearch } from '@/features/deep-research/useDeepResearch';
+import { AnalyzeInputs } from '@/features/analyze-fit/analyze-inputs.component';
+import { AnalyzeResults } from '@/features/analyze-fit/analyze-results.component';
+import { useAnalysis } from '@/features/analyze-fit/hooks/use-analysis.hook';
+import { DeepResearchReport } from '@/features/deep-research/deep-research-report.component';
+import { useDeepResearch } from '@/features/deep-research/hooks/use-deep-research.hook';
 
 type DashboardProps = {
   isDeepResearchEnabled: boolean;
 };
 
-export default function Dashboard(props: DashboardProps) {
+export function Dashboard(props: DashboardProps) {
   const { isDeepResearchEnabled } = props;
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -77,6 +77,7 @@ export default function Dashboard(props: DashboardProps) {
       setValidationError('Please enter a job description.');
       return;
     }
+
     setValidationError(null);
     setActiveTab('analysis');
     analyze(resumeText, jobDescriptionText);

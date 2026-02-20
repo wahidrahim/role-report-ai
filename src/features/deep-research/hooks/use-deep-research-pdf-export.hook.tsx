@@ -3,13 +3,15 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { DeepResearchReportData } from '../pdf/DeepResearchDocument';
+import type { DeepResearchReportData } from '@/features/deep-research/pdf/deep-research-document.component';
 
 type UseDeepResearchPDFExportProps = {
   researchReport: DeepResearchReportData | null;
 };
 
-export function useDeepResearchPDFExport({ researchReport }: UseDeepResearchPDFExportProps) {
+export function useDeepResearchPDFExport(props: UseDeepResearchPDFExportProps) {
+  const { researchReport } = props;
+
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePDF = useCallback(async () => {
@@ -19,7 +21,9 @@ export function useDeepResearchPDFExport({ researchReport }: UseDeepResearchPDFE
 
     try {
       const { pdf } = await import('@react-pdf/renderer');
-      const { DeepResearchDocument } = await import('../pdf/DeepResearchDocument');
+      const { DeepResearchDocument } = await import(
+        '@/features/deep-research/pdf/deep-research-document.component'
+      );
 
       const doc = <DeepResearchDocument data={researchReport} />;
       const blob = await pdf(doc).toBlob();

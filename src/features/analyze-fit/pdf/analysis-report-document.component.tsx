@@ -1,10 +1,10 @@
 import { Document, Image, Page, Text, View } from '@react-pdf/renderer';
 
-import { PDFLearningPriorities } from './components/PDFLearningPriorities';
-import { PDFMatchScore } from './components/PDFMatchScore';
-import { PDFOptimizations } from './components/PDFOptimizations';
-import { PDFSkillAssessment } from './components/PDFSkillAssessment';
-import { colors, styles } from './styles';
+import { PDFLearningPriorities } from './components/pdf-learning-priorities.component';
+import { PDFMatchScore } from './components/pdf-match-score.component';
+import { PDFOptimizations } from './components/pdf-optimizations.component';
+import { PDFSkillAssessment } from './components/pdf-skill-assessment.component';
+import { colors, styles } from './styles.util';
 
 export type AnalysisReportData = {
   suitabilityAssessment?: {
@@ -65,7 +65,9 @@ type AnalysisReportDocumentProps = {
   data: AnalysisReportData;
 };
 
-export function AnalysisReportDocument({ data }: AnalysisReportDocumentProps) {
+export function AnalysisReportDocument(props: AnalysisReportDocumentProps) {
+  const { data } = props;
+
   const generatedDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',

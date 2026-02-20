@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, styles } from '../styles';
+import { colors, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type SkillItem = {
   skillName?: string;
@@ -13,7 +13,9 @@ type PDFSkillAssessmentProps = {
   skills?: (SkillItem | undefined)[] | null;
 };
 
-export function PDFSkillAssessment({ skills }: PDFSkillAssessmentProps) {
+export function PDFSkillAssessment(props: PDFSkillAssessmentProps) {
+  const { skills } = props;
+
   const items = (skills ?? []).filter((skill): skill is SkillItem => skill !== undefined);
 
   if (items.length === 0) return null;

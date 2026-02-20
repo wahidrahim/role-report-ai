@@ -50,8 +50,8 @@ export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps
       .filter((item) => item !== undefined)
       .map((data) => ({
         skill: data.skillName,
-        requiredLevel: Math.min(data.requiredLevel || 0, 100), // Cap at 100%, default to 0
-        candidateLevel: Math.min(data.candidateLevel || 0, 100), // Cap at 100%, default to 0
+        requiredLevel: Math.min(data.requiredLevel || 0, 100), // Cap at 100%, default to 0.
+        candidateLevel: Math.min(data.candidateLevel || 0, 100), // Cap at 100%, default to 0.
         reasoning: data.reasoning,
       }));
 
@@ -111,7 +111,7 @@ export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps
               gridType="circle"
               stroke="var(--color-border)"
               strokeWidth={1}
-              className="opacity-100" // Increased visibility
+              className="opacity-100" // Increased visibility.
             />
             <PolarAngleAxis
               dataKey="skill"

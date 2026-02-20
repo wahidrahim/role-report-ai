@@ -22,10 +22,10 @@ import { Button } from '@/core/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/core/components/ui/card';
 import { Spinner } from '@/core/components/ui/spinner';
 
-import MatchScore from './components/MatchScore';
-import { SkillAssessment } from './components/SkillAssessment';
-import { SkillsRadarChart } from './components/SkillsRadarChart';
-import { usePDFExport } from './hooks/usePDFExport';
+import { MatchScore } from './components/match-score.component';
+import { SkillAssessment } from './components/skill-assessment.component';
+import { SkillsRadarChart } from './components/skills-radar-chart.component';
+import { usePDFExport } from './hooks/use-pdf-export.hook';
 
 type AnalyzeResultsProps = {
   radarChart: any;
@@ -113,17 +113,22 @@ const getLearningCategoryStyle = (category: string) => {
   }
 };
 
-const TimeEstimateBadge = ({ time, variant }: { time: string; variant: 'effort' | 'learning' }) => {
+function TimeEstimateBadge(props: { time: string; variant: 'effort' | 'learning' }) {
+  const { time, variant } = props;
+
   const icon = variant === 'effort' ? <Wrench className="size-3" /> : <Clock className="size-3" />;
+
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded">
       {icon}
       {time}
     </span>
   );
-};
+}
 
-const ExampleRenderer = ({ example }: { example: any }) => {
+function ExampleRenderer(props: { example: any }) {
+  const { example } = props;
+
   if (!example?.type) return null;
 
   switch (example.type) {
@@ -203,15 +208,17 @@ const ExampleRenderer = ({ example }: { example: any }) => {
   }
 };
 
-export function AnalyzeResults({
-  radarChart,
-  skillAssessment,
-  suitabilityAssessment,
-  resumeOptimizations,
-  learningPriorities,
-  isLoading,
-  error,
-}: AnalyzeResultsProps) {
+export function AnalyzeResults(props: AnalyzeResultsProps) {
+  const {
+    radarChart,
+    skillAssessment,
+    suitabilityAssessment,
+    resumeOptimizations,
+    learningPriorities,
+    isLoading,
+    error,
+  } = props;
+
   const chartRef = useRef<HTMLDivElement>(null);
 
   const { generatePDF, isGenerating } = usePDFExport({

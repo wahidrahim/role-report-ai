@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, getPriorityBadgeStyle, styles } from '../styles';
+import { colors, getPriorityBadgeStyle, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type OptimizationExample =
   | { type: 'replacement'; before: string; after: string }
@@ -54,7 +54,9 @@ const getPriorityValue = (priority: string) => {
   }
 };
 
-export function PDFOptimizations({ optimizations }: PDFOptimizationsProps) {
+export function PDFOptimizations(props: PDFOptimizationsProps) {
+  const { optimizations } = props;
+
   const items = (optimizations ?? []).filter(
     (item): item is OptimizationItem => item !== undefined,
   );
@@ -113,7 +115,9 @@ export function PDFOptimizations({ optimizations }: PDFOptimizationsProps) {
   );
 }
 
-function ExampleRenderer({ example }: { example: OptimizationExample }) {
+function ExampleRenderer(props: { example: OptimizationExample }) {
+  const { example } = props;
+
   switch (example.type) {
     case 'replacement':
       return (

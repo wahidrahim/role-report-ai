@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, getPriorityBadgeStyle, styles } from '../styles';
+import { colors, getPriorityBadgeStyle, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type LearningItem = {
   title?: string;
@@ -44,7 +44,9 @@ const getPriorityValue = (priority: string) => {
   }
 };
 
-export function PDFLearningPriorities({ priorities }: PDFLearningPrioritiesProps) {
+export function PDFLearningPriorities(props: PDFLearningPrioritiesProps) {
+  const { priorities } = props;
+
   const items = (priorities ?? []).filter((item): item is LearningItem => item !== undefined);
 
   if (items.length === 0) return null;

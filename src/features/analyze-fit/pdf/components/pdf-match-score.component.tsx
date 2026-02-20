@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, getScoreColor, styles } from '../styles';
+import { colors, getScoreColor, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type CriteriaBreakdown = {
   coreSkillsMatch?: { score: number; reasoning?: string };
@@ -26,13 +26,9 @@ const CRITERIA_CONFIG = [
   { key: 'overallPotential' as const, label: 'Overall Potential', weight: '10%' },
 ];
 
-export function PDFMatchScore({
-  suitabilityScore,
-  bottomLine,
-  keyStrengths,
-  criticalGaps,
-  criteriaBreakdown,
-}: PDFMatchScoreProps) {
+export function PDFMatchScore(props: PDFMatchScoreProps) {
+  const { suitabilityScore, bottomLine, keyStrengths, criticalGaps, criteriaBreakdown } = props;
+
   if (suitabilityScore === undefined) return null;
 
   const scoreColor = getScoreColor(suitabilityScore);

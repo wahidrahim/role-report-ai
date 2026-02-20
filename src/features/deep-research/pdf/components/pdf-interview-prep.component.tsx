@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, styles } from '@/features/analyze-fit/pdf/styles';
+import { colors, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type InterviewFormat = {
   style?: string;
@@ -25,11 +25,9 @@ type PDFInterviewPrepProps = {
   strategicQuestions?: StrategicQuestion[];
 };
 
-export function PDFInterviewPrep({
-  interviewFormat,
-  skillGapCrashCourses,
-  strategicQuestions,
-}: PDFInterviewPrepProps) {
+export function PDFInterviewPrep(props: PDFInterviewPrepProps) {
+  const { interviewFormat, skillGapCrashCourses, strategicQuestions } = props;
+
   if (!interviewFormat && !skillGapCrashCourses?.length && !strategicQuestions?.length) return null;
 
   return (

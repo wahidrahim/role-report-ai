@@ -1,6 +1,6 @@
 import { isFeatureEnabled } from '@/core/featureFlags';
 
-import Dashboard from './Dashboard';
+import { Dashboard } from './dashboard.component';
 
 export default function Home() {
   const isDeepResearchEnabled = isFeatureEnabled('deepResearch');

@@ -30,8 +30,8 @@ import { Spinner } from '@/core/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
 import { cn } from '@/core/lib/utils';
 
-import { useDeepResearchPDFExport } from './hooks/useDeepResearchPDFExport';
-import { StreamEvent } from './useDeepResearch';
+import { useDeepResearchPDFExport } from './hooks/use-deep-research-pdf-export.hook';
+import type { StreamEvent } from './hooks/use-deep-research.hook';
 
 type DeepResearchReportProps = {
   isLoading: boolean;
@@ -60,7 +60,9 @@ const itemVariants = {
 
 // --- Components ---
 
-function StatusLine({ event, isLoading }: { event?: StreamEvent; isLoading: boolean }) {
+function StatusLine(props: { event?: StreamEvent; isLoading: boolean }) {
+  const { event, isLoading } = props;
+
   if (!event && !isLoading) return null;
 
   const displayMessage = event?.data?.message || 'Initializing research protocols...';
@@ -94,7 +96,9 @@ function StatusLine({ event, isLoading }: { event?: StreamEvent; isLoading: bool
   );
 }
 
-function CompanyHealthWidget({ health }: { health: NonNullable<ResearchReport['companyHealth']> }) {
+function CompanyHealthWidget(props: { health: NonNullable<ResearchReport['companyHealth']> }) {
+  const { health } = props;
+
   const statusColors = {
     'Stable/Growing': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     'Risky/Layoffs': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
@@ -170,7 +174,9 @@ function CompanyHealthWidget({ health }: { health: NonNullable<ResearchReport['c
   );
 }
 
-function CultureRadarWidget({ culture }: { culture: NonNullable<ResearchReport['cultureIntel']> }) {
+function CultureRadarWidget(props: { culture: NonNullable<ResearchReport['cultureIntel']> }) {
+  const { culture } = props;
+
   return (
     <Card className="h-full bg-white/5 border-white/10 overflow-hidden relative">
       <div className="absolute top-0 right-0 p-32 bg-primary/5 blur-3xl rounded-full translate-x-10 -translate-y-10" />
@@ -215,7 +221,9 @@ function CultureRadarWidget({ culture }: { culture: NonNullable<ResearchReport['
   );
 }
 
-function PrepHubWidget({ guide }: { guide: NonNullable<ResearchReport['interviewPrepGuide']> }) {
+function PrepHubWidget(props: { guide: NonNullable<ResearchReport['interviewPrepGuide']> }) {
+  const { guide } = props;
+
   return (
     <Card className="col-span-full h-full bg-white/5 border-white/10 overflow-hidden">
       <CardHeader>
@@ -327,12 +335,9 @@ function PrepHubWidget({ guide }: { guide: NonNullable<ResearchReport['interview
   );
 }
 
-export function DeepResearchReport({
-  isLoading,
-  error,
-  streamEvents,
-  researchReport,
-}: DeepResearchReportProps) {
+export function DeepResearchReport(props: DeepResearchReportProps) {
+  const { isLoading, error, streamEvents, researchReport } = props;
+
   const { generatePDF, isGenerating } = useDeepResearchPDFExport({
     researchReport: researchReport ?? null,
   });

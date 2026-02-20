@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, styles } from '@/features/analyze-fit/pdf/styles';
+import { colors, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type PDFCompanyHealthProps = {
   status?: string;
@@ -19,7 +19,9 @@ const getStatusStyle = (status: string) => {
   }
 };
 
-export function PDFCompanyHealth({ status, summary, redFlags }: PDFCompanyHealthProps) {
+export function PDFCompanyHealth(props: PDFCompanyHealthProps) {
+  const { status, summary, redFlags } = props;
+
   if (!status && !summary) return null;
 
   const statusStyle = getStatusStyle(status || 'Unknown');

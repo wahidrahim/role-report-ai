@@ -56,7 +56,9 @@ const getScoreColor = (score: number) => {
   return `hsl(${hue}, 95%, ${lightness}%)`;
 };
 
-export default function MatchScore({ suitabilityAssessment, isLoading }: MatchScoreProps) {
+export function MatchScore(props: MatchScoreProps) {
+  const { suitabilityAssessment, isLoading } = props;
+
   const matchScore = suitabilityAssessment?.suitabilityScore;
 
   // Only show loading state if we're loading AND we don't have a score yet

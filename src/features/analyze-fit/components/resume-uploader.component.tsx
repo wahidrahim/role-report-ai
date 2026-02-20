@@ -1,8 +1,11 @@
 'use client';
+
+import type { TextItem } from 'pdfjs-dist/types/src/display/api';
+import type { ChangeEvent } from 'react';
+
 import { FileText, X } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
-import { TextItem } from 'pdfjs-dist/types/src/display/api';
-import { ChangeEvent, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/core/components/ui/button';
 import { Input } from '@/core/components/ui/input';
@@ -36,11 +39,9 @@ type ResumeUploaderProps = {
   onClear: () => void;
 };
 
-export default function ResumeUploader({
-  resumeFileName,
-  onResumeChange,
-  onClear,
-}: ResumeUploaderProps) {
+export function ResumeUploader(props: ResumeUploaderProps) {
+  const { resumeFileName, onResumeChange, onClear } = props;
+
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

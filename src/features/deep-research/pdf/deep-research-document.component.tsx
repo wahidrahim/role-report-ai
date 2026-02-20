@@ -1,10 +1,10 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 
-import { styles } from '@/features/analyze-fit/pdf/styles';
+import { styles } from '@/features/analyze-fit/pdf/styles.util';
 
-import { PDFCompanyHealth } from './components/PDFCompanyHealth';
-import { PDFCultureIntel } from './components/PDFCultureIntel';
-import { PDFInterviewPrep } from './components/PDFInterviewPrep';
+import { PDFCompanyHealth } from './components/pdf-company-health.component';
+import { PDFCultureIntel } from './components/pdf-culture-intel.component';
+import { PDFInterviewPrep } from './components/pdf-interview-prep.component';
 
 export type DeepResearchReportData = {
   companyHealth?: {
@@ -39,7 +39,9 @@ type DeepResearchDocumentProps = {
   data: DeepResearchReportData;
 };
 
-export function DeepResearchDocument({ data }: DeepResearchDocumentProps) {
+export function DeepResearchDocument(props: DeepResearchDocumentProps) {
+  const { data } = props;
+
   const generatedDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',

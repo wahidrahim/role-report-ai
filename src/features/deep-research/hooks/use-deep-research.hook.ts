@@ -1,3 +1,5 @@
+'use client';
+
 import { createParser } from 'eventsource-parser';
 import { useState } from 'react';
 
@@ -58,7 +60,7 @@ export function useDeepResearch(
             message = data.error;
           }
         } catch {
-          // ignore JSON parse errors
+          // Ignore JSON parse errors.
         }
 
         throw new Error(message);

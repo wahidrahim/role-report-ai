@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 
-import { colors, styles } from '@/features/analyze-fit/pdf/styles';
+import { colors, styles } from '@/features/analyze-fit/pdf/styles.util';
 
 type PDFCultureIntelProps = {
   keywords?: string[];
@@ -8,11 +8,9 @@ type PDFCultureIntelProps = {
   engineeringCulture?: string;
 };
 
-export function PDFCultureIntel({
-  keywords,
-  managerVibe,
-  engineeringCulture,
-}: PDFCultureIntelProps) {
+export function PDFCultureIntel(props: PDFCultureIntelProps) {
+  const { keywords, managerVibe, engineeringCulture } = props;
+
   if (!keywords?.length && !managerVibe && !engineeringCulture) return null;
 
   return (

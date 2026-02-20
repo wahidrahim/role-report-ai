@@ -100,7 +100,7 @@ export function useAnalysis() {
             }
           } catch (e) {
             if (e instanceof SyntaxError) {
-              // Skip malformed JSON chunks
+              // Skip malformed JSON chunks.
               return;
             }
             console.error('Error processing analysis event:', e);

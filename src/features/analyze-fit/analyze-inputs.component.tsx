@@ -1,6 +1,7 @@
+import type { ChangeEvent } from 'react';
+
 import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { ChangeEvent } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
@@ -15,7 +16,11 @@ import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
 
-const ResumeUploader = dynamic(() => import('./components/ResumeUploader'), { ssr: false });
+const ResumeUploader = dynamic(
+  () =>
+    import('./components/resume-uploader.component').then((mod) => ({ default: mod.ResumeUploader })),
+  { ssr: false },
+);
 
 type AnalyzeInputsProps = {
   jobDescriptionText: string;
@@ -29,17 +34,19 @@ type AnalyzeInputsProps = {
   onResumeClear: () => void;
 };
 
-export function AnalyzeInputs({
-  jobDescriptionText,
-  onJobDescriptionChange,
-  onAnalyze,
-  isLoading,
-  validationError,
-  error,
-  resumeFileName,
-  onResumeChange,
-  onResumeClear,
-}: AnalyzeInputsProps) {
+export function AnalyzeInputs(props: AnalyzeInputsProps) {
+  const {
+    jobDescriptionText,
+    onJobDescriptionChange,
+    onAnalyze,
+    isLoading,
+    validationError,
+    error,
+    resumeFileName,
+    onResumeChange,
+    onResumeClear,
+  } = props;
+
   const handleJobDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     onJobDescriptionChange(e.target.value);
   };
