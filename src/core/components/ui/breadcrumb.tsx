@@ -3,12 +3,13 @@ import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/core/lib/utils';
+import { ComponentProps } from "react";
 
-function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
+function Breadcrumb({ ...props }: ComponentProps<'nav'>) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
 }
 
-function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
+function BreadcrumbList({ className, ...props }: ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
@@ -21,7 +22,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   );
 }
 
-function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
+function BreadcrumbItem({ className, ...props }: ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-item"
@@ -35,7 +36,7 @@ function BreadcrumbLink({
   asChild,
   className,
   ...props
-}: React.ComponentProps<'a'> & {
+}: ComponentProps<'a'> & {
   asChild?: boolean;
 }) {
   const Comp = asChild ? Slot : 'a';
@@ -49,7 +50,7 @@ function BreadcrumbLink({
   );
 }
 
-function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
+function BreadcrumbPage({ className, ...props }: ComponentProps<'span'>) {
   return (
     <span
       data-slot="breadcrumb-page"
@@ -62,7 +63,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   );
 }
 
-function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
+function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-separator"
@@ -76,7 +77,7 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
   );
 }
 
-function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
+function BreadcrumbEllipsis({ className, ...props }: ComponentProps<'span'>) {
   return (
     <span
       data-slot="breadcrumb-ellipsis"

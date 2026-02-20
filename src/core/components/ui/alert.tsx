@@ -2,6 +2,7 @@ import { type VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
 
 import { cn } from '@/core/lib/utils';
+import { ComponentProps } from "react";
 
 const alertVariants = cva(
   'relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
@@ -23,7 +24,7 @@ function Alert({
   className,
   variant,
   ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
+}: ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
@@ -34,7 +35,7 @@ function Alert({
   );
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
+function AlertTitle({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-title"
@@ -44,7 +45,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) {
+function AlertDescription({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-description"

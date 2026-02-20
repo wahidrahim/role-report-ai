@@ -1,7 +1,7 @@
 'use client';
 
 import { toPng } from 'html-to-image';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, RefObject } from 'react';
 import { toast } from 'sonner';
 
 import type { AnalysisReportData } from '@/features/analyze-fit/pdf/analysis-report-document.component';
@@ -19,7 +19,7 @@ export function usePDFExport(props: UsePDFExportProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePDF = useCallback(
-    async (chartRef: React.RefObject<HTMLDivElement | null>) => {
+    async (chartRef: RefObject<HTMLDivElement | null>) => {
       setIsGenerating(true);
 
       try {
