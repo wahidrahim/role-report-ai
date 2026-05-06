@@ -62,12 +62,10 @@ export const assessSuitability = async (
     model: models.powerful,
     schema: llmOutputSchema,
     abortSignal: config.signal,
-    providerOptions: {
-      anthropic: {
-        cacheControl: { type: 'ephemeral' },
-      },
-    },
-    system: `
+    messages: [
+      {
+        role: 'system',
+        content: `
       You are an expert technical recruiter conducting a candidate suitability assessment. Your evaluations are fair, evidence-based, and concise.
 
       ## Input Data
@@ -105,7 +103,15 @@ export const assessSuitability = async (
 
       Keep it direct and professional. No fluff or filler phrases.
     `,
-    prompt: `
+        providerOptions: {
+          anthropic: {
+            cacheControl: { type: 'ephemeral' },
+          },
+        },
+      },
+      {
+        role: 'user',
+        content: `
       Assess this candidate's suitability for the role.
 
       <resume>
@@ -124,6 +130,8 @@ export const assessSuitability = async (
         ${JSON.stringify(skillAssessment, null, 2)}
       </skill_assessment>
     `,
+      },
+    ],
   });
 
   for await (const partial of suitabilityAssessmentStream.partialObjectStream) {

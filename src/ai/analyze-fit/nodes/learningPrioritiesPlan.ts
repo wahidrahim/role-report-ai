@@ -81,12 +81,10 @@ export const learningPrioritiesPlan = async (
     model: models.fast,
     schema: learningPlanSchema,
     abortSignal: config.signal,
-    providerOptions: {
-      anthropic: {
-        cacheControl: { type: 'ephemeral' },
-      },
-    },
-    system: `
+    messages: [
+      {
+        role: 'system',
+        content: `
       You are a technical interview coach specializing in rapid skill development for job seekers. Your goal is to create a focused learning plan that maximizes interview readiness in limited time.
 
       ## Context
@@ -122,7 +120,15 @@ export const learningPrioritiesPlan = async (
       - Limit to 6-8 recommendations maximum
       - Be practical — suggest free resources when possible
     `,
-    prompt: `
+        providerOptions: {
+          anthropic: {
+            cacheControl: { type: 'ephemeral' },
+          },
+        },
+      },
+      {
+        role: 'user',
+        content: `
       <resume>
         ${resumeText}
       </resume>
@@ -155,6 +161,8 @@ export const learningPrioritiesPlan = async (
         }
       </suitability_assessment>
     `,
+      },
+    ],
   });
 
   for await (const partial of learningPrioritiesStream.partialObjectStream) {

@@ -35,12 +35,10 @@ export const plotRadarChart = async (
     model: models.balanced,
     schema: radarChartSchema,
     abortSignal: config.signal,
-    providerOptions: {
-      anthropic: {
-        cacheControl: { type: 'ephemeral' },
-      },
-    },
-    system: `
+    messages: [
+      {
+        role: 'system',
+        content: `
       You are a STRICT HIRING MANAGER for the company described in the job description. Your evaluations must be evidence-based and derived solely from the provided resume and job description. Do not assume external knowledge or add unmentioned details.
 
       ## Task
@@ -72,7 +70,15 @@ export const plotRadarChart = async (
       - **candidateLevel**: Base solely on resume evidence. No evidence = 0. Be conservative.
       - **reasoning**: 2-4 sentences justifying BOTH levels with specific evidence
     `,
-    prompt: `
+        providerOptions: {
+          anthropic: {
+            cacheControl: { type: 'ephemeral' },
+          },
+        },
+      },
+      {
+        role: 'user',
+        content: `
       Analyze the job description and resume below. For each key skill from the job description, evaluate both the required proficiency level and the candidate's demonstrated level.
 
       <resume>
@@ -83,6 +89,8 @@ export const plotRadarChart = async (
       ${jobDescriptionText}
       </job_description>
     `,
+      },
+    ],
   });
 
   for await (const partial of radarChartStream.partialObjectStream) {

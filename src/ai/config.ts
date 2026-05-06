@@ -22,4 +22,4 @@ export const aiSdkModels: Record<ModelTier, LanguageModel> = {
 } as const;
 
 // Switch between aiSdkModels, anthropicSdkModels, or others.
-export const models = aiSdkModels;
+export const models = anthropicSdkModels;
