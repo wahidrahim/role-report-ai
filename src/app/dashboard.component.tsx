@@ -120,7 +120,7 @@ export function Dashboard(props: DashboardProps) {
           onResumeClear={handleResumeClear}
         />
 
-        {/* Deep Research Trigger */}
+        {/* TODO: Deep Research
         <div className="pt-4 border-t border-white/10">
           <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
             Advanced Intelligence
@@ -163,7 +163,7 @@ export function Dashboard(props: DashboardProps) {
               )}
             </Tooltip>
           </TooltipProvider>
-        </div>
+        </div> */}
       </motion.div>
 
       {/* RIGHT PANEL - RESULTS (Scrollable) */}
