@@ -20,6 +20,8 @@ export const analyzeFitGraph = new StateGraph(stateAnnotation)
   .addEdge('plotRadarChart', 'assessSuitability')
   .addEdge('assessSkills', 'assessSuitability')
   .addEdge('assessSuitability', END)
+
+  // TODO: seperate this to a different step.
   // .addEdge('assessSuitability', 'resumeOptimizationPlans')
   // .addEdge('assessSuitability', 'learningPrioritiesPlan')
   // .addEdge('resumeOptimizationPlans', END)
