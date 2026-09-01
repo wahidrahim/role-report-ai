@@ -2,9 +2,10 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/core/components/ui/hover-card';
+import { cn } from '@/core/lib/utils';
 
 type MatchScoreProps = {
-  suitabilityAssessment?: Partial<SuitabilityAssessment>;
+  suitabilityAssessment?: Partial<SuitabilityAssessment> | null;
   isLoading?: boolean;
 };
 
@@ -18,39 +19,48 @@ const CRITERIA_CONFIG: readonly { key: CriteriaKey; label: string; weight: strin
   { key: 'overallPotential', label: 'Overall Potential', weight: '10%' },
 ];
 
+const PANELS = [
+  {
+    key: 'keyStrengths',
+    label: 'Key Strengths',
+    icon: CheckCircle2,
+    panel: 'bg-emerald-500/5 border-emerald-500/20',
+    heading: 'text-emerald-400/70',
+    entry: 'text-emerald-300/90 border-emerald-500/40',
+  },
+  {
+    key: 'criticalGaps',
+    label: 'Critical Gaps',
+    icon: AlertTriangle,
+    panel: 'bg-rose-500/5 border-rose-500/20',
+    heading: 'text-rose-400/70',
+    entry: 'text-rose-300/90 border-rose-500/40',
+  },
+] as const;
+
+/**
+ * Hue curve as [score, hue] points: red through orange below 4, a distinct amber/gold band at 5-6
+ * so the colour cannot turn green prematurely, then green into deep emerald at 10.
+ */
+const HUE_POINTS = [
+  [0, 0],
+  [4, 25],
+  [6, 45],
+  [8, 100],
+  [10, 150],
+] as const;
+
 const getScoreColor = (score: number) => {
-  // Custom curve points: [score, hue]
-  // Design goals:
-  // - 0-4: Red to Orange
-  // - 5-6: distinct Amber/Gold (prevent premature green)
-  // - 7-8: transitioning to Green
-  // - 9-10: deep Emerald
-  const points = [
-    [0, 0], // Red
-    [4, 25], // Orange
-    [6, 45], // Amber/Gold
-    [8, 100], // Green
-    [10, 150], // Emerald
-  ];
+  const upperIndex = HUE_POINTS.findIndex(
+    ([bound], i) => i > 0 && score >= HUE_POINTS[i - 1][0] && score <= bound,
+  );
+  const [lowScore, lowHue] = upperIndex === -1 ? HUE_POINTS[0] : HUE_POINTS[upperIndex - 1];
+  const [highScore, highHue] =
+    upperIndex === -1 ? HUE_POINTS[HUE_POINTS.length - 1] : HUE_POINTS[upperIndex];
+  const progress = (score - lowScore) / (highScore - lowScore);
+  const hue = lowHue + (highHue - lowHue) * progress;
 
-  // Find the segment
-  let lower = points[0];
-  let upper = points[points.length - 1];
-
-  for (let i = 0; i < points.length - 1; i++) {
-    if (score >= points[i][0] && score <= points[i + 1][0]) {
-      lower = points[i];
-      upper = points[i + 1];
-      break;
-    }
-  }
-
-  const range = upper[0] - lower[0];
-  const progress = range === 0 ? 0 : (score - lower[0]) / range;
-  const hue = lower[1] + (upper[1] - lower[1]) * progress;
-
-  // Lightness curve: Brighter for lower scores (alert), slightly deeper for high scores (richness)
-  // 60% -> 50%
+  // Brighter for low scores so they read as an alert, deeper for high scores so they read as rich.
   const lightness = 60 - (score / 10) * 10;
 
   return `hsl(${hue}, 95%, ${lightness}%)`;
@@ -65,30 +75,6 @@ export function MatchScore(props: MatchScoreProps) {
   if (isLoading && matchScore === undefined) {
     return (
       <div className="flex flex-col items-center justify-center space-y-6 py-12 animate-in fade-in duration-500">
-        <style jsx>{`
-          @keyframes scan {
-            0% {
-              background-position: 200% 0;
-            }
-            100% {
-              background-position: -200% 0;
-            }
-          }
-          .animate-scan {
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(255, 255, 255, 0.5) 50%,
-              transparent 100%
-            );
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: scan 3s linear infinite;
-          }
-        `}</style>
-
         <div className="relative">
           {/* Base subtext */}
           <p className="text-xs font-mono text-primary/40 text-center uppercase tracking-[0.2em] relative z-0">
@@ -128,47 +114,32 @@ export function MatchScore(props: MatchScoreProps) {
       {/* Strengths & Gaps Row */}
       {(keyStrengths?.length || criticalGaps?.length) && (
         <div className="grid md:grid-cols-2 gap-4">
-          {/* Key Strengths */}
-          {keyStrengths && keyStrengths.length > 0 && (
-            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-3">
-              <h4 className="text-xs font-mono uppercase tracking-widest text-emerald-400/70 flex items-center gap-2">
-                <CheckCircle2 className="size-3.5" />
-                Key Strengths
-              </h4>
-              <ul className="space-y-2">
-                {keyStrengths.map((strength, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-emerald-300/90 pl-3 border-l-2 border-emerald-500/40"
-                    style={{ animationDelay: `${i * 100}ms` }}
-                  >
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {PANELS.map(({ key, label, icon: Icon, panel, heading, entry }) => {
+            const entries = key === 'keyStrengths' ? keyStrengths : criticalGaps;
 
-          {/* Critical Gaps */}
-          {criticalGaps && criticalGaps.length > 0 && (
-            <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-3">
-              <h4 className="text-xs font-mono uppercase tracking-widest text-rose-400/70 flex items-center gap-2">
-                <AlertTriangle className="size-3.5" />
-                Critical Gaps
-              </h4>
-              <ul className="space-y-2">
-                {criticalGaps.map((gap, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-rose-300/90 pl-3 border-l-2 border-rose-500/40"
-                    style={{ animationDelay: `${i * 100}ms` }}
-                  >
-                    {gap}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            if (!entries || entries.length === 0) return null;
+
+            return (
+              <div key={key} className={cn('p-4 rounded-xl space-y-3 border', panel)}>
+                <h4
+                  className={cn(
+                    'text-xs font-mono uppercase tracking-widest flex items-center gap-2',
+                    heading,
+                  )}
+                >
+                  <Icon className="size-3.5" />
+                  {label}
+                </h4>
+                <ul className="space-y-2">
+                  {entries.map((value, i) => (
+                    <li key={i} className={cn('text-sm pl-3 border-l-2', entry)}>
+                      {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -178,7 +149,7 @@ export function MatchScore(props: MatchScoreProps) {
           <h4 className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
             Assessment Breakdown
           </h4>
-          {CRITERIA_CONFIG.map(({ key, label, weight }, index) => {
+          {CRITERIA_CONFIG.map(({ key, label, weight }) => {
             const criteria = criteriaBreakdown[key];
             if (!criteria || criteria.score === undefined) return null;
 
@@ -189,10 +160,7 @@ export function MatchScore(props: MatchScoreProps) {
             return (
               <HoverCard key={key} openDelay={200}>
                 <HoverCardTrigger asChild>
-                  <div
-                    className="grid grid-cols-[1fr_auto_2fr_auto] items-center gap-3 cursor-help group"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
+                  <div className="grid grid-cols-[1fr_auto_2fr_auto] items-center gap-3 cursor-help group">
                     {/* Label */}
                     <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors truncate">
                       {label}

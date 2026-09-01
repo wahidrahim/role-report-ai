@@ -1,13 +1,16 @@
 import { Text, View } from '@react-pdf/renderer';
 
 import { colors, getPriorityBadgeStyle, styles } from '@/features/analyze-fit/pdf/styles.util';
+import { getPriorityValue } from '@/features/analyze-fit/priority.util';
 
-type OptimizationExample =
-  | { type: 'replacement'; before: string; after: string }
-  | { type: 'addition'; content: string; location?: string }
-  | { type: 'removal'; content: string }
-  | { type: 'structural'; suggestion: string }
-  | { type: 'general'; suggestion: string };
+export type OptimizationExample = {
+  type?: 'replacement' | 'addition' | 'removal' | 'structural' | 'general';
+  before?: string;
+  after?: string;
+  content?: string;
+  location?: string;
+  suggestion?: string;
+};
 
 type OptimizationItem = {
   title?: string;
@@ -36,21 +39,6 @@ const getCategoryLabel = (category: string) => {
       return 'Format';
     default:
       return category;
-  }
-};
-
-const getPriorityValue = (priority: string) => {
-  switch (priority?.toLowerCase()) {
-    case 'critical':
-      return 4;
-    case 'high':
-      return 3;
-    case 'medium':
-      return 2;
-    case 'low':
-      return 1;
-    default:
-      return 0;
   }
 };
 

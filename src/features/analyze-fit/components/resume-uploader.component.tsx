@@ -97,27 +97,14 @@ export function ResumeUploader(props: ResumeUploaderProps) {
         </div>
       </div>
 
-      {resumeFile && !isParsing && (
+      {!isParsing && (resumeFile || resumeFileName) && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-200">
           <FileText className="size-4" />
-          <span className="flex-1">File selected: {resumeFile.name}</span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleClear}
-            className="size-6 opacity-60 hover:opacity-100 hover:text-destructive"
-            aria-label="Clear uploaded resume"
-          >
-            <X className="size-3.5" />
-          </Button>
-        </div>
-      )}
-
-      {!resumeFile && !isParsing && resumeFileName && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-200">
-          <FileText className="size-4" />
-          <span className="flex-1">File already loaded: {resumeFileName}</span>
+          <span className="flex-1">
+            {resumeFile
+              ? `File selected: ${resumeFile.name}`
+              : `File already loaded: ${resumeFileName}`}
+          </span>
           <Button
             type="button"
             variant="ghost"

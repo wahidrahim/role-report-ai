@@ -2,6 +2,7 @@ import { Document, Image, Page, Text, View } from '@react-pdf/renderer';
 
 import { PDFLearningPriorities } from './components/pdf-learning-priorities.component';
 import { PDFMatchScore } from './components/pdf-match-score.component';
+import type { OptimizationExample } from './components/pdf-optimizations.component';
 import { PDFOptimizations } from './components/pdf-optimizations.component';
 import { PDFSkillAssessment } from './components/pdf-skill-assessment.component';
 import { colors, styles } from './styles.util';
@@ -39,7 +40,7 @@ export type AnalysisReportData = {
           category?: string;
           description?: string;
           estimatedEffort?: string;
-          example?: any;
+          example?: OptimizationExample;
         }
       | undefined
     )[];

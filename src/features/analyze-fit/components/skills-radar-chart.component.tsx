@@ -1,5 +1,5 @@
 'use client';
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from 'recharts';
 
 import {
@@ -38,6 +38,40 @@ export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps
   function SkillsRadarChart(props, ref) {
     const { data } = props;
 
+    // Rebuilding these arrays on every stream frame hands recharts a fresh data identity and
+    // defeats its memoization, so the whole arrangement is derived once per data change.
+    const finalData = useMemo(() => {
+      const chartData = (data ?? [])
+        .filter((item) => item !== undefined)
+        .map((item) => ({
+          skill: item.skillName,
+          requiredLevel: Math.min(item.requiredLevel || 0, 100), // Cap at 100%, default to 0.
+          candidateLevel: Math.min(item.candidateLevel || 0, 100), // Cap at 100%, default to 0.
+          reasoning: item.reasoning,
+        }));
+
+      // Sort by level to group similar values, then by name for stability
+      const sortedData = [...chartData].sort(
+        (a, b) =>
+          b.candidateLevel - a.candidateLevel || (a.skill || '').localeCompare(b.skill || ''),
+      );
+
+      // Distribute data to create a "bell curve" arrangement
+      // This avoids the sharp cliff between the highest and lowest values in a standard sort
+      const left: typeof chartData = [];
+      const right: typeof chartData = [];
+
+      sortedData.forEach((item, index) => {
+        if (index % 2 === 0) {
+          right.push(item);
+        } else {
+          left.unshift(item);
+        }
+      });
+
+      return [...right, ...left];
+    }, [data]);
+
     if (!data || data.length === 0) {
       return (
         <div className="flex h-[300px] w-full items-center justify-center text-muted-foreground">
@@ -46,42 +80,13 @@ export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps
       );
     }
 
-    const chartData = data
-      .filter((item) => item !== undefined)
-      .map((data) => ({
-        skill: data.skillName,
-        requiredLevel: Math.min(data.requiredLevel || 0, 100), // Cap at 100%, default to 0.
-        candidateLevel: Math.min(data.candidateLevel || 0, 100), // Cap at 100%, default to 0.
-        reasoning: data.reasoning,
-      }));
-
-    // Sort by level to group similar values, then by name for stability
-    const sortedData = [...chartData].sort(
-      (a, b) => b.candidateLevel - a.candidateLevel || (a.skill || '').localeCompare(b.skill || ''),
-    );
-
-    // Distribute data to create a "bell curve" arrangement
-    // This avoids the sharp cliff between the highest and lowest values in a standard sort
-    const left: typeof chartData = [];
-    const right: typeof chartData = [];
-
-    sortedData.forEach((item, index) => {
-      if (index % 2 === 0) {
-        right.push(item);
-      } else {
-        left.unshift(item);
-      }
-    });
-
-    const finalData = [...right, ...left];
-
     return (
       <div ref={ref}>
         <ChartContainer config={chartConfig} className="mx-auto min-h-[400px] w-full">
           <RadarChart data={finalData}>
             <ChartTooltip
               cursor={false}
-              content={(props: any) => {
+              content={(props) => {
                 const { active, payload } = props;
                 if (!active || !payload || !payload.length) {
                   return null;
@@ -107,12 +112,7 @@ export const SkillsRadarChart = forwardRef<HTMLDivElement, SkillsRadarChartProps
                 );
               }}
             />
-            <PolarGrid
-              gridType="circle"
-              stroke="var(--color-border)"
-              strokeWidth={1}
-              className="opacity-100" // Increased visibility.
-            />
+            <PolarGrid gridType="circle" stroke="var(--color-border)" strokeWidth={1} />
             <PolarAngleAxis
               dataKey="skill"
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12, fontWeight: 500 }}
