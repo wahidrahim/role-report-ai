@@ -40,7 +40,7 @@ flowchart LR
     D --> E["React state<br/>progressive UI"]
 ```
 
-Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode), framed as named SSE events by the API route, parsed on the client, and reduced into per-section React state. Aborting the request propagates the signal all the way down to the in-flight model calls.
+Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode) and serialized by the API route as unnamed SSE data lines — each frame is a JSON state patch keyed by slice name (`{"radarChart": ...}`), and the stream ends with `data: [DONE]` — then parsed on the client and reduced into per-section React state. Aborting the request propagates the signal all the way down to the in-flight model calls.
 
 ### Analyze workflow
 
@@ -116,5 +116,3 @@ Built in an intentionally short cycle as the capstone for the [ByteByteAI AI eng
 
 - [ ] **Eval harness** — golden resume/JD dataset; deterministic checks (JD-anchoring rate, schema/enum-violation rate per model tier) plus judge-based rubrics for the fuzzy calls; results published here and run in CI
 - [ ] **Reconnect the action-plan step** — resume optimizations and learning priorities as an explicit follow-on invocation
-- [ ] **Adopt LangGraph v1 native stream encoding** — replace the hand-rolled SSE transport
-- [ ] **Extract the typed event contract** — server emitters and the client hook inferred from a single Zod event registry, as a standalone package

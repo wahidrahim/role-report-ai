@@ -62,7 +62,7 @@ export function useAnalysis() {
         // Each frame carries the whole accumulated slice, so merging it into state is all we do.
         const patch = JSON.parse(value.data) as Partial<AnalysisSlices> & { error?: string };
 
-        if (patch.error) setError(new Error(patch.error));
+        if (patch.error !== undefined) setError(new Error(patch.error));
         else setSlices((prev) => ({ ...prev, ...patch }));
       }
     } catch (e) {
