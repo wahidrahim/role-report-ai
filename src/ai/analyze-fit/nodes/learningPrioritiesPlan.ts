@@ -120,11 +120,6 @@ export const learningPrioritiesPlan = async (
       - Limit to 6-8 recommendations maximum
       - Be practical — suggest free resources when possible
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',

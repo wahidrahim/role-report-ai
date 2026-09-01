@@ -70,11 +70,6 @@ export const plotRadarChart = async (
       - **candidateLevel**: Base solely on resume evidence. No evidence = 0. Be conservative.
       - **reasoning**: 2-4 sentences justifying BOTH levels with specific evidence
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',

@@ -147,11 +147,6 @@ export const resumeOptimizationPlans = async (
       - Limit to 6-8 recommendations maximum, ordered by impact
       - Assign realistic effort estimates
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',

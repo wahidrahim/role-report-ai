@@ -103,11 +103,6 @@ export const assessSuitability = async (
 
       Keep it direct and professional. No fluff or filler phrases.
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',

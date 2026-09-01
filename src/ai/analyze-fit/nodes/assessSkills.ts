@@ -133,11 +133,6 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',
