@@ -14,7 +14,7 @@ The app is the vehicle. The engineering focus is what's underneath: graph-orches
 - **End-to-end structured streaming** — each node streams **typed partial objects** (AI SDK `streamObject`) through LangGraph's custom stream mode, over SSE with abort propagation, into React state — the UI renders every analysis section as the model writes it, not after
 - **Schema guardrails at every boundary** — an input-validation gate before the graph runs, Zod schemas on every model output, and normalization for common enum drift (models love inventing `"strongly preferred"`)
 - **One workflow, three transports** — the analyze graph is served as a streaming HTTP endpoint (`/api/analyze`), as an MCP tool over streamable HTTP (`/api/mcp`), and as a standalone MCP stdio server for clients like Claude Code
-- **Tiered model routing** — `fast` / `balanced` / `powerful` model tiers assigned per node, with prompt caching on the large system prompts
+- **Tiered model routing** — `fast` / `balanced` / `powerful` model tiers assigned per node
 
 ## Demos
 
