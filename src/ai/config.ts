@@ -15,11 +15,4 @@ export const anthropicSdkModels: Record<ModelTier, LanguageModel> = {
   powerful: anthropic('claude-opus-4-5'),
 } as const;
 
-export const aiSdkModels: Record<ModelTier, LanguageModel> = {
-  fast: 'anthropic/claude-haiku-4.5',
-  balanced: 'anthropic/claude-sonnet-4.5',
-  powerful: 'anthropic/claude-opus-4.5',
-} as const;
-
-// Switch between aiSdkModels, anthropicSdkModels, or others.
 export const models = anthropicSdkModels;
