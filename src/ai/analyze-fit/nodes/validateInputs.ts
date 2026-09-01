@@ -162,12 +162,7 @@ export const validateInputs = async (
     validationError = `Invalid job description: ${jdValidation.reason}`;
   }
 
-  if (validationError) {
-    config.writer?.({
-      event: 'VALIDATION_FAILED',
-      data: { message: validationError },
-    });
-  }
+  if (validationError) config.writer?.({ error: validationError });
 
   return { validationError };
 };

@@ -1,70 +1,29 @@
 import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 
-type WriterPayload = {
-  event: string;
-  data: Record<string, unknown>;
-};
-
-type AnalysisType =
+export type AnalysisSlice =
   | 'radarChart'
   | 'skillAssessment'
   | 'suitabilityAssessment'
   | 'resumeOptimizations'
   | 'learningPriorities';
 
-const analysisEventBase = (type: AnalysisType) => {
-  switch (type) {
-    case 'radarChart':
-      return 'RADAR_CHART';
-    case 'skillAssessment':
-      return 'SKILL_ASSESSMENT';
-    case 'suitabilityAssessment':
-      return 'SUITABILITY_ASSESSMENT';
-    case 'resumeOptimizations':
-      return 'RESUME_OPTIMIZATIONS';
-    case 'learningPriorities':
-      return 'LEARNING_PRIORITIES';
+/**
+ * Streams a node's structured output to the client as state patches keyed by slice name, then
+ * returns the finished object so the node can hand it back to the graph. The slice key is the
+ * only discriminator the client needs, so frames carry no event name.
+ */
+export const streamSlice = async <T>(
+  config: LangGraphRunnableConfig,
+  slice: AnalysisSlice,
+  result: { partialObjectStream: AsyncIterable<unknown>; object: Promise<T> },
+): Promise<T> => {
+  for await (const partial of result.partialObjectStream) {
+    config.writer?.({ [slice]: partial });
   }
-};
 
-const write = (config: LangGraphRunnableConfig, payload: WriterPayload) => {
-  config.writer?.(payload);
-};
+  const value = await result.object;
 
-export const emitAnalysisPartial = (
-  config: LangGraphRunnableConfig,
-  args: {
-    node: string;
-    type: AnalysisType;
-    data: unknown;
-  },
-) => {
-  const base = analysisEventBase(args.type);
-  write(config, {
-    event: `${base}_STREAM_PARTIAL`,
-    data: {
-      node: args.node,
-      [args.type]: args.data,
-    },
-  });
-};
+  config.writer?.({ [slice]: value });
 
-export const emitAnalysisCreated = (
-  config: LangGraphRunnableConfig,
-  args: {
-    node: string;
-    type: AnalysisType;
-    message: string;
-    data: unknown;
-  },
-) => {
-  const base = analysisEventBase(args.type);
-  write(config, {
-    event: `${base}_CREATED`,
-    data: {
-      node: args.node,
-      message: args.message,
-      [args.type]: args.data,
-    },
-  });
+  return value;
 };
