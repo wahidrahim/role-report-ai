@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { streamSlice } from '@/ai/analyze-fit/events';
 import { models } from '@/ai/config';
 
 const skillImportanceSchema = z.preprocess(
@@ -133,11 +133,6 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',
@@ -173,17 +168,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     ],
   });
 
-  for await (const partial of skillAssessmentStream.partialObjectStream) {
-    emitAnalysisPartial(config, { node: 'ASSESS_SKILLS', type: 'skillAssessment', data: partial });
-  }
+  const skillAssessment = await streamSlice(config, 'skillAssessment', skillAssessmentStream);
 
-  const skillAssessment = await skillAssessmentStream.object;
-
-  emitAnalysisCreated(config, {
-    node: 'ASSESS_SKILLS',
-    type: 'skillAssessment',
-    message: 'Skill assessment created successfully',
-    data: skillAssessment,
-  });
   return { skillAssessment };
 };

@@ -1,6 +1,7 @@
 import { Text, View } from '@react-pdf/renderer';
 
 import { colors, getPriorityBadgeStyle, styles } from '@/features/analyze-fit/pdf/styles.util';
+import { getPriorityValue } from '@/features/analyze-fit/priority.util';
 
 type LearningItem = {
   title?: string;
@@ -26,21 +27,6 @@ const getCategoryInfo = (category: string) => {
       return { label: 'Interview Prep', color: '#EA580C', bgColor: '#FFEDD5' };
     default:
       return { label: category, color: colors.mediumGray, bgColor: '#F3F4F6' };
-  }
-};
-
-const getPriorityValue = (priority: string) => {
-  switch (priority?.toLowerCase()) {
-    case 'critical':
-      return 4;
-    case 'high':
-      return 3;
-    case 'medium':
-      return 2;
-    case 'low':
-      return 1;
-    default:
-      return 0;
   }
 };
 

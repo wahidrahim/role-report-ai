@@ -1,9 +1,7 @@
 import type { ChangeEvent } from 'react';
 
-import { AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-import { Alert, AlertDescription, AlertTitle } from '@/core/components/ui/alert';
 import { Button } from '@/core/components/ui/button';
 import {
   Card,
@@ -15,6 +13,8 @@ import {
 import { Label } from '@/core/components/ui/label';
 import { Spinner } from '@/core/components/ui/spinner';
 import { Textarea } from '@/core/components/ui/textarea';
+
+import { AnalysisErrorAlert } from './components/analysis-error-alert.component';
 
 const ResumeUploader = dynamic(
   () =>
@@ -95,27 +95,9 @@ export function AnalyzeInputs(props: AnalyzeInputsProps) {
         </CardContent>
       </Card>
 
-      {validationError && (
-        <Alert
-          variant="destructive"
-          className="bg-destructive/10 text-destructive border-destructive/20"
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Validation Error</AlertTitle>
-          <AlertDescription>{validationError}</AlertDescription>
-        </Alert>
-      )}
+      {validationError && <AnalysisErrorAlert title="Validation Error" message={validationError} />}
 
-      {error && (
-        <Alert
-          variant="destructive"
-          className="bg-destructive/10 text-destructive border-destructive/20"
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
-      )}
+      {error && <AnalysisErrorAlert title="Error" message={error.message} />}
     </div>
   );
 }

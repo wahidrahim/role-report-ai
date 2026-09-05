@@ -14,7 +14,7 @@ The app is the vehicle. The engineering focus is what's underneath: graph-orches
 - **End-to-end structured streaming** — each node streams **typed partial objects** (AI SDK `streamObject`) through LangGraph's custom stream mode, over SSE with abort propagation, into React state — the UI renders every analysis section as the model writes it, not after
 - **Schema guardrails at every boundary** — an input-validation gate before the graph runs, Zod schemas on every model output, and normalization for common enum drift (models love inventing `"strongly preferred"`)
 - **One workflow, three transports** — the analyze graph is served as a streaming HTTP endpoint (`/api/analyze`), as an MCP tool over streamable HTTP (`/api/mcp`), and as a standalone MCP stdio server for clients like Claude Code
-- **Tiered model routing** — `fast` / `balanced` / `powerful` model tiers assigned per node, with prompt caching on the large system prompts
+- **Tiered model routing** — `fast` / `balanced` / `powerful` model tiers assigned per node
 
 ## Demos
 
@@ -40,7 +40,7 @@ flowchart LR
     D --> E["React state<br/>progressive UI"]
 ```
 
-Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode), framed as named SSE events by the API route, parsed on the client, and reduced into per-section React state. Aborting the request propagates the signal all the way down to the in-flight model calls.
+Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode) and serialized by the API route as unnamed SSE data lines — each frame is a JSON state patch keyed by slice name (`{"radarChart": ...}`), and the stream ends with `data: [DONE]` — then parsed on the client and reduced into per-section React state. Aborting the request propagates the signal all the way down to the in-flight model calls.
 
 ### Analyze workflow
 
@@ -116,5 +116,3 @@ Built in an intentionally short cycle as the capstone for the [ByteByteAI AI eng
 
 - [ ] **Eval harness** — golden resume/JD dataset; deterministic checks (JD-anchoring rate, schema/enum-violation rate per model tier) plus judge-based rubrics for the fuzzy calls; results published here and run in CI
 - [ ] **Reconnect the action-plan step** — resume optimizations and learning priorities as an explicit follow-on invocation
-- [ ] **Adopt LangGraph v1 native stream encoding** — replace the hand-rolled SSE transport
-- [ ] **Extract the typed event contract** — server emitters and the client hook inferred from a single Zod event registry, as a standalone package

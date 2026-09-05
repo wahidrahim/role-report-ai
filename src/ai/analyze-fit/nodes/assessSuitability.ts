@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { emitAnalysisCreated, emitAnalysisPartial } from '@/ai/analyze-fit/events';
+import { streamSlice } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { models } from '@/ai/config';
@@ -103,11 +103,6 @@ export const assessSuitability = async (
 
       Keep it direct and professional. No fluff or filler phrases.
     `,
-        providerOptions: {
-          anthropic: {
-            cacheControl: { type: 'ephemeral' },
-          },
-        },
       },
       {
         role: 'user',
@@ -134,38 +129,22 @@ export const assessSuitability = async (
     ],
   });
 
-  for await (const partial of suitabilityAssessmentStream.partialObjectStream) {
-    emitAnalysisPartial(config, {
-      node: 'ASSESS_SUITABILITY',
-      type: 'suitabilityAssessment',
-      data: partial,
-    });
-  }
-
-  const llmOutput = await suitabilityAssessmentStream.object;
+  const llmOutput = await streamSlice(config, 'suitabilityAssessment', suitabilityAssessmentStream);
 
   const { criteriaBreakdown } = llmOutput;
   const suitabilityScore =
     Math.round(
-      (criteriaBreakdown.coreSkillsMatch.score * CRITERIA_WEIGHTS.coreSkillsMatch +
-        criteriaBreakdown.experienceRelevance.score * CRITERIA_WEIGHTS.experienceRelevance +
-        criteriaBreakdown.skillGapsSeverity.score * CRITERIA_WEIGHTS.skillGapsSeverity +
-        criteriaBreakdown.transferableSkills.score * CRITERIA_WEIGHTS.transferableSkills +
-        criteriaBreakdown.overallPotential.score * CRITERIA_WEIGHTS.overallPotential) *
-        10,
+      Object.entries(CRITERIA_WEIGHTS).reduce(
+        (total, [criterion, weight]) =>
+          total + criteriaBreakdown[criterion as keyof typeof CRITERIA_WEIGHTS].score * weight,
+        0,
+      ) * 10,
     ) / 10;
 
-  const suitabilityAssessment: SuitabilityAssessment = {
-    ...llmOutput,
-    suitabilityScore,
-  };
+  const suitabilityAssessment: SuitabilityAssessment = { ...llmOutput, suitabilityScore };
 
-  emitAnalysisCreated(config, {
-    node: 'ASSESS_SUITABILITY',
-    type: 'suitabilityAssessment',
-    message: 'Suitability assessment created successfully',
-    data: suitabilityAssessment,
-  });
+  // The score is computed after the stream closes, so the client needs one more frame to get it.
+  config.writer?.({ suitabilityAssessment });
 
   return { suitabilityAssessment };
 };
