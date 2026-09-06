@@ -36,11 +36,11 @@ Every analysis section streams incrementally from model to UI:
 flowchart LR
     A["streamObject()<br/>partial objects"] -->|"config.writer"| B["LangGraph<br/>custom stream mode"]
     B --> C["API route<br/>AI SDK UI message stream"]
-    C -->|"text/event-stream"| D["eventsource-parser"]
-    D --> E["React state<br/>progressive UI"]
+    C -->|"text/event-stream"| D["useChat<br/>(DefaultChatTransport)"]
+    D --> E["data parts on assistant message<br/>progressive UI"]
 ```
 
-Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode) and serialized by the API route through `createUIMessageStreamResponse` as AI SDK UI message chunks — each frame is a data part typed `data-<slice>` whose id is the slice name so the client replaces it in place (e.g. `{"type":"data-radarChart","id":"radarChart","data":{...}}`), errors arrive as `{"type":"error","errorText":...}`, and the stream ends with `data: [DONE]` — then parsed on the client and reduced into per-section React state. Aborting the request propagates the signal all the way down to the in-flight model calls.
+Inside each node, the AI SDK's `partialObjectStream` yields progressively complete objects validated against a Zod schema. Those partials are forwarded through LangGraph's `config.writer` (custom stream mode) and serialized by the API route through `createUIMessageStreamResponse` as AI SDK UI message chunks — each frame is a data part typed `data-<slice>` whose id is the slice name so the client replaces it in place (e.g. `{"type":"data-radarChart","id":"radarChart","data":{...}}`), errors arrive as `{"type":"error","errorText":...}`, and the stream ends with `data: [DONE]` — then read by the AI SDK's `useChat` hook, which appends each part onto the assistant message keyed by slice name so every frame replaces the matching part in place. Aborting the request propagates the signal all the way down to the in-flight model calls.
 
 ### Analyze workflow
 
