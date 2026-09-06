@@ -1,5 +1,5 @@
 import type { LangGraphRunnableConfig } from '@langchain/langgraph';
-import type { UIMessage } from 'ai';
+import type { DeepPartial, UIMessage } from 'ai';
 
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
@@ -24,10 +24,10 @@ export type AnalysisUIMessage = UIMessage<never, AnalysisData>;
  * Emits one slice as an AI SDK data part. Reusing the slice name as the part id makes the client
  * replace the part in place instead of appending a new one per frame.
  */
-export const writeSlice = (
+export const writeSlice = <K extends AnalysisSlice>(
   config: LangGraphRunnableConfig,
-  slice: AnalysisSlice,
-  data: unknown,
+  slice: K,
+  data: DeepPartial<AnalysisData[K]>,
 ) => {
   config.writer?.({ type: `data-${slice}`, id: slice, data });
 };
@@ -36,10 +36,10 @@ export const writeSlice = (
  * Streams a node's structured output to the client frame by frame, then returns the finished
  * object so the node can hand it back to the graph.
  */
-export const streamSlice = async <T>(
+export const streamSlice = async <K extends AnalysisSlice, T extends DeepPartial<AnalysisData[K]>>(
   config: LangGraphRunnableConfig,
-  slice: AnalysisSlice,
-  result: { partialObjectStream: AsyncIterable<unknown>; object: Promise<T> },
+  slice: K,
+  result: { partialObjectStream: AsyncIterable<DeepPartial<AnalysisData[K]>>; object: Promise<T> },
 ): Promise<T> => {
   for await (const partial of result.partialObjectStream) writeSlice(config, slice, partial);
 
