@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from '@langchain/langgraph';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
-import { streamSlice } from '@/ai/analyze-fit/events';
+import { streamSlice, writeSlice } from '@/ai/analyze-fit/events';
 import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
 import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
 import { models } from '@/ai/config';
@@ -144,7 +144,7 @@ export const assessSuitability = async (
   const suitabilityAssessment: SuitabilityAssessment = { ...llmOutput, suitabilityScore };
 
   // The score is computed after the stream closes, so the client needs one more frame to get it.
-  config.writer?.({ suitabilityAssessment });
+  writeSlice(config, 'suitabilityAssessment', suitabilityAssessment);
 
   return { suitabilityAssessment };
 };
