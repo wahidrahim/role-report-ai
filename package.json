@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.35",
+    "@ai-sdk/react": "^3.0.70",
     "@langchain/core": "^1.1.4",
     "@langchain/langgraph": "^1.0.4",
     "@modelcontextprotocol/sdk": "1.26.0",
