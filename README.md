@@ -11,7 +11,7 @@ The app is the vehicle. The engineering focus is what's underneath: graph-orches
 ## What this demonstrates
 
 - **Graph-orchestrated workflows** — LangGraph `StateGraph`s with parallel fan-out/fan-in, conditional routing, and an iterative research loop (plan → search → review → re-plan until sufficient)
-- **End-to-end structured streaming** — each node streams **typed partial objects** (AI SDK `streamObject`) through LangGraph's custom stream mode, over SSE with abort propagation, into React state — the UI renders every analysis section as the model writes it, not after
+- **End-to-end structured streaming** — each node streams **typed partial objects** (AI SDK `streamObject`) through LangGraph's custom stream mode, over SSE with abort propagation, into the UI via `useChat` — the UI renders every analysis section as the model writes it, not after
 - **Schema guardrails at every boundary** — an input-validation gate before the graph runs, Zod schemas on every model output, and normalization for common enum drift (models love inventing `"strongly preferred"`)
 - **One workflow, three transports** — the analyze graph is served as a streaming HTTP endpoint (`/api/analyze`), as an MCP tool over streamable HTTP (`/api/mcp`), and as a standalone MCP stdio server for clients like Claude Code
 - **Tiered model routing** — `fast` / `balanced` / `powerful` model tiers assigned per node
@@ -86,10 +86,10 @@ Feature-flagged off by default (`FEATURE_DEEP_RESEARCH=true` to enable).
 
 The analyze workflow is also exposed as an MCP tool (`analyze_fit`) with full Zod input/output schemas, over two transports:
 
-| Transport | Entry point | Use case |
-| --- | --- | --- |
-| Streamable HTTP | `/api/mcp` | Remote MCP clients against the deployed app |
-| stdio | `pnpm mcp:stdio` | Local clients (e.g. Claude Code) spawning the server directly, no Next.js required |
+| Transport       | Entry point      | Use case                                                                           |
+| --------------- | ---------------- | ---------------------------------------------------------------------------------- |
+| Streamable HTTP | `/api/mcp`       | Remote MCP clients against the deployed app                                        |
+| stdio           | `pnpm mcp:stdio` | Local clients (e.g. Claude Code) spawning the server directly, no Next.js required |
 
 ## Stack
 
@@ -104,10 +104,10 @@ pnpm dev
 
 Environment variables (`.env.local`):
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | yes | Model calls for both workflows |
-| `TAVILY_API_KEY` | for deep research | Web search |
+| Variable                | Required             | Purpose                            |
+| ----------------------- | -------------------- | ---------------------------------- |
+| `ANTHROPIC_API_KEY`     | yes                  | Model calls for both workflows     |
+| `TAVILY_API_KEY`        | for deep research    | Web search                         |
 | `FEATURE_DEEP_RESEARCH` | no (default `false`) | Enables the deep research workflow |
 
 ## Scope & roadmap
