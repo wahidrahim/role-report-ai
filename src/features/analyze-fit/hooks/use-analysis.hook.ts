@@ -1,70 +1,52 @@
 'use client';
 
-import type { InferUIMessageChunk } from 'ai';
-import { EventSourceParserStream } from 'eventsource-parser/stream';
-import { useCallback, useState } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 
 import type { AnalysisData, AnalysisUIMessage } from '@/ai/analyze-fit/events';
 
-type AnalysisSlices = { [K in keyof AnalysisData]: AnalysisData[K] | null };
+const transport = new DefaultChatTransport<AnalysisUIMessage>({ api: '/api/analyze' });
 
-const EMPTY_SLICES: AnalysisSlices = {
-  radarChart: null,
-  skillAssessment: null,
-  suitabilityAssessment: null,
-  resumeOptimizations: null,
-  learningPriorities: null,
+/**
+ * The transport surfaces a non-2xx response body verbatim and the route answers those with
+ * `{ error }` JSON, so unwrap that shape the way use-deep-research.hook.ts already does. Errors
+ * streamed as chunks are plain text already and pass through untouched.
+ */
+const unwrapError = (error: Error) => {
+  try {
+    const body = JSON.parse(error.message) as { error?: unknown };
+
+    return typeof body.error === 'string' ? new Error(body.error) : error;
+  } catch {
+    return error;
+  }
 };
 
 export function useAnalysis() {
-  const [slices, setSlices] = useState<AnalysisSlices>(EMPTY_SLICES);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const { messages, status, error, sendMessage, setMessages } = useChat({ transport });
 
-  const analyze = useCallback(async (resumeText: string, jobDescriptionText: string) => {
-    setIsLoading(true);
-    setError(null);
-    setSlices(EMPTY_SLICES);
+  const analyze = (resumeText: string, jobDescriptionText: string) => {
+    // Every analysis is a fresh run, so drop the previous one instead of appending to it.
+    setMessages([]);
+    sendMessage({ text: 'analyze' }, { body: { resumeText, jobDescriptionText } });
+  };
 
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeText, jobDescriptionText }),
-      });
+  const parts = messages.find((message) => message.role === 'assistant')?.parts ?? [];
 
-      if (!response.ok) throw new Error('Analysis failed');
+  const slice = <K extends keyof AnalysisData>(key: K) => {
+    const part = parts.find((candidate) => candidate.type === `data-${key}`);
 
-      if (!response.body) throw new Error('No response body');
+    return part && 'data' in part ? (part.data as AnalysisData[K]) : null;
+  };
 
-      const reader = response.body
-        .pipeThrough(new TextDecoderStream())
-        .pipeThrough(new EventSourceParserStream())
-        .getReader();
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) break;
-
-        // The SSE transform closes every stream with a sentinel frame that is not JSON.
-        if (value.data === '[DONE]') continue;
-
-        // Each data part carries the whole accumulated slice, so merging it into state is all
-        // we do. The part type is the slice name prefixed with "data-".
-        const chunk = JSON.parse(value.data) as InferUIMessageChunk<AnalysisUIMessage>;
-
-        if (chunk.type === 'error') setError(new Error(chunk.errorText));
-        else if ('data' in chunk) {
-          setSlices((prev) => ({ ...prev, [chunk.type.slice(5)]: chunk.data }));
-        }
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error('Unknown error'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  return { ...slices, isLoading, error, analyze };
+  return {
+    radarChart: slice('radarChart'),
+    skillAssessment: slice('skillAssessment'),
+    suitabilityAssessment: slice('suitabilityAssessment'),
+    resumeOptimizations: slice('resumeOptimizations'),
+    learningPriorities: slice('learningPriorities'),
+    isLoading: status === 'submitted' || status === 'streaming',
+    error: error ? unwrapError(error) : null,
+    analyze,
+  };
 }
