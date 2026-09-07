@@ -79,7 +79,7 @@ export const createInterviewPrepGuide = async (
         cacheControl: { type: 'ephemeral' },
       },
     },
-    system: `
+    instructions: `
       You are a **Forensic Technical Interview Strategist**.
       Your goal is to build a "Gap-Bridging" study plan that helps a specific candidate pass an interview at ${companyName}.
 

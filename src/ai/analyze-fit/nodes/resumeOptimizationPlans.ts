@@ -97,10 +97,7 @@ export const resumeOptimizationPlans = async (
     model: models.powerful,
     schema: actionPlanSchema,
     abortSignal: config.signal,
-    messages: [
-      {
-        role: 'system',
-        content: `
+    instructions: `
       You are an expert ATS (Applicant Tracking System) optimization specialist and career coach with 15+ years of experience helping candidates land interviews.
 
       ## Your Mission
@@ -147,10 +144,7 @@ export const resumeOptimizationPlans = async (
       - Limit to 6-8 recommendations maximum, ordered by impact
       - Assign realistic effort estimates
     `,
-      },
-      {
-        role: 'user',
-        content: `
+    prompt: `
       <resume>
         ${resumeText}
       </resume>
@@ -179,8 +173,6 @@ export const resumeOptimizationPlans = async (
         Bottom Line: ${suitabilityAssessment.bottomLine ?? 'N/A'}
       </suitability_assessment>
     `,
-      },
-    ],
   });
 
   const resumeOptimizations = await streamSlice(

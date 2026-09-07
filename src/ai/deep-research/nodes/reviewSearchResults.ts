@@ -37,7 +37,7 @@ export const reviewSearchResults = async (
         status: z.enum(['PASS', 'FAIL']),
         feedback: z.string(),
       }),
-      system: `
+      instructions: `
         You are a Research Quality Assurance Officer.
         Evaluate the gathered data for the "Deep Research Dossier".
 

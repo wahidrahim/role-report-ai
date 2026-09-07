@@ -64,7 +64,7 @@ export const createResearchReport = async (
         cacheControl: { type: 'ephemeral' },
       },
     },
-    system: `
+    instructions: `
       You are a Senior Career Strategist for a specialized talent agency.
       Your goal is to write a confidential "Intelligence Brief" (Dossier) for a candidate.
 

@@ -62,10 +62,7 @@ export const assessSuitability = async (
     model: models.powerful,
     schema: llmOutputSchema,
     abortSignal: config.signal,
-    messages: [
-      {
-        role: 'system',
-        content: `
+    instructions: `
       You are an expert technical recruiter conducting a candidate suitability assessment. Your evaluations are fair, evidence-based, and concise.
 
       ## Input Data
@@ -103,10 +100,7 @@ export const assessSuitability = async (
 
       Keep it direct and professional. No fluff or filler phrases.
     `,
-      },
-      {
-        role: 'user',
-        content: `
+    prompt: `
       Assess this candidate's suitability for the role.
 
       <resume>
@@ -125,8 +119,6 @@ export const assessSuitability = async (
         ${JSON.stringify(skillAssessment, null, 2)}
       </skill_assessment>
     `,
-      },
-    ],
   });
 
   const llmOutput = await streamSlice(config, 'suitabilityAssessment', suitabilityAssessmentStream);
