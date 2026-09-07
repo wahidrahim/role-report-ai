@@ -93,7 +93,7 @@ The analyze workflow is also exposed as an MCP tool (`analyze_fit`) with full Zo
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · LangGraph JS v1 · Vercel AI SDK v6 · Anthropic Claude (tiered) · Zod 4 · Tavily · MCP SDK · shadcn/ui · Tailwind 4 · @react-pdf/renderer (PDF export)
+Next.js 16 (App Router) · React 19 · LangGraph JS v1 · Vercel AI SDK v7 · Anthropic Claude (tiered) · Zod 4 · Tavily · MCP SDK · shadcn/ui · Tailwind 4 · @react-pdf/renderer (PDF export)
 
 ## Running locally
 

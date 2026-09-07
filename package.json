@@ -10,6 +10,9 @@
     "format": "prettier --write .",
     "mcp:stdio": "tsx --env-file=.env.local src/mcp/stdio.ts"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.49",
     "@ai-sdk/react": "4.0.96",

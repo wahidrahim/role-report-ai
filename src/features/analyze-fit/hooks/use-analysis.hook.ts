@@ -24,7 +24,7 @@ const unwrapError = (error: Error) => {
 };
 
 export function useAnalysis() {
-  // Each partial frame would otherwise re-render the whole dashboard; batch them per animation frame.
+  // Each partial frame would otherwise re-render the whole dashboard; batch them per THROTTLE_MS.
   const { messages, status, error, sendMessage, setMessages } = useChat({
     transport,
     throttle: THROTTLE_MS,
