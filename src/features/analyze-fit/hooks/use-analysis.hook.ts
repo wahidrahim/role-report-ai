@@ -7,6 +7,21 @@ import type { AnalysisData, AnalysisUIMessage } from '@/ai/analyze-fit/events';
 
 const transport = new DefaultChatTransport<AnalysisUIMessage>({ api: '/api/analyze' });
 
+/**
+ * The transport surfaces a non-2xx response body verbatim and the route answers those with
+ * `{ error }` JSON, so unwrap that shape the way use-deep-research.hook.ts already does. Errors
+ * streamed as chunks are plain text already and pass through untouched.
+ */
+const unwrapError = (error: Error) => {
+  try {
+    const body = JSON.parse(error.message) as { error?: unknown };
+
+    return typeof body.error === 'string' ? new Error(body.error) : error;
+  } catch {
+    return error;
+  }
+};
+
 export function useAnalysis() {
   const { messages, status, error, sendMessage, setMessages } = useChat({ transport });
 
@@ -31,7 +46,7 @@ export function useAnalysis() {
     resumeOptimizations: slice('resumeOptimizations'),
     learningPriorities: slice('learningPriorities'),
     isLoading: status === 'submitted' || status === 'streaming',
-    error: error ?? null,
+    error: error ? unwrapError(error) : null,
     analyze,
   };
 }
