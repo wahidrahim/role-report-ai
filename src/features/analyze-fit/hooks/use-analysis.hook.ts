@@ -1,21 +1,12 @@
 'use client';
 
+import type { InferUIMessageChunk } from 'ai';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { useCallback, useState } from 'react';
 
-import type { SkillAssessment } from '@/ai/analyze-fit/nodes/assessSkills';
-import type { SuitabilityAssessment } from '@/ai/analyze-fit/nodes/assessSuitability';
-import type { LearningPlan } from '@/ai/analyze-fit/nodes/learningPrioritiesPlan';
-import type { RadarChart } from '@/ai/analyze-fit/nodes/plotRadarChart';
-import type { ActionPlan } from '@/ai/analyze-fit/nodes/resumeOptimizationPlans';
+import type { AnalysisData, AnalysisUIMessage } from '@/ai/analyze-fit/events';
 
-type AnalysisSlices = {
-  radarChart: RadarChart | null;
-  skillAssessment: SkillAssessment | null;
-  suitabilityAssessment: SuitabilityAssessment | null;
-  resumeOptimizations: ActionPlan | null;
-  learningPriorities: LearningPlan | null;
-};
+type AnalysisSlices = { [K in keyof AnalysisData]: AnalysisData[K] | null };
 
 const EMPTY_SLICES: AnalysisSlices = {
   radarChart: null,
@@ -59,11 +50,14 @@ export function useAnalysis() {
         // The SSE transform closes every stream with a sentinel frame that is not JSON.
         if (value.data === '[DONE]') continue;
 
-        // Each frame carries the whole accumulated slice, so merging it into state is all we do.
-        const patch = JSON.parse(value.data) as Partial<AnalysisSlices> & { error?: string };
+        // Each data part carries the whole accumulated slice, so merging it into state is all
+        // we do. The part type is the slice name prefixed with "data-".
+        const chunk = JSON.parse(value.data) as InferUIMessageChunk<AnalysisUIMessage>;
 
-        if (patch.error !== undefined) setError(new Error(patch.error));
-        else setSlices((prev) => ({ ...prev, ...patch }));
+        if (chunk.type === 'error') setError(new Error(chunk.errorText));
+        else if ('data' in chunk) {
+          setSlices((prev) => ({ ...prev, [chunk.type.slice(5)]: chunk.data }));
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Unknown error'));
