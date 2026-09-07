@@ -6,6 +6,7 @@ import { DefaultChatTransport } from 'ai';
 import type { AnalysisData, AnalysisUIMessage } from '@/ai/analyze-fit/events';
 
 const transport = new DefaultChatTransport<AnalysisUIMessage>({ api: '/api/analyze' });
+const THROTTLE_MS = 50;
 
 /**
  * The transport surfaces a non-2xx response body verbatim and the route answers those with
@@ -23,7 +24,11 @@ const unwrapError = (error: Error) => {
 };
 
 export function useAnalysis() {
-  const { messages, status, error, sendMessage, setMessages } = useChat({ transport });
+  // Each partial frame would otherwise re-render the whole dashboard; batch them per animation frame.
+  const { messages, status, error, sendMessage, setMessages } = useChat({
+    transport,
+    throttle: THROTTLE_MS,
+  });
 
   const analyze = (resumeText: string, jobDescriptionText: string) => {
     // Every analysis is a fresh run, so drop the previous one instead of appending to it.
