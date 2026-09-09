@@ -65,10 +65,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
     model: models.balanced,
     schema: skillAssessmentSchema,
     abortSignal: config.signal,
-    messages: [
-      {
-        role: 'system',
-        content: `
+    instructions: `
       You are a SKILLS ASSESSMENT SPECIALIST. Analyze the candidate's fit for a role based solely on evidence from the resume and job description.
 
       OUTPUT FORMAT: Return a JSON object with a single field \`skills\`. Each skill object corresponds to a skill FROM THE JOB DESCRIPTION. The skillName must be the JD's terminology. Do NOT include candidate skills that aren't required by the job.
@@ -133,10 +130,7 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       - Never output values like "strongly preferred" for importance. Use only "critical" or "nice-to-have".
       - Provide specific evidence in reasoning
     `,
-      },
-      {
-        role: 'user',
-        content: `
+    prompt: `
       Analyze the job description against the candidate's resume. For each specific technology mentioned in the job description, output a skill object with its status and importance, wrapped in a JSON object under the key \`skills\`.
 
       BE COMPREHENSIVE. List every single technology found in the job description and assess it.
@@ -164,8 +158,6 @@ export const assessSkills = async (state: AssessSkillsState, config: LangGraphRu
       ${jobDescriptionText}
       </job-description>
     `,
-      },
-    ],
   });
 
   const skillAssessment = await streamSlice(config, 'skillAssessment', skillAssessmentStream);

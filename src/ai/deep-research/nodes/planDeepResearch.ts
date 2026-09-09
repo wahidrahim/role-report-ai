@@ -60,7 +60,7 @@ export const planDeepResearch = async (
         cacheControl: { type: 'ephemeral' },
       },
     },
-    system: `
+    instructions: `
       You are a Lead Investigator for a Career Intelligence Unit.
       Your goal is to uncover "Insider Intel" tailored to a specific candidate's weaknesses.
 

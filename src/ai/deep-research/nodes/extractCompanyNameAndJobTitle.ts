@@ -34,7 +34,7 @@ export const extractCompanyNameAndJobTitle = async (
         cacheControl: { type: 'ephemeral' },
       },
     },
-    system: `
+    instructions: `
     You extract the hiring company name and the job title from a job description.
 
     Your outputs are used downstream for research, so accuracy and specificity matter more than always returning something.
